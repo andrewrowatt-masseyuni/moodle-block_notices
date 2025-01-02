@@ -37,7 +37,7 @@ class block_notices extends block_base {
      * @return stdClass The block contents.
      */
     public function get_content() {
-        global $CFG, $DB, $OUTPUT, $USER, $PAGE;
+        global $CFG, $DB, $OUTPUT, $USER;
 
         if ($this->content !== null) {
             return $this->content;
@@ -49,16 +49,14 @@ class block_notices extends block_base {
         }
 
         $this->content = new stdClass();
-        $this->content->items = array();
-        $this->content->icons = array();
+        $this->content->items = [];
+        $this->content->icons = [];
         $this->content->footer = '';
 
         if (!empty($this->config->text)) {
             $this->content->text = $this->config->text;
         } else {
-            $text = 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec interdum vehicula nulla, eu rhoncus velit consectetur a.';
-
-            // var_dump($this->output);
+            $text = 'Lorem ipsum dolor sit amet.';
 
             $action = optional_param('action', '', PARAM_TEXT);
 
@@ -70,11 +68,10 @@ class block_notices extends block_base {
                 $text .= 'Deleted item';
             }
 
-            
-
             $text .= html_writer::link(
-                new moodle_url('/blocks/notices/manage.php', ['instanceid' => $this->instance->id,]),
-                $OUTPUT->pix_icon('t/preferences', get_string('managenotices', 'block_notices')) . get_string('managenotices', 'block_notices'),
+                new moodle_url('/blocks/notices/manage.php', ['instanceid' => $this->instance->id]),
+                $OUTPUT->pix_icon('t/preferences',
+                get_string('managenotices', 'block_notices')) . get_string('managenotices', 'block_notices'),
                 ['role' => 'button']
             );
 

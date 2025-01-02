@@ -32,19 +32,19 @@ class addnotice extends \moodleform {
     public function definition() {
         $mform = $this->_form; // Don't forget the underscore!
 
-        $mform->addElement('selectyesno', 'visible',get_string('visible', 'block_notices'));
+        $mform->addElement('selectyesno', 'visible', get_string('visible', 'block_notices'));
         $mform->setDefault('visible', 0);
         $mform->addHelpButton('visible', 'visible', 'block_notices');
 
-        $mform->addElement('text', 'title',get_string('title', 'block_notices'));
+        $mform->addElement('text', 'title', get_string('title', 'block_notices'));
         $mform->setDefault('title', '');
         $mform->setType('title', PARAM_TEXT);
         $mform->addHelpButton('title', 'title', 'block_notices');
 
-        $editoroptions = ['maxfiles' => 0, 'noclean'=>true, 'context'=>null,];
+        $editoroptions = ['maxfiles' => 0, 'noclean' => true, 'context' => null];
         $mform->addElement('editor', 'content', get_string('content', 'block_notices'), null, $editoroptions);
         $mform->addRule('content', null, 'required', null, 'client');
-        $mform->setType('content', PARAM_RAW); // XSS is prevented when printing the block contents and serving files
+        $mform->setType('content', PARAM_RAW); // XSS is prevented when printing the block contents and serving files.
 
         $submitlabel = get_string('save');
         $mform->addElement('submit', 'submitmessage', $submitlabel);

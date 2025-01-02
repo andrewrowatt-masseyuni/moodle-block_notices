@@ -29,8 +29,6 @@ class block_notices_edit_form extends block_edit_form {
      * @param MoodleQuickForm $mform The form being built.
      */
     protected function specific_definition($mform) {
-
         // Section header title.
-        // $mform->addElement('header', 'configheader', get_string('blocksettings', 'block'));
     }
 }

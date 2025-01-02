@@ -35,8 +35,8 @@ $PAGE->set_heading($SITE->fullname);
 
 $noticeform = new \block_notices\form\addnotice($url);
 
-if($data = $noticeform->get_data()) {
-   $content = $data->content['text'];
+if ($data = $noticeform->get_data()) {
+    $content = $data->content['text'];
 
     if (!empty($content)) {
         $record = new stdClass;
@@ -44,8 +44,8 @@ if($data = $noticeform->get_data()) {
         $record->visible = 1;
         $record->title = required_param('title', PARAM_TEXT);
         $record->content = $content;
-        // $record->timecreated = time();
-        // $record->userid = $USER->id;
+        // ...$record->timecreated = time();
+        // ...$record->userid = $USER->id;
 
         $DB->insert_record('block_notices', $record);
         redirect(new moodle_url('/blocks/notices/manage.php', ['instanceid' => $instanceid]));

@@ -33,9 +33,11 @@ $PAGE->set_context(context_system::instance());
 
 $PAGE->set_heading($SITE->fullname);
 echo $OUTPUT->header();
+
 echo html_writer::link(
-    new moodle_url('/blocks/notices/add.php', ['instanceid' => $instanceid,]),
+    new moodle_url('/blocks/notices/add.php', ['instanceid' => $instanceid]),
     $OUTPUT->pix_icon('t/preferences', get_string('addnotice', 'block_notices')) . get_string('addnotice', 'block_notices'),
     ['role' => 'button']
 );
+
 echo $OUTPUT->footer();
