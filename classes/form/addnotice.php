@@ -40,6 +40,12 @@ class addnotice extends \moodleform {
         $mform->setDefault('title', '');
         $mform->setType('title', PARAM_TEXT);
         $mform->addHelpButton('title', 'title', 'block_notices');
+        $mform->addRule('title', null, 'required', null, 'client');
+
+        $mform->addElement('text', 'updatedescription', get_string('updatedescription', 'block_notices'));
+        $mform->setDefault('updatedescription', '');
+        $mform->setType('updatedescription', PARAM_TEXT);
+        $mform->addHelpButton('updatedescription', 'updatedescription', 'block_notices');
 
         $editoroptions = ['maxfiles' => 0, 'noclean' => true, 'context' => null];
         $mform->addElement('editor', 'content', get_string('content', 'block_notices'), null, $editoroptions);

@@ -36,20 +36,25 @@ $PAGE->set_heading($SITE->fullname);
 $noticeform = new \block_notices\form\addnotice($url);
 
 if ($data = $noticeform->get_data()) {
-    $content = $data->content['text'];
-
-    if (!empty($content)) {
         $record = new stdClass;
         $record->instanceid = $instanceid;
-        $record->visible = 1;
-        $record->title = required_param('title', PARAM_TEXT);
-        $record->content = $content;
-        // ...$record->timecreated = time();
-        // ...$record->userid = $USER->id;
+        $record->visible = $data->visible ? 1 : 0;
+        $record->title = $data->title;
+        $record->content = $data->content['text'];
+        
+        $record->updatedescription = $data->updatedescription;
+        $record->moreinformation = ''; // $data->moreinformation;
+        $record->owner = ''; // $data->owner;
+        $record->owneremail = ''; // $data->owneremail;
+        $record->notes = ''; // $data->notes['text'];
+
+        $record->timecreated = time();
+        $record->timemodified = $record->timecreated; // To ensure the same value.
+        $record->createdby = $USER->id;
+        $record->modifiedby = $USER->id;
 
         $DB->insert_record('block_notices', $record);
         redirect(new moodle_url('/blocks/notices/manage.php', ['instanceid' => $instanceid]));
-    }
 }
 
 echo $OUTPUT->header();
