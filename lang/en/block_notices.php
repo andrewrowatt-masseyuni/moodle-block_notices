@@ -25,9 +25,17 @@
 
 defined('MOODLE_INTERNAL') || die();
 
+$string['addnotice'] = 'Add notice';
+$string['content'] = 'Content';
+$string['content_help'] = 'Content of notice. Use basic formatting only.';
+$string['contentdesc'] = 'Content of notice. Use basic formatting only.';
 $string['customcss'] = 'Custom CSS';
+$string['customcssdesc'] = 'Use this setting to override the base CSS/SCSS. Use for minor changes only.';
+$string['managenotices'] = 'Manage notices';
 $string['pluginname'] = 'Notices';
 $string['title'] = 'Title';
+$string['title_help'] = 'Title of notice. Maximum of 64 characters.';
 $string['titledesc'] = 'Title of notice. Maximum of 64 characters.';
 $string['visible'] = 'Visible';
+$string['visible_help'] = 'Display this notice.';
 $string['visibledesc'] = 'Display this notice.';

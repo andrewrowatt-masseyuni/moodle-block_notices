@@ -37,6 +37,7 @@ class block_notices extends block_base {
      * @return stdClass The block contents.
      */
     public function get_content() {
+        global $CFG, $DB, $OUTPUT, $USER, $PAGE;
 
         if ($this->content !== null) {
             return $this->content;
@@ -55,7 +56,28 @@ class block_notices extends block_base {
         if (!empty($this->config->text)) {
             $this->content->text = $this->config->text;
         } else {
-            $text = 'Please define the content text in /blocks/notices/block_notices.php.';
+            $text = 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec interdum vehicula nulla, eu rhoncus velit consectetur a.';
+
+            // var_dump($this->output);
+
+            $action = optional_param('action', '', PARAM_TEXT);
+
+            if ($action == 'del') {
+                require_sesskey();
+
+                $id = required_param('id', PARAM_TEXT);
+
+                $text .= 'Deleted item';
+            }
+
+            
+
+            $text .= html_writer::link(
+                new moodle_url('/blocks/notices/manage.php', ['instanceid' => $this->instance->id,]),
+                $OUTPUT->pix_icon('t/preferences', get_string('managenotices', 'block_notices')) . get_string('managenotices', 'block_notices'),
+                ['role' => 'button']
+            );
+
             $this->content->text = $text;
         }
 
@@ -92,7 +114,6 @@ class block_notices extends block_base {
      * @return string[] Array of pages and permissions.
      */
     public function applicable_formats() {
-        return array(
-        );
+        return ['my' => true];
     }
 }
