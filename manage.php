@@ -27,6 +27,8 @@ require('../../config.php');
 require_login();
 
 $instanceid = required_param('instanceid', PARAM_INT);
+require_capability('block/notices:managenotices', context_block::instance($instanceid));
+
 $url = new moodle_url('/blocks/notices/manage.php', ['instanceid' => $instanceid]);
 $PAGE->set_url($url);
 $PAGE->set_context(context_system::instance());

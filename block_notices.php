@@ -53,6 +53,8 @@ class block_notices extends block_base {
         $this->content->icons = [];
         $this->content->footer = '';
 
+        $canmanage = has_capability('block/notices:managenotices', $this->context);
+
         if (!empty($this->config->text)) {
             $this->content->text = $this->config->text;
         } else {
@@ -68,12 +70,14 @@ class block_notices extends block_base {
                 $text .= 'Deleted item';
             }
 
-            $text .= html_writer::link(
-                new moodle_url('/blocks/notices/manage.php', ['instanceid' => $this->instance->id]),
-                $OUTPUT->pix_icon('t/preferences',
-                get_string('managenotices', 'block_notices')) . get_string('managenotices', 'block_notices'),
-                ['role' => 'button']
-            );
+            if ($canmanage) {
+                $text .= html_writer::link(
+                    new moodle_url('/blocks/notices/manage.php', ['instanceid' => $this->instance->id]),
+                    $OUTPUT->pix_icon('t/preferences',
+                    get_string('managenotices', 'block_notices')) . get_string('managenotices', 'block_notices'),
+                    ['role' => 'button']
+                );
+            }
 
             $this->content->text = $text;
         }

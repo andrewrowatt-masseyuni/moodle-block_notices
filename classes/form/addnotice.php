@@ -15,6 +15,8 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 namespace block_notices\form;
+use block_notices\notices;
+
 defined('MOODLE_INTERNAL') || die();
 require_once($CFG->libdir . '/formslib.php');
 
@@ -33,7 +35,7 @@ class addnotice extends \moodleform {
         $mform = $this->_form; // Don't forget the underscore!
 
         $mform->addElement('selectyesno', 'visible', get_string('visible', 'block_notices'));
-        $mform->setDefault('visible', 0);
+        $mform->setDefault('visible', notices::NOTICE_HIDDEN);
         $mform->addHelpButton('visible', 'visible', 'block_notices');
 
         $mform->addElement('text', 'title', get_string('title', 'block_notices'));

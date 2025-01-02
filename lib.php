@@ -15,35 +15,11 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Capability definitions for Notices
- *
- * Documentation: {@link https://moodledev.io/docs/apis/subsystems/access}
+ * Callback implementations for Notices
  *
  * @package    block_notices
- * @category   access
  * @copyright  2025 Andrew Rowatt <A.J.Rowatt@massey.ac.nz>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-defined('MOODLE_INTERNAL') || die();
-
-$capabilities = [
-    'block/notices:myaddinstance' => [
-        'captype' => 'write',
-        'contextlevel' => CONTEXT_SYSTEM,
-        'archetypes' => [
-            'user' => CAP_ALLOW,
-        ],
-
-        'clonepermissionsfrom' => 'moodle/my:manageblocks',
-    ],
-
-    'block/notices:managenotices' => [
-        'captype' => 'write',
-        'riskbitmask' => RISK_XSS | RISK_SPAM,
-        'contextlevel' => CONTEXT_BLOCK,
-        'archetypes' => [
-            'manager' => CAP_ALLOW,
-        ],
-    ],
-];
+ 

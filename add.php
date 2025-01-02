@@ -26,7 +26,12 @@ require('../../config.php');
 
 require_login();
 
+use block_notices\notices;
+
+
 $instanceid = required_param('instanceid', PARAM_INT);
+require_capability('block/notices:managenotices', context_block::instance($instanceid));
+
 $url = new moodle_url('/blocks/notices/add.php', ['instanceid' => $instanceid]);
 $PAGE->set_url($url);
 $PAGE->set_context(context_system::instance());
@@ -35,25 +40,20 @@ $PAGE->set_heading($SITE->fullname);
 
 $noticeform = new \block_notices\form\addnotice($url);
 
-if ($data = $noticeform->get_data()) {
-        $record = new stdClass;
-        $record->instanceid = $instanceid;
-        $record->visible = $data->visible ? 1 : 0;
-        $record->title = $data->title;
-        $record->content = $data->content['text'];
-        
-        $record->updatedescription = $data->updatedescription;
-        $record->moreinformation = ''; // $data->moreinformation;
-        $record->owner = ''; // $data->owner;
-        $record->owneremail = ''; // $data->owneremail;
-        $record->notes = ''; // $data->notes['text'];
+if ($formdata = $noticeform->get_data()) {
+        $data = (object) [
+            'visible' => $formdata->visible ? 1 : 0,
+            'title' => $formdata->title,
+            'content' => $formdata->content['text'],
+            'updatedescription' => $formdata->updatedescription,
+            'moreinformation' => '', // $formdata->moreinformation,
+            'owner' => '', // $formdata->owner,
+            'owneremail' => '', // $formdata->owneremail,
+            'notes' => '', // $formdata->notes['text'];
+        ];
 
-        $record->timecreated = time();
-        $record->timemodified = $record->timecreated; // To ensure the same value.
-        $record->createdby = $USER->id;
-        $record->modifiedby = $USER->id;
+        notices::add_notice($instanceid, $data);
 
-        $DB->insert_record('block_notices', $record);
         redirect(new moodle_url('/blocks/notices/manage.php', ['instanceid' => $instanceid]));
 }
 
