@@ -37,14 +37,14 @@
     <span style="font-size: inherit; font-weight: 300;" class="badge badge-{{css}}">{{description}}</span>
     <div class="d-flex justify-content-end" style="gap: 1em;">
         
-        {{#canmoveup}}<a role="button" href="manage.php?sesskey={{sesskey}}&instanceid={{instanceid}}&action=moveup&id={{id}}">{{#pix}} t/up, core, {{#str}} moveup, core {{/str}} {{/pix}}{{#str}} moveup, core {{/str}}</a>{{/canmoveup}}
-        {{#canmovedown}}<a role="button" href="manage.php?sesskey={{sesskey}}&instanceid={{instanceid}}&action=movedown&id={{id}}">{{#pix}} t/down, core, {{#str}} movedown, core {{/str}} {{/pix}}{{#str}} movedown, core {{/str}}</a>{{/canmovedown}}
+        {{#canmoveup}}<a role="button" href="manage.php?sesskey={{sesskey}}&courseid={{courseid}}&action=moveup&id={{id}}">{{#pix}} t/up, core, {{#str}} moveup, core {{/str}} {{/pix}}{{#str}} moveup, core {{/str}}</a>{{/canmoveup}}
+        {{#canmovedown}}<a role="button" href="manage.php?sesskey={{sesskey}}&courseid={{courseid}}&action=movedown&id={{id}}">{{#pix}} t/down, core, {{#str}} movedown, core {{/str}} {{/pix}}{{#str}} movedown, core {{/str}}</a>{{/canmovedown}}
 
-        {{#canshow}}<a role="button" href="manage.php?sesskey={{sesskey}}&instanceid={{instanceid}}&action=show&id={{id}}">{{#pix}} t/hide, core, {{#str}} show, core {{/str}} {{/pix}}{{#str}} show, core {{/str}}</a>{{/canshow}}
-        {{#canhide}}<a role="button" href="manage.php?sesskey={{sesskey}}&instanceid={{instanceid}}&action=hide&id={{id}}">{{#pix}} t/show, core, {{#str}} hide, core {{/str}} {{/pix}}{{#str}} hide, core {{/str}}</a>{{/canhide}}
+        {{#canshow}}<a role="button" href="manage.php?sesskey={{sesskey}}&courseid={{courseid}}&action=show&id={{id}}">{{#pix}} t/hide, core, {{#str}} show, core {{/str}} {{/pix}}{{#str}} show, core {{/str}}</a>{{/canshow}}
+        {{#canhide}}<a role="button" href="manage.php?sesskey={{sesskey}}&courseid={{courseid}}&action=hide&id={{id}}">{{#pix}} t/show, core, {{#str}} hide, core {{/str}} {{/pix}}{{#str}} hide, core {{/str}}</a>{{/canhide}}
         
         <a role="button" href="edit.php?id={{id}}">{{#pix}} t/edit, core, {{#str}} edit, core {{/str}} {{/pix}}{{#str}} edit, core {{/str}}</a>
-        <a role="button" href="manage.php?sesskey={{sesskey}}&instanceid={{instanceid}}&action=delete&id={{id}}">{{#pix}} t/delete, core, {{#str}} delete, core {{/str}} {{/pix}}{{#str}} delete, core {{/str}}</a>
+        <a role="button" href="manage.php?sesskey={{sesskey}}&courseid={{courseid}}&action=delete&id={{id}}">{{#pix}} t/delete, core, {{#str}} delete, core {{/str}} {{/pix}}{{#str}} delete, core {{/str}}</a>
     </div>
     </div>
     
@@ -56,7 +56,7 @@
 <hr />
 
 <div>
-<a role="button" href="add.php?instanceid={{instanceid}}">
+<a role="button" href="add.php?courseid={{courseid}}">
 {{#pix}} t/preferences, core, {{#str}} addnotice, block_notices {{/str}} {{/pix}}{{#str}} addnotice, block_notices {{/str}}
 </a>
 </div>

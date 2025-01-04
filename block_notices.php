@@ -56,11 +56,12 @@ class block_notices extends block_base {
         $this->content->footer = '';
 
         $canmanage = has_capability('block/notices:managenotices', $this->context);
+        $courseid = $this->page->course->id;
 
         $this->page->requires->css('/blocks/notices/styles.css');
         $this->page->requires->js('/blocks/notices/swiper/swiper-bundle.min.js', false);
         $this->page->requires->css('/blocks/notices/swiper/swiper-bundle.min.css');
-        $this->page->requires->js_call_amd('block_notices/swiper', 'init', []);
+        $this->page->requires->js_call_amd('block_notices/block_notices', 'init', []);
 
         if (!empty($this->config->text)) {
             $this->content->text = $this->config->text;
@@ -68,16 +69,32 @@ class block_notices extends block_base {
 
             $data=[
                 'canmanage' => $canmanage,
-                'instanceid' => $this->instance->id,
+                'courseid' => $courseid,
                 'wwwroot' => $CFG->wwwroot,
                 'notices' => [],
             ];
 
-            foreach(notices::get_notices($this->instance->id) as $noticeobject) {
-                $data['notices'][] = (array)$noticeobject;
+            foreach(notices::get_notices($courseid, $canmanage) as $noticeobject) {
+                $noticearray = (array)$noticeobject;
+
+                if ($noticearray['moreinformationurl']) {
+                    $noticearray += [
+                        'moreinformationlink' => $noticearray['moreinformationurl'],
+                        'moreinformationtext' => get_string('moreinformation', 'block_notices'),
+                    ];
+                } else {
+                    $noticearray += [
+                        'moreinformationlink' => 'mailto:' . $noticearray['owneremail'],
+                        'moreinformationtext' => $noticearray['owner'],
+                    ];
+                }
+
+                $data['notices'][] = $noticearray;
             }
 
             $text = $OUTPUT->render_from_template('block_notices/notices', $data);
+
+            var_dump($this->page->course->id);
 
             $this->content->text = $text;
         }
@@ -114,6 +131,10 @@ class block_notices extends block_base {
      * @return string[] Array of pages and permissions.
      */
     public function applicable_formats() {
-        return ['my' => true];
+        return [
+            'my' => true,
+            'site-index' => true,
+            'course-view' => true,
+          ];
     }
 }

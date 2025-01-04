@@ -28,7 +28,7 @@
         <div class="swiper-wrapper">
         {{#notices}}
             <div class="swiper-slide">
-                <div class="item">
+                <div class="item item__visible_{{visible}}">
                     <div>
                         <div class="item__heading">
                             <h6 title="{{title}}">{{title}}</h6>
@@ -36,7 +36,7 @@
                         </div>
                         <div class="item__content">{{{content}}}</div>
                         <div class="item__more_info">
-                        [more info logic needed]
+                        <a target="_blank" href="{{moreinformationlink}}">{{moreinformationtext}}</a>
                         </div>
                     </div>
                 </div>
@@ -50,5 +50,5 @@
 </div>
 {{#canmanage}}
 <hr />
-<a role="button" href="{{wwwroot}}/blocks/notices/manage.php?instanceid={{instanceid}}">{{#pix}} t/preferences, core, {{#str}} managenotices, block_notices {{/str}} {{/pix}}{{#str}} managenotices, block_notices {{/str}}</a>
+<div><a role="button" href="{{wwwroot}}/blocks/notices/manage.php?courseid={{courseid}}">{{#pix}} t/preferences, core, {{#str}} managenotices, block_notices {{/str}} {{/pix}}{{#str}} managenotices, block_notices {{/str}}</a> (only admins can see this option)</div>
 {{/canmanage}}

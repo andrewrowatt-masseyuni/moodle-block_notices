@@ -36,6 +36,7 @@ $string['customcssdesc'] = 'Use this setting to override the base CSS/SCSS. Use 
 $string['deletenotice'] = 'Delete notice';
 $string['editnotice'] = 'Edit notice';
 $string['managenotices'] = 'Manage notices';
+$string['moreinformation'] = 'More information';
 $string['moreinformationurl'] = 'URL for more information';
 $string['moreinformationurl_help'] = 'URL for more information about this notice. If not provided, owner information will be used.';
 $string['notes'] = 'Notes';

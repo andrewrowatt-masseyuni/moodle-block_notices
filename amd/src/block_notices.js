@@ -16,12 +16,16 @@
 /**
  * TODO describe module swiper
  *
- * @module     block_notices/swiper
+ * @module     block_notices/block_notices
  * @copyright  2025 Andrew Rowatt <A.J.Rowatt@massey.ac.nz>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
+
+
 export const init = () => {
-    const swiper = new Swiper('.swiper', {
+  /* global Swiper */
+  /* eslint no-undef: "error" */
+    new Swiper('.swiper', {
         direction: 'horizontal',
         spaceBetween: 30,
         autoplay: {

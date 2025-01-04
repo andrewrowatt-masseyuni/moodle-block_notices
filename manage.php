@@ -28,12 +28,12 @@ require_login();
 
 use block_notices\notices;
 
-$instanceid = required_param('instanceid', PARAM_INT);
-require_capability('block/notices:managenotices', context_block::instance($instanceid));
+$courseid = required_param('courseid', PARAM_INT);
+require_capability('block/notices:managenotices', context_block::instance($courseid));
 
-// notices::add_notice_test_data($instanceid);
+if (notices::get_notice_count($courseid) ==0) notices::add_notice_test_data($courseid);
 
-$url = new moodle_url('/blocks/notices/manage.php', ['instanceid' => $instanceid]);
+$url = new moodle_url('/blocks/notices/manage.php', ['courseid' => $courseid]);
 $PAGE->set_url($url);
 $PAGE->set_context(context_system::instance());
 
@@ -91,7 +91,7 @@ $noticegroupinpreview = [
 ];
 
 // Iterate over all notices, add additional properties to improve the template output, and then add them to the correct "group".
-foreach (notices::get_notices_admin($instanceid) as $noticeobject) {
+foreach (notices::get_notices_admin($courseid) as $noticeobject) {
     // Convert the dataset to an array ready for using with a template.
     $noticearray = (array)$noticeobject;
 
@@ -125,7 +125,7 @@ foreach (notices::get_notices_admin($instanceid) as $noticeobject) {
 // Prepare the data for the template.
 $data = [
     'sesskey' => sesskey(),
-    'instanceid' => $instanceid,
+    'courseid' => $courseid,
     'groups' => [ 
         $noticegroupinpreview,
         $noticegroupvisible,

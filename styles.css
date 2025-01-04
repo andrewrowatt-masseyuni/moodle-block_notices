@@ -72,6 +72,10 @@
     margin: 0 40px;
     height: calc(var(--height) - 24px);
     max-width: 100%;
+
+    &.item__visible_2 {
+        background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' version='1.1' height='100px' width='100px'><text transform='translate(20, 100) rotate(-45)' fill='rgb(239,239,239)' font-size='20'>PREVIEW</text></svg>");
+    }
 }
 
 .item.item__has_image > div {

@@ -29,10 +29,10 @@ require_login();
 use block_notices\notices;
 
 
-$instanceid = required_param('instanceid', PARAM_INT);
-require_capability('block/notices:managenotices', context_block::instance($instanceid));
+$courseid = required_param('courseid', PARAM_INT);
+require_capability('block/notices:managenotices', context_block::instance($courseid));
 
-$url = new moodle_url('/blocks/notices/add.php', ['instanceid' => $instanceid]);
+$url = new moodle_url('/blocks/notices/add.php', ['courseid' => $courseid]);
 $PAGE->set_url($url);
 $PAGE->set_context(context_system::instance());
 
@@ -54,9 +54,9 @@ if ($formdata = $noticeform->get_data()) {
             'notes' => $formdata->notes,
         ];
 
-        notices::add_notice($instanceid, $data);
+        notices::add_notice($courseid, $data);
 
-        redirect(new moodle_url('/blocks/notices/manage.php', ['instanceid' => $instanceid]));
+        redirect(new moodle_url('/blocks/notices/manage.php', ['courseid' => $courseid]));
 }
 
 echo $OUTPUT->header();

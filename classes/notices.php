@@ -136,34 +136,49 @@ class notices {
         ],
     ];
 
-
-    public static function get_notices($instanceid): array {
+    public static function get_notice_count(int $courseid): int {
         global $DB;
 
-        $sql = 'SELECT * FROM {block_notices} WHERE instanceid = :instanceid and visible = :visible order by sortorder asc';
-        
-        return $DB->get_records_sql($sql, ['instanceid' => $instanceid, 'visible' => self::NOTICE_VISIBLE]);
+        return $DB->count_records('block_notices', ['courseid' => $courseid]);
+    }
+
+    public static function get_notices(int $courseid, bool $includepreview = false): array {
+        global $DB;
+
+        $visible = [self::NOTICE_VISIBLE];
+        if ($includepreview) {
+            array_push($visible,self::NOTICE_IN_PREVIEW);
+        }
+
+        [$insql, $inparams] = $DB->get_in_or_equal($visible);
+
+        $sql = "SELECT * FROM {block_notices}
+            WHERE courseid = ? and
+            visible $insql 
+            order by sortorder asc";
+
+        return $DB->get_records_sql($sql, ['courseid' => $courseid] + $inparams);
     }
 
     /**
      * Get all notices for a given instance.
      *
-     * @param int $instanceid
+     * @param int $courseid
      * @return array
      */
-    public static function get_notices_admin($instanceid): array {
+    public static function get_notices_admin($courseid): array {
         global $DB;
 
         $sql = 'SELECT b.*,
             trim(concat(cb.firstname, \' \', cb.lastname)) as createdbyname,
             trim(concat(mb.firstname, \' \', mb.lastname)) as modifiedbyname,
-            b.sortorder = (select min(sortorder) from {block_notices} where instanceid = b.instanceid and visible=:visiblemin) as isfirst,
-            b.sortorder = (select max(sortorder) from {block_notices} where instanceid = b.instanceid and visible=:visiblemax) as islast
+            b.sortorder = (select min(sortorder) from {block_notices} where courseid = b.courseid and visible=:visiblemin) as isfirst,
+            b.sortorder = (select max(sortorder) from {block_notices} where courseid = b.courseid and visible=:visiblemax) as islast
             FROM {block_notices} b
             join {user} cb on b.createdby = cb.id
             join {user} mb on b.modifiedby = mb.id
-            WHERE b.instanceid = :instanceid order by b.visible, b.sortorder';
-        return $DB->get_records_sql($sql, ['instanceid' => $instanceid, 'visiblemin' => self::NOTICE_VISIBLE, 'visiblemax' => self::NOTICE_VISIBLE]);
+            WHERE b.courseid = :courseid order by b.visible, b.sortorder';
+        return $DB->get_records_sql($sql, ['courseid' => $courseid, 'visiblemin' => self::NOTICE_VISIBLE, 'visiblemax' => self::NOTICE_VISIBLE]);
     }
 
     /**
@@ -213,16 +228,16 @@ class notices {
     /**
      * Add a notice.
      *
-     * @param int $instanceid block instance of the notice block
+     * @param int $courseid block instance of the notice block
      * @param object $data core data for the notice to add
      */
-    public static function add_notice(int $instanceid, array $data): int {
+    public static function add_notice(int $courseid, array $data): int {
         global $DB, $USER;
 
         $timecreated = time(); // So timecreated and timemodified are the same.
 
         $presets = [
-            'instanceid' => $instanceid,
+            'courseid' => $courseid,
             'visible' => self::NOTICE_IN_PREVIEW,
             'timecreated' => $timecreated,
             'timemodified' => $timecreated,
@@ -241,9 +256,9 @@ class notices {
 
         $sortorder = $notice->sortorder;
         $prevnotice = $DB->get_record_sql('select * from {block_notices} 
-            where instanceid = :instanceid and visible=:visible and 
+            where courseid = :courseid and visible=:visible and 
             sortorder < :sortorder order by sortorder desc limit 1' 
-        , ['instanceid' => $notice->instanceid, 'visible' => self::NOTICE_VISIBLE, 'sortorder' => $sortorder]);
+        , ['courseid' => $notice->courseid, 'visible' => self::NOTICE_VISIBLE, 'sortorder' => $sortorder]);
 
         if ($prevnotice) {
             $notice->sortorder = $prevnotice->sortorder;
@@ -261,9 +276,9 @@ class notices {
 
         $sortorder = $notice->sortorder;
         $nextnotice = $DB->get_record_sql('select * from {block_notices} 
-            where instanceid = :instanceid and visible=:visible and 
+            where courseid = :courseid and visible=:visible and 
             sortorder > :sortorder order by sortorder asc limit 1' 
-        , ['instanceid' => $notice->instanceid, 'visible' => self::NOTICE_VISIBLE, 'sortorder' => $sortorder]);
+        , ['courseid' => $notice->courseid, 'visible' => self::NOTICE_VISIBLE, 'sortorder' => $sortorder]);
 
         if ($nextnotice) {
             $notice->sortorder = $nextnotice->sortorder;
@@ -282,8 +297,8 @@ class notices {
 
         // When a notice is shown, we also need to set the sortorder so it is added to the end of the list.
         $maxsortorder = $DB->get_field_sql(
-            'SELECT MAX(sortorder) FROM {block_notices} where instanceid = :instanceid and visible=:visible', 
-            ['instanceid' => $notice->instanceid, 'visible' => self::NOTICE_VISIBLE]);
+            'SELECT MAX(sortorder) FROM {block_notices} where courseid = :courseid and visible=:visible', 
+            ['courseid' => $notice->courseid, 'visible' => self::NOTICE_VISIBLE]);
 
         $notice->sortorder = $maxsortorder + 1;
         $notice->visible = self::NOTICE_VISIBLE;
@@ -297,22 +312,22 @@ class notices {
         $notice = self::get_notice($id);
 
         // When a notice is shown, we also need to set the sortorder so it is added to the end of the list.
-        $maxsortorder = $DB->get_field_sql('SELECT MAX(sortorder) FROM {block_notices} where instanceid = :instanceid', ['instanceid' => $notice->instanceid]);
+        $maxsortorder = $DB->get_field_sql('SELECT MAX(sortorder) FROM {block_notices} where courseid = :courseid', ['courseid' => $notice->courseid]);
 
         $notice->sortorder = 0;
         $notice->visible = self::NOTICE_HIDDEN;
 
         $DB->update_record('block_notices', $notice);
 
-        self::recalc_visible_notices_sortorder($notice->instanceid);
+        self::recalc_visible_notices_sortorder($notice->courseid);
     }
 
-    private static function recalc_visible_notices_sortorder(int $instanceid): void {
+    private static function recalc_visible_notices_sortorder(int $courseid): void {
         global $DB;
 
         $sortorder = 1;
         $notices = $DB->get_records('block_notices', 
-            ['instanceid' => $instanceid, 'visible' => self::NOTICE_VISIBLE], 
+            ['courseid' => $courseid, 'visible' => self::NOTICE_VISIBLE], 
             'sortorder ASC');
 
         foreach ($notices as $notice) {
@@ -324,11 +339,11 @@ class notices {
     /**
      * Add test data to the notices table.
      *
-     * @param int $instanceid
+     * @param int $courseid
      */
-    public static function add_notice_test_data(int $instanceid): void {
+    public static function add_notice_test_data(int $courseid): void {
         foreach (self::TEST_DATA as $notice) {
-            $id = self::add_notice($instanceid, $notice);
+            $id = self::add_notice($courseid, $notice);
             if ($notice['visible'] === 1) {
                 self::show_notice($id);
             } elseif ($notice['visible'] === 0) {
