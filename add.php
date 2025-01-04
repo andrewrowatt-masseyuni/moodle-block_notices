@@ -36,20 +36,22 @@ $url = new moodle_url('/blocks/notices/add.php', ['instanceid' => $instanceid]);
 $PAGE->set_url($url);
 $PAGE->set_context(context_system::instance());
 
-$PAGE->set_heading($SITE->fullname);
+$PAGE->set_title(get_string('addnotice', 'block_notices'));
+$PAGE->set_heading(get_string('addnotice', 'block_notices'));
 
 $noticeform = new \block_notices\form\addnotice($url);
 
 if ($formdata = $noticeform->get_data()) {
-        $data = (object) [
-            'visible' => $formdata->visible ? 1 : 0,
+        $data = [
+            'visible' => $formdata->visible,
             'title' => $formdata->title,
             'content' => $formdata->content['text'],
+            'contentformat' => $formdata->content['format'],
             'updatedescription' => $formdata->updatedescription,
-            'moreinformation' => '', // $formdata->moreinformation,
-            'owner' => '', // $formdata->owner,
-            'owneremail' => '', // $formdata->owneremail,
-            'notes' => '', // $formdata->notes['text'];
+            'moreinformationurl' => $formdata->moreinformationurl,
+            'owner' => $formdata->owner,
+            'owneremail' => $formdata->owneremail,
+            'notes' => $formdata->notes,
         ];
 
         notices::add_notice($instanceid, $data);

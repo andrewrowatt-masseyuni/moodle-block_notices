@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<XMLDB PATH="blocks/notices/db" VERSION="20250102" COMMENT="XMLDB file for Moodle blocks/notices"
+<XMLDB PATH="blocks/notices/db" VERSION="20250104" COMMENT="XMLDB file for Moodle blocks/notices"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:noNamespaceSchemaLocation="../../../lib/xmldb/xmldb.xsd"
 >
@@ -11,10 +11,12 @@
         <FIELD NAME="visible" TYPE="int" LENGTH="1" NOTNULL="true" SEQUENCE="false" COMMENT="hidden=0, visible=1"/>
         <FIELD NAME="title" TYPE="char" LENGTH="64" NOTNULL="true" SEQUENCE="false" COMMENT="Title of the notice"/>
         <FIELD NAME="content" TYPE="text" NOTNULL="true" SEQUENCE="false" COMMENT="HTML content of the notice"/>
+        <FIELD NAME="contentformat" TYPE="int" LENGTH="4" NOTNULL="true" SEQUENCE="false"/>
         <FIELD NAME="updatedescription" TYPE="char" LENGTH="64" NOTNULL="true" SEQUENCE="false" COMMENT="Contains short description related to when the notice was added or updated. Use one of the conventions i.e., 'Added 5 January', 'Updated 6 Janurary', 'Updated 4pm, 6 January'"/>
         <FIELD NAME="moreinformationurl" TYPE="char" LENGTH="256" NOTNULL="true" SEQUENCE="false" COMMENT="URL for more information."/>
         <FIELD NAME="owner" TYPE="char" LENGTH="256" NOTNULL="true" SEQUENCE="false" COMMENT="Owner or person responsible for this notice"/>
         <FIELD NAME="owneremail" TYPE="char" LENGTH="256" NOTNULL="true" SEQUENCE="false" COMMENT="Owner or person responsible for this notice"/>
+        <FIELD NAME="sortorder" TYPE="int" LENGTH="4" NOTNULL="true" SEQUENCE="false" COMMENT="Provides a mechanism or order or prioritise notices"/>
         <FIELD NAME="notes" TYPE="text" NOTNULL="true" SEQUENCE="false" COMMENT="Administrative notes and next steps/actions for this notice e.g., when to hide or remove it. These notes are not displayed."/>
         <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
         <FIELD NAME="timemodified" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>

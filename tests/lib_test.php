@@ -25,7 +25,6 @@ namespace block_notices;
  * @license     https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 final class lib_test extends \advanced_testcase {
-
     // Write the tests here as public funcions.
     // Please refer to {@link https://docs.moodle.org/dev/PHPUnit} for more details on PHPUnit tests in Moodle.
 
