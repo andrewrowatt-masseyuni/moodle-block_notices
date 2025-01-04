@@ -91,7 +91,7 @@ $noticegroupinpreview = [
 ];
 
 // Iterate over all notices, add additional properties to improve the template output, and then add them to the correct "group".
-foreach (notices::get_notices($instanceid) as $noticeobject) {
+foreach (notices::get_notices_admin($instanceid) as $noticeobject) {
     // Convert the dataset to an array ready for using with a template.
     $noticearray = (array)$noticeobject;
 

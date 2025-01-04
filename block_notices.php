@@ -14,6 +14,8 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
 
+use block_notices\notices;
+
 /**
  * Block notices is defined here.
  *
@@ -55,29 +57,27 @@ class block_notices extends block_base {
 
         $canmanage = has_capability('block/notices:managenotices', $this->context);
 
+        $this->page->requires->css('/blocks/notices/styles.css');
+        $this->page->requires->js('/blocks/notices/swiper/swiper-bundle.min.js', false);
+        $this->page->requires->css('/blocks/notices/swiper/swiper-bundle.min.css');
+        $this->page->requires->js_call_amd('block_notices/swiper', 'init', []);
+
         if (!empty($this->config->text)) {
             $this->content->text = $this->config->text;
         } else {
-            $text = 'Lorem ipsum dolor sit amet.';
 
-            $action = optional_param('action', '', PARAM_TEXT);
+            $data=[
+                'canmanage' => $canmanage,
+                'instanceid' => $this->instance->id,
+                'wwwroot' => $CFG->wwwroot,
+                'notices' => [],
+            ];
 
-            if ($action == 'del') {
-                require_sesskey();
-
-                $id = required_param('id', PARAM_TEXT);
-
-                $text .= 'Deleted item';
+            foreach(notices::get_notices($this->instance->id) as $noticeobject) {
+                $data['notices'][] = (array)$noticeobject;
             }
 
-            if ($canmanage) {
-                $text .= html_writer::link(
-                    new moodle_url('/blocks/notices/manage.php', ['instanceid' => $this->instance->id]),
-                    $OUTPUT->pix_icon('t/preferences',
-                    get_string('managenotices', 'block_notices')) . get_string('managenotices', 'block_notices'),
-                    ['role' => 'button']
-                );
-            }
+            $text = $OUTPUT->render_from_template('block_notices/notices', $data);
 
             $this->content->text = $text;
         }
@@ -91,7 +91,6 @@ class block_notices extends block_base {
      * The function is called immediately after init().
      */
     public function specialization() {
-
         // Load user defined title and make sure it's never empty.
         if (empty($this->config->title)) {
             $this->title = get_string('pluginname', 'block_notices');

@@ -136,13 +136,22 @@ class notices {
         ],
     ];
 
+
+    public static function get_notices($instanceid): array {
+        global $DB;
+
+        $sql = 'SELECT * FROM {block_notices} WHERE instanceid = :instanceid and visible = :visible order by sortorder asc';
+        
+        return $DB->get_records_sql($sql, ['instanceid' => $instanceid, 'visible' => self::NOTICE_VISIBLE]);
+    }
+
     /**
      * Get all notices for a given instance.
      *
      * @param int $instanceid
      * @return array
      */
-    public static function get_notices($instanceid): array {
+    public static function get_notices_admin($instanceid): array {
         global $DB;
 
         $sql = 'SELECT b.*,
