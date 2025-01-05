@@ -26,8 +26,11 @@ require('../../config.php');
 
 use block_notices\notices;
 
+$noticeid = required_param('id', PARAM_INT);
+$notice = (array)notices::get_notice($noticeid);
+
 // Setup page context and course and check permissions.
-$courseid = required_param('courseid', PARAM_INT);
+$courseid = $notice['courseid'];
 if ($courseid == 1) {
     $context = context_system::instance();
     require_login();
@@ -36,7 +39,7 @@ if ($courseid == 1) {
 }
 require_capability('block/notices:managenotices', $PAGE->context);
 
-$url = new moodle_url('/blocks/notices/add.php', ['courseid' => $courseid]);
+$url = new moodle_url('/blocks/notices/edit.php', ['noticeid' => $noticeid]);
 $PAGE->set_url($url);
 $PAGE->set_title(get_string('addnotice', 'block_notices'));
 $PAGE->set_heading(get_string('addnotice', 'block_notices'));
@@ -47,7 +50,8 @@ if ($noticeform->is_cancelled()) {
     redirect(new moodle_url('/blocks/notices/manage.php', ['courseid' => $courseid]));
 } else if ($formdata = $noticeform->get_data()) {
     $data = [
-        'visible' => $formdata->visible,
+        'id' => $formdata->id,
+        'visible' => notices::NOTICE_IN_PREVIEW, // Force into preview mode.
         'title' => $formdata->title,
         'content' => $formdata->content['text'],
         'contentformat' => $formdata->content['format'],
@@ -58,9 +62,21 @@ if ($noticeform->is_cancelled()) {
         'notes' => $formdata->notes,
     ];
 
-    notices::add_notice($courseid, $data);
+    notices::update_notice($data);
 
     redirect(new moodle_url('/blocks/notices/manage.php', ['courseid' => $courseid]));
+} else {
+    // This branch is executed if the form is submitted but the data doesn't
+    // validate and the form should be redisplayed or on the first display of the form.
+
+    // Set anydefault data (if any).
+    $noticeform->set_data(
+        ['content' => [
+            'text' => $notice['content'],
+            'format' => $notice['contentformat'],
+            ],
+        ] + $notice
+    );
 }
 
 echo $OUTPUT->header();

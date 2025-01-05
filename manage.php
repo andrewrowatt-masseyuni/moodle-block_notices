@@ -24,12 +24,18 @@
 
 require('../../config.php');
 
-require_login();
-
 use block_notices\notices;
 
+// Setup page context and course and check permissions.
 $courseid = required_param('courseid', PARAM_INT);
-require_capability('block/notices:managenotices', context_block::instance($courseid));
+if ($courseid == 1) {
+    $context = context_system::instance();
+    require_login();
+} else {
+    require_login($courseid);
+}
+require_capability('block/notices:managenotices', $PAGE->context);
+notices::require_notice_block($courseid);
 
 // Add some test data if there are no notices. This code will probably be removed in the final version.
 if (notices::get_notice_count($courseid) == 0) {
@@ -38,8 +44,6 @@ if (notices::get_notice_count($courseid) == 0) {
 
 $url = new moodle_url('/blocks/notices/manage.php', ['courseid' => $courseid]);
 $PAGE->set_url($url);
-$PAGE->set_context(context_system::instance());
-
 $PAGE->set_title(get_string('managenotices', 'block_notices'));
 $PAGE->set_heading(get_string('managenotices', 'block_notices'));
 

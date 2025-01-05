@@ -35,15 +35,17 @@ class addnotice extends \moodleform {
     public function definition() {
         $mform = $this->_form; // Don't forget the underscore!
 
+        $mform->addElement('hidden', 'id', '0');
+
         // Start of general group.
 
         $mform->addElement('header', 'general', get_string('basicinformationgroup', 'block_notices'));
 
-        $mform->addElement('static', 'visible',
+        $mform->addElement('static', 'visible_label',
             get_string('visible', 'block_notices'),
             get_string('visibility_preview', 'block_notices'));
 
-        $mform->addElement('text', 'title', get_string('title', 'block_notices'));
+        $mform->addElement('text', 'title', get_string('title', 'block_notices'), ['size' => 64]);
         $mform->setDefault('title', '');
         $mform->setType('title', PARAM_TEXT);
         $mform->addHelpButton('title', 'title', 'block_notices');
@@ -99,12 +101,9 @@ class addnotice extends \moodleform {
         $mform->setType('notes', PARAM_TEXT);
         $mform->addHelpButton('notes', 'notes', 'block_notices');
 
-        $submitlabel = get_string('save');
-        $mform->addElement('submit', 'submitmessage', $submitlabel);
-
         $buttonarray = [];
-        $buttonarray[] =& $mform->createElement('submit', 'submitbutton', get_string('savechanges'));
-        $buttonarray[] =& $mform->createElement('submit', 'cancel', get_string('cancel'));
+        $buttonarray[] = $mform->createElement('submit', 'submitbutton', get_string('save'));
+        $buttonarray[] = $mform->createElement('cancel');
         $mform->addGroup($buttonarray, 'buttonar', '', [' '], false);
     }
 }

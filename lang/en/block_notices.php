@@ -27,6 +27,7 @@ defined('MOODLE_INTERNAL') || die();
 
 $string['addnotice'] = 'Add notice';
 $string['basicinformationgroup'] = 'General';
+$string['block_notices:missingblock'] = 'Unable to to manage notices for a course without a Notices block.';
 $string['content'] = 'Content';
 $string['content_help_additional'] = 'Use basic formatting only e.g., bold, italic, and links. Do not use headings, lists, images, and tables.';
 $string['customcss'] = 'Custom CSS';

@@ -30,5 +30,10 @@ class block_notices_edit_form extends block_edit_form {
      */
     protected function specific_definition($mform) {
         // Section header title.
+
+        $mform->addElement('header', 'configheader', get_string('blocksettings', 'block'));
+
+        $mform->addElement('text', 'config_title', get_string('configtitle', 'block_html'));
+        $mform->setType('config_title', PARAM_TEXT);
     }
 }

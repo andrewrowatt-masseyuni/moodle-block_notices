@@ -94,8 +94,6 @@ class block_notices extends block_base {
 
             $text = $OUTPUT->render_from_template('block_notices/notices', $data);
 
-            var_dump($this->page->course->id);
-
             $this->content->text = $text;
         }
 

@@ -157,7 +157,7 @@ class notices {
 
         $visible = [self::NOTICE_VISIBLE];
         if ($includepreview) {
-            array_push($visible, self::NOTICE_IN_PREVIEW);
+            $visible[] = self::NOTICE_IN_PREVIEW;
         }
 
         [$insql, $inparams] = $DB->get_in_or_equal($visible);
@@ -171,7 +171,7 @@ class notices {
     }
 
     /**
-     * Get all notices for a given instance.
+     * Get full details for all notices for a given course.
      *
      * @param int $courseid
      * @return array
@@ -223,19 +223,18 @@ class notices {
      * @param int $id
      * @param array $data
      */
-    public static function update_notice($id, $data) {
+    public static function update_notice(array $data) {
         global $DB;
 
-        $record = new \stdClass;
-        $record->id = $id;
-        $record->visible = $data->visible ? 1 : 0;
-        $record->title = $data->title;
-        $record->content = $data->content['text'];
-        $record->updatedescription = $data->updatedescription;
-        $record->timemodified = time();
-        $record->modifiedby = $data->modifiedby;
+        $noticepreviousversion = self::get_notice($data['id']);
+        $DB->update_record('block_notices', $data);
 
-        $DB->update_record('block_notices', $record);
+        // Through this method, visibility may change from visible to preview
+        // so we will need to recalculate the sortorder in that case.
+        if ($noticepreviousversion->visible == self::NOTICE_VISIBLE &&
+                $data['visible'] != self::NOTICE_VISIBLE) {
+            self::recalc_visible_notices_sortorder($noticepreviousversion['courseid']);
+        }
     }
 
     /**
@@ -347,18 +346,14 @@ class notices {
 
         $notice = self::get_notice($id);
 
-        // ...TODO: Check that the notice is not already visible.
-
-        // When a notice is shown, we also need to set the sortorder so it is added to the end of the list.
-        $maxsortorder = $DB->get_field_sql(
-            'SELECT MAX(sortorder) FROM {block_notices} where courseid = :courseid',
-             ['courseid' => $notice->courseid]);
+        // ...TODO: Check that the notice is not already hidden.
 
         $notice->sortorder = 0;
         $notice->visible = self::NOTICE_HIDDEN;
 
         $DB->update_record('block_notices', $notice);
 
+        // When a notice is hidden, it may leave gaps in the sortorder sequence.
         self::recalc_visible_notices_sortorder($notice->courseid);
     }
 
@@ -381,6 +376,38 @@ class notices {
         foreach ($notices as $notice) {
             $notice->sortorder = $sortorder++;
             $DB->update_record('block_notices', $notice);
+        }
+    }
+
+    /**
+     * Check if a course has a notice block added.
+     *
+     * @param int $courseid
+     * @return bool
+     */
+    public static function has_notice_block(int $courseid): bool {
+        global $DB;
+
+        if ($courseid == 1) {
+            $contextid = 1;
+        } else {
+            $context = \context_course::instance($courseid);
+            $contextid = $context->id;
+        }
+
+        return $DB->record_exists('block_instances',
+            ['blockname' => 'notices', 'parentcontextid' => $contextid]);
+    }
+
+    /**
+     * Check if a course has a notice block added and throw an exception if not.
+     *
+     * @param int $courseid
+     * @throws \moodle_exception
+     */
+    public static function require_notice_block($courseid): void {
+        if (!self::has_notice_block($courseid)) {
+            throw new \moodle_exception('block_notices:missingblock', 'block_notices');
         }
     }
 
