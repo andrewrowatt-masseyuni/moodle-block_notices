@@ -16,6 +16,8 @@
 
 namespace block_notices;
 
+// "PS C:\github\moodle405\moodle> vendor/bin/phpunit --filter 'block_notices\\lib_test'"
+
 defined('MOODLE_INTERNAL') || die();
 
 global $CFG;
@@ -28,11 +30,11 @@ global $CFG;
  * @copyright   2024 Andrew Rowatt <A.J.Rowatt@massey.ac.nz>
  * @license     https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-final class lib_test extends \advanced_testcase {
+final class notices extends \advanced_testcase {
     /**
      * "Real world" Test data.
      */
-    public const TEST_DATA = [
+    public static const TEST_DATA = [
         [
             'visible' => 1,
             'title' => 'MOST (Massey Online Survey Tool)',
