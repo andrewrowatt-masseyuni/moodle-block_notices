@@ -200,10 +200,10 @@ class notices {
      * @param int $id
      * @return object
      */
-    public static function get_notice($id): object {
+    public static function get_notice($id): array {
         global $DB;
 
-        return $DB->get_record('block_notices', ['id' => $id]);
+        return (array)$DB->get_record('block_notices', ['id' => $id]);
     }
 
     /**
@@ -227,12 +227,15 @@ class notices {
         global $DB;
 
         $noticepreviousversion = self::get_notice($data['id']);
+
+        $data['visible'] = self::NOTICE_IN_PREVIEW;
+        $data['sortorder'] = 0;
+
         $DB->update_record('block_notices', $data);
 
         // Through this method, visibility may change from visible to preview
         // so we will need to recalculate the sortorder in that case.
-        if ($noticepreviousversion->visible == self::NOTICE_VISIBLE &&
-                $data['visible'] != self::NOTICE_VISIBLE) {
+        if ($noticepreviousversion['visible'] == self::NOTICE_VISIBLE) {
             self::recalc_visible_notices_sortorder($noticepreviousversion['courseid']);
         }
     }
@@ -271,14 +274,14 @@ class notices {
 
         $notice = self::get_notice($id);
 
-        $sortorder = $notice->sortorder;
+        $sortorder = $notice['sortorder'];
         $prevnotice = $DB->get_record_sql('select * from {block_notices}
                 where courseid = :courseid and visible=:visible and
                 sortorder < :sortorder order by sortorder desc limit 1',
-            ['courseid' => $notice->courseid, 'visible' => self::NOTICE_VISIBLE, 'sortorder' => $sortorder]);
+            ['courseid' => $notice['courseid'], 'visible' => self::NOTICE_VISIBLE, 'sortorder' => $sortorder]);
 
         if ($prevnotice) {
-            $notice->sortorder = $prevnotice->sortorder;
+            $notice['sortorder'] = $prevnotice->sortorder;
             $prevnotice->sortorder = $sortorder;
 
             $DB->update_record('block_notices', $notice);
@@ -296,14 +299,14 @@ class notices {
 
         $notice = self::get_notice($id);
 
-        $sortorder = $notice->sortorder;
+        $sortorder = $notice['sortorder'];
         $nextnotice = $DB->get_record_sql('select * from {block_notices}
                 where courseid = :courseid and visible=:visible and
                 sortorder > :sortorder order by sortorder asc limit 1',
-            ['courseid' => $notice->courseid, 'visible' => self::NOTICE_VISIBLE, 'sortorder' => $sortorder]);
+            ['courseid' => $notice['courseid'], 'visible' => self::NOTICE_VISIBLE, 'sortorder' => $sortorder]);
 
         if ($nextnotice) {
-            $notice->sortorder = $nextnotice->sortorder;
+            $notice['sortorder'] = $nextnotice->sortorder;
             $nextnotice->sortorder = $sortorder;
 
             $DB->update_record('block_notices', $notice);
@@ -328,10 +331,10 @@ class notices {
         $maxsortorder = $DB->get_field_sql(
             'SELECT MAX(sortorder) FROM {block_notices}
                 where courseid = :courseid and visible=:visible',
-            ['courseid' => $notice->courseid, 'visible' => self::NOTICE_VISIBLE]);
+            ['courseid' => $notice['courseid'], 'visible' => self::NOTICE_VISIBLE]);
 
-        $notice->sortorder = $maxsortorder + 1;
-        $notice->visible = self::NOTICE_VISIBLE;
+        $notice['sortorder'] = $maxsortorder + 1;
+        $notice['visible'] = self::NOTICE_VISIBLE;
 
         $DB->update_record('block_notices', $notice);
     }
@@ -348,13 +351,13 @@ class notices {
 
         // ...TODO: Check that the notice is not already hidden.
 
-        $notice->sortorder = 0;
-        $notice->visible = self::NOTICE_HIDDEN;
+        $notice['sortorder'] = 0;
+        $notice['visible'] = self::NOTICE_HIDDEN;
 
         $DB->update_record('block_notices', $notice);
 
         // When a notice is hidden, it may leave gaps in the sortorder sequence.
-        self::recalc_visible_notices_sortorder($notice->courseid);
+        self::recalc_visible_notices_sortorder($notice['courseid']);
     }
 
     /**
