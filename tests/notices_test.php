@@ -258,8 +258,6 @@ final class notices_test extends \advanced_testcase {
         $this->assertEquals(notices::get_notice($id2)['sortorder'], 2);
     }
 
-    
-
     /**
      * Tests updating a notice
      *
@@ -274,7 +272,7 @@ final class notices_test extends \advanced_testcase {
         notices::show_notice($id2);
 
         $this->assertEquals(notices::get_notice($id1)['visible'], notices::NOTICE_VISIBLE);
-        
+
         $notice = notices::get_notice($id1);
 
         $notice['title'] = 'test_notice_update_basic';
@@ -285,6 +283,5 @@ final class notices_test extends \advanced_testcase {
         $this->assertEquals(notices::get_notice($id1)['title'], 'test_notice_update_basic');
 
         $this->assertEquals(notices::get_notice($id2)['sortorder'], 1);
-     
     }
 }
