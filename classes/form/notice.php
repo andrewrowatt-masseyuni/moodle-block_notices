@@ -25,10 +25,10 @@ require_once($CFG->libdir . '/formslib.php');
  * Class addnotice
  *
  * @package    block_notices
- * @copyright  2025 YOUR NAME <your@email.com>
+ * @copyright  2025 Andrew Rowatt <A.J.Rowatt@massey.ac.nz>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class addnotice extends \moodleform {
+class notice extends \moodleform {
     /**
      * Define the form.
      */

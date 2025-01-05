@@ -44,7 +44,7 @@ $PAGE->set_url($url);
 $PAGE->set_title(get_string('addnotice', 'block_notices'));
 $PAGE->set_heading(get_string('addnotice', 'block_notices'));
 
-$noticeform = new \block_notices\form\addnotice($url);
+$noticeform = new \block_notices\form\notice($url);
 
 if ($noticeform->is_cancelled()) {
     redirect(new moodle_url('/blocks/notices/manage.php', ['courseid' => $courseid]));
