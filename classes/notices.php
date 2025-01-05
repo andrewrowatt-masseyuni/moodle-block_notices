@@ -68,14 +68,14 @@ class notices {
         [
             'visible' => 1,
             'title' => 'Copyright Notice',
-            'content' => '<p>All Stream course materials are copyrighted an
-                d intended solely for the University\'s educational purposes
-                . They may contain extracts from copyrighted works used under licenses
-                . You may create a single copy for personal use, but further copying o
-                r distribution of any course materials, including powerpoints, r
-                eadings, tests, and exam papers, to others or online platforms i
-                s prohibited. Non-compliance with this warning may lead to legal actio
-                n for copyright infringement and/or disciplinary measures by the University.</p>',
+            'content' => '<p>All Stream course materials are copyrighted and
+                intended solely for the University\'s educational purposes.
+                They may contain extracts from copyrighted works used under licenses.
+                You may create a single copy for personal use, but further copying or
+                distribution of any course materials, including powerpoints,
+                readings, tests, and exam papers, to others or online platforms is
+                prohibited. Non-compliance with this warning may lead to legal action
+                for copyright infringement and/or disciplinary measures by the University.</p>',
             'contentformat' => 1,
             'updatedescription' => 'Updated 11 January',
             'moreinformationurl' => 'https://www.massey.ac.nz/
@@ -87,13 +87,12 @@ class notices {
         [
             'visible' => 0,
             'title' => 'Student Portal Unavailable Friday, 21 June',
-            'content' => '<p>The Student Portal will be unavailable from <strong>&nbsp;Frida
-			y, 21 June at 6pm until Saturday, 22 June at 6pm</strong>&nbsp;while an update o
-			ccurs.</p>
+            'content' => '<p>The Student Portal will be unavailable from <strong>&nbsp;Friday,
+            21 June at 6pm until Saturday, 22 June at 6pm</strong>&nbsp;while an update occurs.</p>
 	        <p style="text-align: center;"><strong>Stream will remain accessible during this time.</strong>
-	        </p><p>Students are encouraged to complete any applications in the portal ahead of time t
-	        o avoid inconvenience. This includes semester two enrolments, scholarship
-	        s, and special circumstance requests.</p>',
+	        </p><p>Students are encouraged to complete any applications in the portal ahead of time to
+            avoid inconvenience. This includes semester two enrolments, scholarships
+	        , and special circumstance requests.</p>',
             'contentformat' => 1,
             'updatedescription' => 'Updated 6pm, 19 June',
             'moreinformationurl' => 'https://www.massey.ac.nz/student-life/
@@ -102,10 +101,14 @@ class notices {
             'owneremail' => 'h.burnett@massey.ac.nz',
             'notes' => 'n/a',
         ],
-		[
+        [
             'visible' => 1,
             'title' => 'MyHub',
-            'content' => '<p><a href="https://myhub.massey.ac.nz" target="_blank">MyHub</a> is your go-to platform to enhance your career prospects with job searches and skill workshops, engage in wellbeing activities, influence university decisions through Student Voice, and explore extensive support for study planning, course selection, and essential student resources.</p>',
+            'content' => '<p><a href="https://myhub.massey.ac.nz"
+                target="_blank">MyHub</a> is your go-to platform to enhance your career prospects
+                with job searches and skill workshops, engage in wellbeing activities, influence
+                university decisions through Student Voice, and explore extensive support for
+                study planning, course selection, and essential student resources.</p>',
             'contentformat' => 1,
             'updatedescription' => 'Updated 8 January',
             'moreinformationurl' => 'https://myhub.massey.ac.nz',
@@ -113,10 +116,13 @@ class notices {
             'owneremail' => 'A.J.Rowatt@massey.ac.nz',
             'notes' => 'n/a',
         ],
-		[
+        [
             'visible' => 2,
             'title' => 'Office 365 free for Students',
-            'content' => '<p>Ensure you\'re fully equipped for your Massey University courses. Office 365 is free for you and helps with accessing course materials and submitting assignments and exams in the right format. <a href="https://massey.ac.nz/freeoffice" target="_blank">Get Office 365 here</a>.</p>',
+            'content' => '<p>Ensure you\'re fully equipped for your Massey University courses.
+                Office 365 is free for you and helps with accessing course materials and submitting
+                assignments and exams in the right format.
+                <a href="https://massey.ac.nz/freeoffice" target="_blank">Get Office 365 here</a>.</p>',
             'contentformat' => 1,
             'updatedescription' => 'Updated 8 January',
             'moreinformationurl' => 'https://massey.ac.nz/freeoffice',
@@ -125,26 +131,40 @@ class notices {
             'notes' => 'ITS manage this resource.',
         ],
     ];
-
+    /**
+     * Get the count of notices for a given instance
+     *
+     * @param int $courseid
+     * @return int
+     */
     public static function get_notice_count(int $courseid): int {
         global $DB;
+
+        // ...TODO: Implement "bool $includepreview = false".
 
         return $DB->count_records('block_notices', ['courseid' => $courseid]);
     }
 
+    /**
+     * Get all notices for a given instance.
+     *
+     * @param int $courseid
+     * @param bool $includepreview
+     * @return array
+     */
     public static function get_notices(int $courseid, bool $includepreview = false): array {
         global $DB;
 
         $visible = [self::NOTICE_VISIBLE];
         if ($includepreview) {
-            array_push($visible,self::NOTICE_IN_PREVIEW);
+            array_push($visible, self::NOTICE_IN_PREVIEW);
         }
 
         [$insql, $inparams] = $DB->get_in_or_equal($visible);
 
         $sql = "SELECT * FROM {block_notices}
             WHERE courseid = ? and
-            visible $insql 
+            visible $insql
             order by sortorder asc";
 
         return $DB->get_records_sql($sql, ['courseid' => $courseid] + $inparams);
@@ -162,13 +182,16 @@ class notices {
         $sql = 'SELECT b.*,
             trim(concat(cb.firstname, \' \', cb.lastname)) as createdbyname,
             trim(concat(mb.firstname, \' \', mb.lastname)) as modifiedbyname,
-            b.sortorder = (select min(sortorder) from {block_notices} where courseid = b.courseid and visible=:visiblemin) as isfirst,
-            b.sortorder = (select max(sortorder) from {block_notices} where courseid = b.courseid and visible=:visiblemax) as islast
+            b.sortorder = (select min(sortorder) from {block_notices}
+                where courseid = b.courseid and visible=:visiblemin) as isfirst,
+            b.sortorder = (select max(sortorder) from {block_notices}
+                where courseid = b.courseid and visible=:visiblemax) as islast
             FROM {block_notices} b
             join {user} cb on b.createdby = cb.id
             join {user} mb on b.modifiedby = mb.id
             WHERE b.courseid = :courseid order by b.visible, b.sortorder';
-        return $DB->get_records_sql($sql, ['courseid' => $courseid, 'visiblemin' => self::NOTICE_VISIBLE, 'visiblemax' => self::NOTICE_VISIBLE]);
+        return $DB->get_records_sql($sql,
+             ['courseid' => $courseid, 'visiblemin' => self::NOTICE_VISIBLE, 'visiblemax' => self::NOTICE_VISIBLE]);
     }
 
     /**
@@ -218,8 +241,8 @@ class notices {
     /**
      * Add a notice.
      *
-     * @param int $courseid block instance of the notice block
-     * @param object $data core data for the notice to add
+     * @param int $courseid
+     * @param object $data
      */
     public static function add_notice(int $courseid, array $data): int {
         global $DB, $USER;
@@ -239,16 +262,21 @@ class notices {
         return $DB->insert_record('block_notices', $presets + $data);
     }
 
+    /**
+     * Move a notice up in the display order
+     * @param int $id
+     * @return void
+     */
     public static function move_up(int $id): void {
         global $DB;
 
         $notice = self::get_notice($id);
 
         $sortorder = $notice->sortorder;
-        $prevnotice = $DB->get_record_sql('select * from {block_notices} 
-            where courseid = :courseid and visible=:visible and 
-            sortorder < :sortorder order by sortorder desc limit 1' 
-        , ['courseid' => $notice->courseid, 'visible' => self::NOTICE_VISIBLE, 'sortorder' => $sortorder]);
+        $prevnotice = $DB->get_record_sql('select * from {block_notices}
+                where courseid = :courseid and visible=:visible and
+                sortorder < :sortorder order by sortorder desc limit 1',
+            ['courseid' => $notice->courseid, 'visible' => self::NOTICE_VISIBLE, 'sortorder' => $sortorder]);
 
         if ($prevnotice) {
             $notice->sortorder = $prevnotice->sortorder;
@@ -259,16 +287,21 @@ class notices {
         }
     }
 
+    /**
+     * Move a notice down in the display order
+     * @param int $id
+     * @return void
+     */
     public static function move_down(int $id): void {
         global $DB;
 
         $notice = self::get_notice($id);
 
         $sortorder = $notice->sortorder;
-        $nextnotice = $DB->get_record_sql('select * from {block_notices} 
-            where courseid = :courseid and visible=:visible and 
-            sortorder > :sortorder order by sortorder asc limit 1' 
-        , ['courseid' => $notice->courseid, 'visible' => self::NOTICE_VISIBLE, 'sortorder' => $sortorder]);
+        $nextnotice = $DB->get_record_sql('select * from {block_notices}
+                where courseid = :courseid and visible=:visible and
+                sortorder > :sortorder order by sortorder asc limit 1',
+            ['courseid' => $notice->courseid, 'visible' => self::NOTICE_VISIBLE, 'sortorder' => $sortorder]);
 
         if ($nextnotice) {
             $notice->sortorder = $nextnotice->sortorder;
@@ -279,15 +312,23 @@ class notices {
         }
     }
 
-
+    /**
+     * Show a notice.
+     *
+     * @param int $id
+     */
     public static function show_notice(int $id): void {
         global $DB;
 
         $notice = self::get_notice($id);
 
-        // When a notice is shown, we also need to set the sortorder so it is added to the end of the list.
+        // ...TODO: Check that the notice is not already visible.
+
+        // When a notice is shown, we also need to set the sortorder
+        // By default is is added to end of the list.
         $maxsortorder = $DB->get_field_sql(
-            'SELECT MAX(sortorder) FROM {block_notices} where courseid = :courseid and visible=:visible', 
+            'SELECT MAX(sortorder) FROM {block_notices}
+                where courseid = :courseid and visible=:visible',
             ['courseid' => $notice->courseid, 'visible' => self::NOTICE_VISIBLE]);
 
         $notice->sortorder = $maxsortorder + 1;
@@ -296,13 +337,22 @@ class notices {
         $DB->update_record('block_notices', $notice);
     }
 
+    /**
+     * Hide a notice.
+     *
+     * @param int $id
+     */
     public static function hide_notice(int $id): void {
         global $DB;
 
         $notice = self::get_notice($id);
 
+        // ...TODO: Check that the notice is not already visible.
+
         // When a notice is shown, we also need to set the sortorder so it is added to the end of the list.
-        $maxsortorder = $DB->get_field_sql('SELECT MAX(sortorder) FROM {block_notices} where courseid = :courseid', ['courseid' => $notice->courseid]);
+        $maxsortorder = $DB->get_field_sql(
+            'SELECT MAX(sortorder) FROM {block_notices} where courseid = :courseid',
+             ['courseid' => $notice->courseid]);
 
         $notice->sortorder = 0;
         $notice->visible = self::NOTICE_HIDDEN;
@@ -312,12 +362,20 @@ class notices {
         self::recalc_visible_notices_sortorder($notice->courseid);
     }
 
+    /**
+     * Recalcuate the sortorder for all visible notices.
+     *
+     * This function is called when a visible notice is deleted as this may leave gaps in the sortorder.
+     *
+     * @param int $courseid
+     * @return void
+     */
     private static function recalc_visible_notices_sortorder(int $courseid): void {
         global $DB;
 
         $sortorder = 1;
-        $notices = $DB->get_records('block_notices', 
-            ['courseid' => $courseid, 'visible' => self::NOTICE_VISIBLE], 
+        $notices = $DB->get_records('block_notices',
+            ['courseid' => $courseid, 'visible' => self::NOTICE_VISIBLE],
             'sortorder ASC');
 
         foreach ($notices as $notice) {
@@ -334,9 +392,11 @@ class notices {
     public static function add_notice_test_data(int $courseid): void {
         foreach (self::TEST_DATA as $notice) {
             $id = self::add_notice($courseid, $notice);
-            if ($notice['visible'] === 1) {
+
+            // New notices are always in preview mode, update to visible or hidden if required.
+            if ($notice['visible'] == self::NOTICE_VISIBLE) {
                 self::show_notice($id);
-            } elseif ($notice['visible'] === 0) {
+            } else if ($notice['visible'] == self::NOTICE_HIDDEN) {
                 self::hide_notice($id);
             }
         }

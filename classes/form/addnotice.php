@@ -41,14 +41,7 @@ class addnotice extends \moodleform {
 
         $mform->addElement('static', 'visible',
             get_string('visible', 'block_notices'),
-            notices::NOTICE_VISIBLITY[notices::NOTICE_IN_PREVIEW]);
-
-        /*
-        $mform->addElement('select', 'visible', get_string('visible', 'block_notices'), notices::NOTICE_VISIBLITY);
-        $mform->addElement('selectyesno', 'visible', get_string('visible', 'block_notices'));
-        $mform->setDefault('visible', notices::NOTICE_IN_PREVIEW);
-        $mform->addHelpButton('visible', 'visible', 'block_notices');
-        */
+            get_string('visibility_preview', 'block_notices'));
 
         $mform->addElement('text', 'title', get_string('title', 'block_notices'));
         $mform->setDefault('title', '');

@@ -67,14 +67,14 @@ class block_notices extends block_base {
             $this->content->text = $this->config->text;
         } else {
 
-            $data=[
+            $data = [
                 'canmanage' => $canmanage,
                 'courseid' => $courseid,
                 'wwwroot' => $CFG->wwwroot,
                 'notices' => [],
             ];
 
-            foreach(notices::get_notices($courseid, $canmanage) as $noticeobject) {
+            foreach (notices::get_notices($courseid, $canmanage) as $noticeobject) {
                 $noticearray = (array)$noticeobject;
 
                 if ($noticearray['moreinformationurl']) {

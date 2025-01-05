@@ -31,7 +31,10 @@ use block_notices\notices;
 $courseid = required_param('courseid', PARAM_INT);
 require_capability('block/notices:managenotices', context_block::instance($courseid));
 
-if (notices::get_notice_count($courseid) ==0) notices::add_notice_test_data($courseid);
+// Add some test data if there are no notices. This code will probably be removed in the final version.
+if (notices::get_notice_count($courseid) == 0) {
+    notices::add_notice_test_data($courseid);
+}
 
 $url = new moodle_url('/blocks/notices/manage.php', ['courseid' => $courseid]);
 $PAGE->set_url($url);
@@ -45,7 +48,7 @@ $noticeid = optional_param('id', null, PARAM_INT);
 
 if ($action && $noticeid) {
     require_sesskey();
-    
+
     switch ($action) {
         case 'hide':
             notices::hide_notice($noticeid);
@@ -131,7 +134,7 @@ foreach (notices::get_notices_admin($courseid) as $noticeobject) {
 $data = [
     'sesskey' => sesskey(),
     'courseid' => $courseid,
-    'groups' => [ 
+    'groups' => [
         $noticegroupinpreview,
         $noticegroupvisible,
         $noticegrouphidden,
