@@ -32,21 +32,29 @@
 <ul class="list-group pb-3">
     {{#notices}}
     <li class="list-group-item visibility-{{visible}}" draggable="true">
-    {{<block_notices/notice_admin}}{{/block_notices/notice_admin}}
-    <div class="d-flex justify-content-between align-items-center">
-    <span style="font-size: inherit; font-weight: 300;" class="badge badge-{{css}}">{{description}}</span>
-    <div class="d-flex justify-content-end" style="gap: 1em;">
-        
-        {{#canmoveup}}<a role="button" href="manage.php?sesskey={{sesskey}}&courseid={{courseid}}&action=moveup&id={{id}}">{{#pix}} t/up, core, {{#str}} moveup, core {{/str}} {{/pix}}{{#str}} moveup, core {{/str}}</a>{{/canmoveup}}
-        {{#canmovedown}}<a role="button" href="manage.php?sesskey={{sesskey}}&courseid={{courseid}}&action=movedown&id={{id}}">{{#pix}} t/down, core, {{#str}} movedown, core {{/str}} {{/pix}}{{#str}} movedown, core {{/str}}</a>{{/canmovedown}}
+        <div class="d-flex w-100 justify-content-between">
+            <h5 class="mb-1">{{#showsortorder}}<span class="badge badge-secondary">{{sortorder}}</span> {{/showsortorder}}{{title}}</h5>
+            <small>{{updatedescription}}</small>
+        </div>
+        <p class="mb-1">{{{content}}}</p>
+        <div class="d-flex justify-content-between">
+            <small>{{#str}} moreinformationurl, block_notices {{/str}}: <a href="{{moreinformationurl}}" target="_blank">{{moreinformationurl}}</a></small>
+            <small>{{#str}} owner, block_notices {{/str}}: <a title="Click to email" href="mailto:{{owneremail}}">{{owner}}</a></small>
+        </div>
+        <hr />
+        <div class="d-flex justify-content-between align-items-center">
+            <span style="font-size: inherit; font-weight: 300;" class="badge badge-{{css}}">{{description}}</span>
+            <div class="d-flex justify-content-end" style="gap: 1em;">
+                {{#canmoveup}}<a role="button" href="manage.php?sesskey={{sesskey}}&courseid={{courseid}}&action=moveup&id={{id}}">{{#pix}} t/up, core, {{#str}} moveup, core {{/str}} {{/pix}}{{#str}} moveup, core {{/str}}</a>{{/canmoveup}}
+                {{#canmovedown}}<a role="button" href="manage.php?sesskey={{sesskey}}&courseid={{courseid}}&action=movedown&id={{id}}">{{#pix}} t/down, core, {{#str}} movedown, core {{/str}} {{/pix}}{{#str}} movedown, core {{/str}}</a>{{/canmovedown}}
 
-        {{#canshow}}<a role="button" href="manage.php?sesskey={{sesskey}}&courseid={{courseid}}&action=show&id={{id}}">{{#pix}} t/hide, core, {{#str}} show, core {{/str}} {{/pix}}{{#str}} show, core {{/str}}</a>{{/canshow}}
-        {{#canhide}}<a role="button" href="manage.php?sesskey={{sesskey}}&courseid={{courseid}}&action=hide&id={{id}}">{{#pix}} t/show, core, {{#str}} hide, core {{/str}} {{/pix}}{{#str}} hide, core {{/str}}</a>{{/canhide}}
-        
-        <a role="button" href="edit.php?id={{id}}">{{#pix}} t/edit, core, {{#str}} edit, core {{/str}} {{/pix}}{{#str}} edit, core {{/str}}</a>
-        <a role="button" href="manage.php?sesskey={{sesskey}}&courseid={{courseid}}&action=delete&id={{id}}">{{#pix}} t/delete, core, {{#str}} delete, core {{/str}} {{/pix}}{{#str}} delete, core {{/str}}</a>
-    </div>
-    </div>
+                {{#canshow}}<a role="button" href="manage.php?sesskey={{sesskey}}&courseid={{courseid}}&action=show&id={{id}}">{{#pix}} t/hide, core, {{#str}} show, core {{/str}} {{/pix}}{{#str}} show, core {{/str}}</a>{{/canshow}}
+                {{#canhide}}<a role="button" href="manage.php?sesskey={{sesskey}}&courseid={{courseid}}&action=hide&id={{id}}">{{#pix}} t/show, core, {{#str}} hide, core {{/str}} {{/pix}}{{#str}} hide, core {{/str}}</a>{{/canhide}}
+                
+                <a role="button" href="edit.php?id={{id}}">{{#pix}} t/edit, core, {{#str}} edit, core {{/str}} {{/pix}}{{#str}} edit, core {{/str}}</a>
+                <a role="button" href="manage.php?sesskey={{sesskey}}&courseid={{courseid}}&action=delete&id={{id}}">{{#pix}} t/delete, core, {{#str}} delete, core {{/str}} {{/pix}}{{#str}} delete, core {{/str}}</a>
+            </div>
+        </div>
     
     </li>
     {{/notices}}
