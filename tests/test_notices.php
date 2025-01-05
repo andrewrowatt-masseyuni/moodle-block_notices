@@ -16,21 +16,21 @@
 
 namespace block_notices;
 
-// "PS C:\github\moodle405\moodle> vendor/bin/phpunit --filter 'block_notices\\lib_test'"
+// "PS C:\github\moodle405\moodle> vendor/bin/phpunit --filter 'block_notices\\test_notices'"
 
 defined('MOODLE_INTERNAL') || die();
 
 global $CFG;
 
 /**
- * The lib_test test class.
+ * The notices test class.
  *
  * @package     block_notices
  * @category    test
  * @copyright   2024 Andrew Rowatt <A.J.Rowatt@massey.ac.nz>
  * @license     https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-final class notices extends \advanced_testcase {
+final class test_notices extends \advanced_testcase {
     /**
      * "Real world" Test data.
      */
@@ -115,8 +115,6 @@ final class notices extends \advanced_testcase {
         ],
     ];
 
-    // Write the tests here as public funcions.
-    // Please refer to {@link https://docs.moodle.org/dev/PHPUnit} for more details on PHPUnit tests in Moodle.
     /**
      * Tests adding a single notice.
      *
