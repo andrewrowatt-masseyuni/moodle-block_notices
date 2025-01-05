@@ -24,7 +24,6 @@ namespace block_notices;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class notices {
-
     /**
      * @var int defining so it can be used for filtering
      */
@@ -39,15 +38,6 @@ class notices {
      * @var int defining so it can be used for filtering
      */
     public const NOTICE_IN_PREVIEW = 2;
-
-    /**
-     * @var array lookup table for notice visibility
-     */
-    public const NOTICE_VISIBLITY = [
-        self::NOTICE_VISIBLE => 'Visible',
-        self::NOTICE_HIDDEN => 'Hidden',
-        self::NOTICE_IN_PREVIEW => 'In Preview (visible to Admins only)',
-    ];
 
     /**
      * @var array lookup table for attributes based on notice visibility

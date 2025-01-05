@@ -65,26 +65,31 @@ if ($action && $noticeid) {
 
     }
 
+    // Redirect as Moodle good practice to remove the session key from the URL.
     redirect($url);
 }
 
-// Setup notice "groups" (based on visibility) for the template.
+/*
+    Setup notice "groups" (based on visibility) for the template.
+    Could be alternatively done using separate hardcoded templates.
+*/
+
 $noticegrouphidden = [
-    'description' => notices::NOTICE_VISIBLITY[notices::NOTICE_HIDDEN],
+    'description' => get_string('visibility_hidden', 'block_notices'),
     'css' => notices::NOTICE_VISIBLITY_BOOTSTRAP_CSS_CLASS[notices::NOTICE_HIDDEN],
     'notices' => [
     ],
 ];
 
 $noticegroupvisible = [
-    'description' => notices::NOTICE_VISIBLITY[notices::NOTICE_VISIBLE],
+    'description' => get_string('visibility_visible', 'block_notices'),
     'css' => notices::NOTICE_VISIBLITY_BOOTSTRAP_CSS_CLASS[notices::NOTICE_VISIBLE],
     'notices' => [
     ],
 ];
 
 $noticegroupinpreview = [
-    'description' => notices::NOTICE_VISIBLITY[notices::NOTICE_IN_PREVIEW],
+    'description' => get_string('visibility_preview', 'block_notices'),
     'css' => notices::NOTICE_VISIBLITY_BOOTSTRAP_CSS_CLASS[notices::NOTICE_IN_PREVIEW],
     'notices' => [
     ],
