@@ -16,7 +16,7 @@
 
 namespace block_notices;
 
-// "PS C:\github\moodle405\moodle> vendor/bin/phpunit --filter 'block_notices\\test_notices'"
+// ..."PS C:\github\moodle405\moodle> vendor/bin/phpunit --filter 'block_notices\\notices_test'"
 
 defined('MOODLE_INTERNAL') || die();
 
@@ -30,11 +30,11 @@ global $CFG;
  * @copyright   2024 Andrew Rowatt <A.J.Rowatt@massey.ac.nz>
  * @license     https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-final class test_notices extends \advanced_testcase {
+final class notices_test extends \advanced_testcase {
     /**
      * "Real world" Test data.
      */
-    public static const TEST_DATA = [
+    public const TEST_DATA = [
         [
             'visible' => 1,
             'title' => 'MOST (Massey Online Survey Tool)',
@@ -205,6 +205,24 @@ final class test_notices extends \advanced_testcase {
     }
 
     /**
+     * Tests moving a notice down (a.k.a. increasing sort order) when the notice is already at the top.
+     *
+     * @covers ::move_down
+     */
+    public function test_notice_visible_movedown_invalid(): void {
+        $this->resetAfterTest(true);
+        $id1 = notices::add_notice(1, self::TEST_DATA[0]);
+        $id2 = notices::add_notice(1, self::TEST_DATA[1]);
+
+        notices::show_notice($id1);
+        notices::show_notice($id2);
+        notices::move_down($id2);
+
+        $this->assertEquals(notices::get_notice($id1)['sortorder'], 1);
+        $this->assertEquals(notices::get_notice($id2)['sortorder'], 2);
+    }
+
+    /**
      * Tests moving a notice up (a.k.a. descreasing sort order).
      *
      * @covers ::move_up
@@ -240,23 +258,7 @@ final class test_notices extends \advanced_testcase {
         $this->assertEquals(notices::get_notice($id2)['sortorder'], 2);
     }
 
-    /**
-     * Tests moving a notice down (a.k.a. increasing sort order) when the notice is already at the top.
-     *
-     * @covers ::move_down
-     */
-    public function test_notice_visible_movedown_invalid(): void {
-        $this->resetAfterTest(true);
-        $id1 = notices::add_notice(1, self::TEST_DATA[0]);
-        $id2 = notices::add_notice(1, self::TEST_DATA[1]);
-
-        notices::show_notice($id1);
-        notices::show_notice($id2);
-        notices::move_down($id2);
-
-        $this->assertEquals(notices::get_notice($id1)['sortorder'], 1);
-        $this->assertEquals(notices::get_notice($id2)['sortorder'], 2);
-    }
+    
 
     /**
      * Tests updating a notice
