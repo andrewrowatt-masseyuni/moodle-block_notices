@@ -16,15 +16,18 @@ Feature: Notices block a course
       | user     | course | role           |
       | teacher1 | C1     | editingteacher |
       | student1 | C1     | student        |
+    And I log in as "teacher1"
+    And I am on "Course 1" course homepage with editing mode on
+    And I add the "Notices" block
 
   Scenario: Adding Notice block on a course
     When I log in as "teacher1"
-    And I am on "Course 1" course homepage with editing mode on
-    And I add the "Notices" block
-    Then I should see "No notices" in the "Notices" "block"
-    Then I should see "Manage notices" in the "Notices" "block"
-    And I log out
-    When I log in as "student1"
     And I am on "Course 1" course homepage
-    Then I should see "No notices" in the "Notices" "block"
-    Then I should not see "Manage notices" in the "Notices" "block"
+    Then I should see "No notices"
+    Then I should see "Manage notices"
+
+    Scenario: Block is visible to students
+      When I log in as "student1"
+      And I am on "Course 1" course homepage
+      Then I should see "No notices"
+      Then I should not see "Manage notices"

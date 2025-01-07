@@ -29,8 +29,9 @@ use block_notices\notices;
 // Setup page context and course and check permissions.
 $courseid = required_param('courseid', PARAM_INT);
 if ($courseid == 1) {
-    $context = context_system::instance();
     require_login();
+    $context = context_system::instance();
+    $PAGE->set_context($context);
 } else {
     require_login($courseid);
 }
@@ -39,7 +40,7 @@ notices::require_notice_block($courseid);
 
 // Add some test data if there are no notices. This code will probably be removed in the final version.
 if (notices::get_notice_count($courseid) == 0) {
-    notices::add_notice_test_data($courseid);
+    // notices::add_notice_test_data($courseid);
 }
 
 $url = new moodle_url('/blocks/notices/manage.php', ['courseid' => $courseid]);

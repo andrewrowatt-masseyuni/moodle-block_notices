@@ -392,14 +392,19 @@ class notices {
         global $DB;
 
         if ($courseid == 1) {
-            $contextid = 1;
+            $contextids = [1,2]; //... 1 is system/my-index, 2 is site homepage (site-index)
         } else {
             $context = \context_course::instance($courseid);
-            $contextid = $context->id;
+            $contextids = [$context->id];
         }
 
-        return $DB->record_exists('block_instances',
-            ['blockname' => 'notices', 'parentcontextid' => $contextid]);
+        [$insql, $inparams] = $DB->get_in_or_equal($contextids);
+
+        $sql = "SELECT * FROM {block_instances}
+            WHERE blockname = ? and
+            parentcontextid $insql";
+
+        return $DB->record_exists_sql($sql, ['blockname' => 'notices'] + $inparams);
     }
 
     /**

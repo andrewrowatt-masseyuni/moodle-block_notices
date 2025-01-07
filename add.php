@@ -29,8 +29,9 @@ use block_notices\notices;
 // Setup page context and course and check permissions.
 $courseid = required_param('courseid', PARAM_INT);
 if ($courseid == 1) {
-    $context = context_system::instance();
     require_login();
+    $context = context_system::instance();
+    $PAGE->set_context($context);
 } else {
     require_login($courseid);
 }
@@ -47,7 +48,6 @@ if ($noticeform->is_cancelled()) {
     redirect(new moodle_url('/blocks/notices/manage.php', ['courseid' => $courseid]));
 } else if ($formdata = $noticeform->get_data()) {
     $data = [
-        'visible' => $formdata->visible,
         'title' => $formdata->title,
         'content' => $formdata->content['text'],
         'contentformat' => $formdata->content['format'],

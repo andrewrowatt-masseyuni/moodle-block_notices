@@ -35,7 +35,8 @@ class notice extends \moodleform {
     public function definition() {
         $mform = $this->_form; // Don't forget the underscore!
 
-        $mform->addElement('hidden', 'id', '0');
+        $mform->addElement('hidden', 'id', 0);
+        $mform->setType('id', PARAM_INT);
 
         // Start of general group.
 
