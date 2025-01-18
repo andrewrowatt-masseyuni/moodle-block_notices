@@ -39,8 +39,8 @@ require_capability('block/notices:managenotices', $PAGE->context);
 notices::require_notice_block($courseid);
 
 // Add some test data if there are no notices. This code will probably be removed in the final version.
-if (notices::get_notice_count($courseid) == 0) {
-    // notices::add_notice_test_data($courseid);
+if (notices::get_notice_count($courseid) == -1) {
+    notices::add_notice_test_data($courseid);
 }
 
 $url = new moodle_url('/blocks/notices/manage.php', ['courseid' => $courseid]);

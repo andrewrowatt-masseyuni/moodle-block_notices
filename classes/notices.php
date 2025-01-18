@@ -224,12 +224,14 @@ class notices {
      * @param array $data
      */
     public static function update_notice(array $data) {
-        global $DB;
+        global $DB, $USER;
 
         $noticepreviousversion = self::get_notice($data['id']);
 
         $data['visible'] = self::NOTICE_IN_PREVIEW;
         $data['sortorder'] = 0;
+        $data['timemodified'] = time();
+        $data['modifiedby'] = $USER->id;
 
         $DB->update_record('block_notices', $data);
 
@@ -238,6 +240,14 @@ class notices {
         if ($noticepreviousversion['visible'] == self::NOTICE_VISIBLE) {
             self::recalc_visible_notices_sortorder($noticepreviousversion['courseid']);
         }
+
+        $event = \block_notices\event\notice_updated::create([
+            'objectid' => $data['id'],
+            'userid' => $data['modifiedby'],
+            'context' => \context_course::instance($noticepreviousversion['courseid']),
+        ]);
+
+        $event->trigger();
     }
 
     /**
@@ -392,7 +402,7 @@ class notices {
         global $DB;
 
         if ($courseid == 1) {
-            $contextids = [1,2]; //... 1 is system/my-index, 2 is site homepage (site-index)
+            $contextids = [1, 2]; // ...1 is system/my-index, 2 is site homepage (site-index)
         } else {
             $context = \context_course::instance($courseid);
             $contextids = [$context->id];
