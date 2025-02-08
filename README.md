@@ -6,6 +6,8 @@ This block is used to display one or more semi-structured notices, events, and i
 
 Additionally, administrative information can also be included with the notice. This information is not displayed but provides information for notice managers to maintain the list of notices.
 
+A block is used as the display mechanism for notices and as the path for teachers or administrators to manage notices. While a block is used to display notices, the actual notices are *course-specific*. That is, if you added a second block to the course, the existing set of notices will be displayed. This includes the Dashboard and Frontpage, which are both technically course 1.
+
 This plugin was based on an H5P widget:
 
 <https://github.com/andrewrowatt-masseyuni/H5P.MUNoticesCarousel>
