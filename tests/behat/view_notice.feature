@@ -42,7 +42,7 @@ Feature: View notice
       | createdby          | 3                             |
       | modifiedby         | 3                             |
 
-
+  @javascript
   Scenario: Checking the layout of the Notice block as admin
     When I log in as "admin"
     And I am on site homepage
@@ -52,6 +52,7 @@ Feature: View notice
     And I should see "Notice2content"
     And I should see "Manage notices"
     
+  @javascript
   Scenario: Checking the layout of the Notice block as a non-admin
     When I log in as "student1"
     And I am on site homepage
