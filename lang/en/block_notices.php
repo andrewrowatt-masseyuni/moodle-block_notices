@@ -51,6 +51,7 @@ $string['owneremail_help'] = "Valid email address for the owner or person respon
 $string['ownergroup'] = 'Owner details';
 $string['ownergroupdescription'] = 'Specify the details for the person responsible ("owner") of the notice i.e., the person who requested or authorized the notice. This will not be displayed on the notice unless the "URL for more information" field is blank.';
 $string['pluginname'] = 'Notices';
+$string['privacy:metadata'] = 'TBA';
 $string['title'] = 'Title';
 $string['title_help'] = 'Title of notice. Maximum of 64 characters.';
 $string['updatedescription'] = 'Update description';
