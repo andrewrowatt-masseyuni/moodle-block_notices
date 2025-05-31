@@ -50,7 +50,7 @@ Feature: View notice
     And I should see "Notice2title"
     And I should see "Notice2content"
     And I should see "Manage notices"
-    
+
   Scenario: Checking the layout of the Notice block as a non-admin
     When I log in as "student1"
     And I am on site homepage
@@ -58,5 +58,5 @@ Feature: View notice
     And I should see "Notice1content"
     # Notice2 is in preview
     And I should not see "Notice2title"
-    And I should not see "Notice2content"    
+    And I should not see "Notice2content"
     And I should not see "Manage notices"

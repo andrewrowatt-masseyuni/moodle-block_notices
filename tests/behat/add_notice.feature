@@ -12,7 +12,7 @@ Feature: Add a notice
     Then I should see "No notices"
     And I should see "Manage notices"
 
-Scenario: Add a notice as admin
+  Scenario: Add a notice as admin
     Given I log in as "admin"
     And I am on site homepage
     And I follow "Manage notices"
