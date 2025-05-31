@@ -52,7 +52,7 @@ class provider implements
             'blocks_notices',
             [
                 'createdby' => 'privacy:metadata:blocks_notices:createdby',
-				'modifiedby' => 'privacy:metadata:blocks_notices:modifiedby',
+        'modifiedby' => 'privacy:metadata:blocks_notices:modifiedby',
             ],
             'privacy:metadata:blocks_notices'
         );
