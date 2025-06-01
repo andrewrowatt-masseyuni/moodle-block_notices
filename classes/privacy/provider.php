@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
-namespace blocks_notices\privacy;
+namespace block_notices\privacy;
 
 use core_privacy\local\request\userlist;
 use core_privacy\local\request\approved_contextlist;
@@ -52,7 +52,8 @@ class provider implements
             'blocks_notices',
             [
                 'createdby' => 'privacy:metadata:blocks_notices:createdby',
-        'modifiedby' => 'privacy:metadata:blocks_notices:modifiedby',
+                'modifiedby' => 'privacy:metadata:blocks_notices:modifiedby',
+                'content' => 'privacy:metadata:blocks_notices:content',
             ],
             'privacy:metadata:blocks_notices'
         );
