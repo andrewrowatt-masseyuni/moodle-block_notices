@@ -46,5 +46,5 @@ Feature: Add a notice
     Then I should see "Notice2title"
     And I should see "Notice2content"
 
-    And I click on "[data-notice-id=\"1\"] [data-notice-action=\"show\"]" "css_element"
-    And I click on "[data-notice-id=\"2\"] [data-notice-action=\"show\"]" "css_element"
+    And I click on ".block_notices_group-visibility_preview [data-notice-title=\"Notice1title\"] [data-notice-action=\"show\"]" "css_element"
+    And I click on ".block_notices_group-visibility_preview [data-notice-title=\"Notice2title\"] [data-notice-action=\"show\"]" "css_element"

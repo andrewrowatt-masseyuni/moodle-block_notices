@@ -24,14 +24,14 @@
     }
 }}
 {{#groups}}
-<div class="block_notices_group block_notices_group-{{css}}">
-<h3>{{description}}</h3>
+<div class="block_notices_group block_notices_group-{{group}}">
+<h3>{{description}}{{#count}}<small> ({{count}} notice(s))</small>{{/count}}</h3>
 {{^notices}}
 <div>No notices</div>
 {{/notices}}
 <ul class="list-group pb-3">
     {{#notices}}
-    <li class="list-group-item visibility-{{visible}}" data-notice-id="{{id}}">
+    <li class="list-group-item visibility-{{visible}}" data-notice-id="{{id}}" data-notice-title="{{title}}">
         <div class="d-flex w-100 justify-content-between">
             <h5 class="mb-1">{{#showsortorder}}<span class="badge badge-secondary">{{sortorder}}</span> {{/showsortorder}}{{title}}</h5>
             <small>{{updatedescription}}</small>

@@ -83,24 +83,30 @@ if ($action && $noticeid) {
 */
 
 $noticegrouphidden = [
+    'group' => 'visibility_hidden',
     'description' => get_string('visibility_hidden', 'block_notices'),
     'css' => notices::NOTICE_VISIBLITY_BOOTSTRAP_CSS_CLASS[notices::NOTICE_HIDDEN],
     'notices' => [
     ],
+    'count' => 0,
 ];
 
 $noticegroupvisible = [
+    'group' => 'visibility_visible',
     'description' => get_string('visibility_visible', 'block_notices'),
     'css' => notices::NOTICE_VISIBLITY_BOOTSTRAP_CSS_CLASS[notices::NOTICE_VISIBLE],
     'notices' => [
     ],
+    'count' => 0,
 ];
 
 $noticegroupinpreview = [
+    'group' => 'visibility_preview',
     'description' => get_string('visibility_preview', 'block_notices'),
     'css' => notices::NOTICE_VISIBLITY_BOOTSTRAP_CSS_CLASS[notices::NOTICE_IN_PREVIEW],
     'notices' => [
     ],
+    'count' => 0,
 ];
 
 // Iterate over all notices, add additional properties to improve the template output, and then add them to the correct "group".
@@ -115,6 +121,7 @@ foreach (notices::get_notices_admin($courseid) as $noticeobject) {
                 'canshow' => true,
             ];
             $noticegrouphidden['notices'][] = $noticearray;
+            $noticegrouphidden['count']++;
             break;
         case notices::NOTICE_VISIBLE:
             $noticearray += [
@@ -124,6 +131,7 @@ foreach (notices::get_notices_admin($courseid) as $noticeobject) {
                 'showsortorder' => true,
             ];
             $noticegroupvisible['notices'][] = $noticearray;
+            $noticegroupvisible['count']++;
             break;
         case notices::NOTICE_IN_PREVIEW:
             $noticearray += [
@@ -131,6 +139,7 @@ foreach (notices::get_notices_admin($courseid) as $noticeobject) {
                 'canshow' => true,
             ];
             $noticegroupinpreview['notices'][] = $noticearray;
+            $noticegroupinpreview['count']++;
             break;
     }
 }
