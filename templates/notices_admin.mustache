@@ -31,7 +31,7 @@
 {{/notices}}
 <ul class="list-group pb-3">
     {{#notices}}
-    <li class="list-group-item visibility-{{visible}}" draggable="true">
+    <li class="list-group-item visibility-{{visible}}" data-notice-id="{{id}}">
         <div class="d-flex w-100 justify-content-between">
             <h5 class="mb-1">{{#showsortorder}}<span class="badge badge-secondary">{{sortorder}}</span> {{/showsortorder}}{{title}}</h5>
             <small>{{updatedescription}}</small>
@@ -45,14 +45,14 @@
         <div class="d-flex justify-content-between align-items-center">
             <span style="font-size: inherit; font-weight: 300;" class="badge badge-{{css}}">{{description}}</span>
             <div class="d-flex justify-content-end" style="gap: 1em;">
-                {{#canmoveup}}<a role="button" href="manage.php?sesskey={{sesskey}}&courseid={{courseid}}&action=moveup&id={{id}}">{{#pix}} t/up, core, {{#str}} moveup, core {{/str}} {{/pix}}{{#str}} moveup, core {{/str}}</a>{{/canmoveup}}
-                {{#canmovedown}}<a role="button" href="manage.php?sesskey={{sesskey}}&courseid={{courseid}}&action=movedown&id={{id}}">{{#pix}} t/down, core, {{#str}} movedown, core {{/str}} {{/pix}}{{#str}} movedown, core {{/str}}</a>{{/canmovedown}}
+                {{#canmoveup}}<a role="button" href="manage.php?sesskey={{sesskey}}&courseid={{courseid}}&action=moveup&id={{id}}" data-notice-action"moveup">{{#pix}} t/up, core, {{#str}} moveup, core {{/str}} {{/pix}}{{#str}} moveup, core {{/str}}</a>{{/canmoveup}}
+                {{#canmovedown}}<a role="button" href="manage.php?sesskey={{sesskey}}&courseid={{courseid}}&action=movedown&id={{id}}" data-notice-action="movedown">{{#pix}} t/down, core, {{#str}} movedown, core {{/str}} {{/pix}}{{#str}} movedown, core {{/str}}</a>{{/canmovedown}}
 
-                {{#canshow}}<a role="button" href="manage.php?sesskey={{sesskey}}&courseid={{courseid}}&action=show&id={{id}}">{{#pix}} t/hide, core, {{#str}} show, core {{/str}} {{/pix}}{{#str}} show, core {{/str}}</a>{{/canshow}}
-                {{#canhide}}<a role="button" href="manage.php?sesskey={{sesskey}}&courseid={{courseid}}&action=hide&id={{id}}">{{#pix}} t/show, core, {{#str}} hide, core {{/str}} {{/pix}}{{#str}} hide, core {{/str}}</a>{{/canhide}}
+                {{#canshow}}<a role="button" href="manage.php?sesskey={{sesskey}}&courseid={{courseid}}&action=show&id={{id}}" data-notice-action="show">{{#pix}} t/hide, core, {{#str}} show, core {{/str}} {{/pix}}{{#str}} show, core {{/str}}</a>{{/canshow}}
+                {{#canhide}}<a role="button" href="manage.php?sesskey={{sesskey}}&courseid={{courseid}}&action=hide&id={{id}}" data-notice-action="hide">{{#pix}} t/show, core, {{#str}} hide, core {{/str}} {{/pix}}{{#str}} hide, core {{/str}}</a>{{/canhide}}
                 
-                <a role="button" href="edit.php?id={{id}}">{{#pix}} t/edit, core, {{#str}} edit, core {{/str}} {{/pix}}{{#str}} edit, core {{/str}}</a>
-                <a role="button" href="manage.php?sesskey={{sesskey}}&courseid={{courseid}}&action=delete&id={{id}}">{{#pix}} t/delete, core, {{#str}} delete, core {{/str}} {{/pix}}{{#str}} delete, core {{/str}}</a>
+                <a role="button" href="edit.php?id={{id}}" data-notice-action="edit">{{#pix}} t/edit, core, {{#str}} edit, core {{/str}} {{/pix}}{{#str}} edit, core {{/str}}</a>
+                <a role="button" href="manage.php?sesskey={{sesskey}}&courseid={{courseid}}&action=delete&id={{id}}" data-notice-action="delete">{{#pix}} t/delete, core, {{#str}} delete, core {{/str}} {{/pix}}{{#str}} delete, core {{/str}}</a>
             </div>
         </div>
     
