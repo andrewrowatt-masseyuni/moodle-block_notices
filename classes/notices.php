@@ -220,7 +220,6 @@ class notices {
     /**
      * Update a notice.
      *
-     * @param int $id
      * @param array $data
      */
     public static function update_notice(array $data) {
@@ -254,7 +253,8 @@ class notices {
      * Add a notice.
      *
      * @param int $courseid
-     * @param object $data
+     * @param array $data
+     * @return int The id of the newly created notice.
      */
     public static function add_notice(int $courseid, array $data): int {
         global $DB, $USER;
