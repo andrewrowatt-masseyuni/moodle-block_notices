@@ -119,8 +119,8 @@ foreach (notices::get_notices_admin($courseid) as $noticeobject) {
         case notices::NOTICE_VISIBLE:
             $noticearray += [
                 'canhide' => true,
-                'canmoveup' => !$noticearray['isfirst'],
-                'canmovedown' => !$noticearray['islast'],
+                'canmoveup' => $noticearray['isfirst'] == 'f',
+                'canmovedown' => $noticearray['islast'] == 'f',
                 'showsortorder' => true,
             ];
             $noticegroupvisible['notices'][] = $noticearray;
