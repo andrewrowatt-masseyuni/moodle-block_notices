@@ -83,7 +83,7 @@ if ($action && $noticeid) {
 */
 
 $noticegrouphidden = [
-    'group' => 'visibility_hidden',
+    'groupcssclasssuffix' => 'visibility-hidden',
     'description' => get_string('visibility_hidden', 'block_notices'),
     'css' => notices::NOTICE_VISIBLITY_BOOTSTRAP_CSS_CLASS[notices::NOTICE_HIDDEN],
     'notices' => [
@@ -92,7 +92,7 @@ $noticegrouphidden = [
 ];
 
 $noticegroupvisible = [
-    'group' => 'visibility_visible',
+    'groupcssclasssuffix' => 'visibility-visible',
     'description' => get_string('visibility_visible', 'block_notices'),
     'css' => notices::NOTICE_VISIBLITY_BOOTSTRAP_CSS_CLASS[notices::NOTICE_VISIBLE],
     'notices' => [
@@ -101,7 +101,7 @@ $noticegroupvisible = [
 ];
 
 $noticegroupinpreview = [
-    'group' => 'visibility_preview',
+    'groupcssclasssuffix' => 'visibility-preview',
     'description' => get_string('visibility_preview', 'block_notices'),
     'css' => notices::NOTICE_VISIBLITY_BOOTSTRAP_CSS_CLASS[notices::NOTICE_IN_PREVIEW],
     'notices' => [

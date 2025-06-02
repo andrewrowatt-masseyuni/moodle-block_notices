@@ -24,10 +24,11 @@
     }
 }}
 {{#groups}}
-<div class="block_notices_group block_notices_group-{{group}}">
-<h3>{{description}}{{#count}}<small> ({{count}} notice(s))</small>{{/count}}</h3>
+<div class="block-notices-group block-notices-group-{{groupcssclasssuffix}}" data-notice-count="{{count}}">
+<h3>{{description}}</h3>
+{{#count}}<div class="block-notices-count mb-2">{{count}} notice(s)</div>{{/count}}
 {{^notices}}
-<div>No notices</div>
+<div class="block-notices-count">No notices</div>
 {{/notices}}
 <ul class="list-group pb-3">
     {{#notices}}
@@ -38,7 +39,7 @@
         </div>
         <p class="mb-1">{{{content}}}</p>
         <div class="d-flex justify-content-between">
-            <small>{{#str}} moreinformationurl, block_notices {{/str}}: <a href="{{moreinformationurl}}" target="_blank">{{moreinformationurl}}</a></small>
+            <small>{{#str}} moreinformationurl, block_notices {{/str}}: <a href="{{moreinformationurl}}" target="-blank">{{moreinformationurl}}</a></small>
             <small>{{#str}} owner, block_notices {{/str}}: <a title="Click to email" href="mailto:{{owneremail}}">{{owner}}</a></small>
         </div>
         <hr />
