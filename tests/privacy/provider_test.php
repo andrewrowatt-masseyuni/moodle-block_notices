@@ -51,14 +51,14 @@ final class provider_test extends \core_privacy\tests\provider_testcase {
         $this->user3 = $user3;
 
         $this->setUser($user1);
-        $id = notices::add_notice(1,notices::TEST_DATA[0]);
+        $id = notices::add_notice(1, notices::TEST_DATA[0]);
 
         $notice = notices::get_notice($id);
-        
+
         $this->setUser($user2);
         notices::update_notice($notice);
-        $id = notices::add_notice(1,notices::TEST_DATA[1]);
-        $id = notices::add_notice(1,notices::TEST_DATA[2]);
+        $id = notices::add_notice(1, notices::TEST_DATA[1]);
+        $id = notices::add_notice(1, notices::TEST_DATA[2]);
     }
 
     /**
@@ -149,10 +149,10 @@ final class provider_test extends \core_privacy\tests\provider_testcase {
     }
 
         /**
-     * Test for provider::delete_data_for_all_users_in_context
-     *
-     * @covers \local_faultreporting\privacy
-     */
+         * Test for provider::delete_data_for_all_users_in_context
+         *
+         * @covers \local_faultreporting\privacy
+         */
     public function test_delete_data_for_all_users_in_context() {
         $context = \context_system::instance();
 

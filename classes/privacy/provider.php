@@ -130,7 +130,9 @@ class provider implements
         list($userinsql, $userinparams) = $DB->get_in_or_equal($userlist->get_userids(), SQL_PARAMS_NAMED);
         $params = array_merge(['courseid' => $context->instanceid], $userinparams);
 
-        $DB->delete_records_select('block_notices', "courseid = :courseid AND (createdby {$userinsql} or modifiedby {$userinsql})", $params);
+        $DB->delete_records_select(
+            'block_notices',
+            "courseid = :courseid AND (createdby {$userinsql} or modifiedby {$userinsql})", $params);
     }
 
     /**
@@ -146,7 +148,7 @@ class provider implements
         \block_notices\notices::delete_all_notices();
     }
 
-    
+
 
     /**
      * Implements export_user_data

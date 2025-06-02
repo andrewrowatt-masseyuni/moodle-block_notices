@@ -173,6 +173,7 @@ class notices {
     /**
      * Delete all notices for a given user. Used for privacy purposes.
      *
+     * @param int $courseid
      * @param int $userid
      * @return array
      */
@@ -180,7 +181,7 @@ class notices {
         global $DB;
 
         $DB->delete_records_select(
-            'block_notices', 
+            'block_notices',
             'courseid = :courseid and (createdby = :createdby or modifiedby = :modifiedby)',
             ['courseid' => $courseid,
             'createdby' => $userid,
