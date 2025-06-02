@@ -171,6 +171,23 @@ class notices {
     }
 
     /**
+     * Delete all notices for a given user. Used for privacy purposes.
+     *
+     * @param int $userid
+     * @return array
+     */
+    public static function delete_notices_by_user(int $courseid, int $userid): void {
+        global $DB;
+
+        $DB->delete_records_select(
+            'block_notices', 
+            'courseid = :courseid and (createdby = :createdby or modifiedby = :modifiedby)',
+            ['courseid' => $courseid,
+            'createdby' => $userid,
+            'modifiedby' => $userid]);
+    }
+
+    /**
      * Get full details for all notices for a given course.
      *
      * @param int $courseid

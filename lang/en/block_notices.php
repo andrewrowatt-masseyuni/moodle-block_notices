@@ -41,6 +41,7 @@ $string['moreinformationurl_help'] = 'URL for more information about this notice
 $string['nonotices'] = 'No notices.';
 $string['notes'] = 'Notes';
 $string['notes_help'] = 'Administrative notes and next steps/actions for this notice e.g., when to hide or remove it. <b>These notes are not displayed on the notice</b>.';
+$string['notices'] = 'Notices';
 $string['notices:addinstance'] = 'Add Notices block';
 $string['notices:managenotices'] = 'Manage notices';
 $string['notices:myaddinstance'] = 'Add instance to frontpage.';

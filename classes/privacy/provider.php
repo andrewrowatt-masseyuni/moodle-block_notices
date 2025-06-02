@@ -49,7 +49,7 @@ class provider implements
     public static function get_metadata(collection $collection): collection {
         // The 'local_notices' table stores information about individual fault notices.
         $collection->add_database_table(
-            'blocks_notices',
+            'block_notices',
             [
                 'createdby' => 'privacy:metadata:blocks_notices:createdby',
                 'modifiedby' => 'privacy:metadata:blocks_notices:modifiedby',
@@ -68,17 +68,14 @@ class provider implements
      */
     public static function get_users_in_context(userlist $userlist) {
         $context = $userlist->get_context();
-
-        if (!is_a($context, \context_system::class)) {
-            return;
-        }
-
         // Get the list of users who have data in this context.
 
-        $notices = \block_notices\notices::get_notices();
+        $notices = \block_notices\notices::get_notices_admin($context->instanceid);
+
         foreach ($notices as $notice) {
             // Note that the add_user function convieniently handles duplicates.
-            $userlist->add_user($notice->userid);
+            $userlist->add_user($notice->createdby);
+            $userlist->add_user($notice->modifiedby);
         }
     }
 
@@ -89,14 +86,36 @@ class provider implements
      * @return  contextlist   $contextlist  The list of contexts used in this plugin.
      */
     public static function get_contexts_for_userid(int $userid): contextlist {
-        $contextlist = new contextlist();
-        $notices = \block_notices\notices::get_notices_by_user($userid);
 
-        if (count($notices)) {
-            $contextlist->add_system_context();
-        }
+        $contextlist = new contextlist();
+
+        $params = [
+            'contextlevel'  => CONTEXT_COURSE,
+            'createdby' => $userid,
+            'modifiedby' => $userid,
+        ];
+
+        // Coures with the block.
+        $sql = "SELECT c.id
+                  FROM {block_notices} b
+                  JOIN {context} c on c.instanceid = b.courseid and c.contextlevel = :contextlevel
+                  WHERE b.createdby = :createdby or b.modifiedby = :modifiedby
+        ";
+        $contextlist->add_from_sql($sql, $params);
 
         return $contextlist;
+    }
+
+    /**
+     * Implements delete_data_for_user
+     * @param \core_privacy\local\request\approved_contextlist $contextlist
+     * @return void
+     */
+    public static function delete_data_for_user(approved_contextlist $contextlist) {
+        $userid = $contextlist->get_user()->id;
+        foreach ($contextlist as $context) {
+            \block_notices\notices::delete_notices_by_user($context->instanceid, $userid);
+        }
     }
 
     /**
@@ -105,15 +124,13 @@ class provider implements
      * @param   approved_userlist       $userlist The approved context and user information to delete information for.
      */
     public static function delete_data_for_users(approved_userlist $userlist) {
+        global $DB;
         $context = $userlist->get_context();
 
-        if (!is_a($context, \context_system::class)) {
-            return;
-        }
+        list($userinsql, $userinparams) = $DB->get_in_or_equal($userlist->get_userids(), SQL_PARAMS_NAMED);
+        $params = array_merge(['courseid' => $context->instanceid], $userinparams);
 
-        foreach ($userlist->get_userids() as $userid) {
-            \blocks_notices\notices::delete_notices_by_user($userid);
-        }
+        $DB->delete_records_select('block_notices', "courseid = :courseid AND (createdby {$userinsql} or modifiedby {$userinsql})", $params);
     }
 
     /**
@@ -126,22 +143,10 @@ class provider implements
             return;
         }
 
-        \blocks_notices\notices::delete_all_notices();
+        \block_notices\notices::delete_all_notices();
     }
 
-    /**
-     * Implements delete_data_for_user
-     * @param \core_privacy\local\request\approved_contextlist $contextlist
-     * @return void
-     */
-    public static function delete_data_for_user(approved_contextlist $contextlist) {
-        if (empty($contextlist->count())) {
-            return;
-        }
-
-        $userid = $contextlist->get_user()->id;
-        \blocks_notices\notices::delete_notices_by_user($userid);
-    }
+    
 
     /**
      * Implements export_user_data
@@ -152,7 +157,7 @@ class provider implements
         $context = \context_system::instance();
 
         $userid = $contextlist->get_user()->id;
-        $notices = \blocks_notices\notices::get_notices_by_user($userid);
+        $notices = \block_notices\notices::get_notices_by_user($userid);
 
         if (count($notices) == 0) {
             return;
@@ -160,7 +165,7 @@ class provider implements
 
         $noticesdata = [];
 
-        $datalabel = get_string('notices', 'blocks_notices');
+        $datalabel = get_string('notices', 'block_notices');
 
         foreach ($notices as $notice) {
             $noticedata = [$datalabel => $notice->payload];
@@ -171,8 +176,8 @@ class provider implements
 
         // Add the data to the context.
         writer::with_context($context)->export_data(
-            [get_string('noticess', 'blocks_notices')],
-            (object)[get_string('noticess', 'blocks_notices') => $noticesdata]
+            [get_string('notices', 'block_notices')],
+            (object)[get_string('notices', 'block_notices') => $noticesdata]
         );
     }
 }
