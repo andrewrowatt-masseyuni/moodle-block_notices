@@ -50,6 +50,14 @@
 
 }
 
+section.block_notices {
+    div.card-text.content {
+        /* stylelint-disable-next-line declaration-no-important */
+        margin: 0 !important; /* needed due to mt-3 */
+    }
+}
+
+
 #stream-dashboard-notices {
     --item_margin: 20px;
     --default_spacing: 12px;
