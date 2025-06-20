@@ -162,4 +162,15 @@ final class provider_test extends \core_privacy\tests\provider_testcase {
         $this->assertCount(0, $notices);
     }
 
+    /**
+     * Test for provider::export_user_data
+     *
+     * @covers \local_faultreporting\privacy
+     */
+    public function test_export_user_data() {
+        $contextlist = new \core_privacy\local\request\approved_contextlist(
+            $this->user1, 'block_notices', [\context_course::instance(1)->id]);
+
+        privacy\provider::export_user_data($contextlist);
+    }
 }

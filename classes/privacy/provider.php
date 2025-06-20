@@ -172,16 +172,16 @@ class provider implements
         $datalabel = get_string('notices', 'block_notices');
 
         foreach ($notices as $notice) {
-            $noticedata = [$datalabel => $notice->payload];
+            $noticedata = [
+                'title' => $notice->title,
+                'content' => $notice->content, ];
             $noticesdata[] = (object)$noticedata;
+
+            // Add the data to the context.
+            writer::with_context($context)->export_data(
+                [get_string('notices', 'block_notices')],
+                (object)[get_string('notices', 'block_notices') => $noticesdata]
+            );
         }
-
-        $context = \context_system::instance();
-
-        // Add the data to the context.
-        writer::with_context($context)->export_data(
-            [get_string('notices', 'block_notices')],
-            (object)[get_string('notices', 'block_notices') => $noticesdata]
-        );
     }
 }

@@ -237,7 +237,7 @@ class notices {
         $sql = "select * from {block_notices}
             where createdby = :createdbyid or modifiedby = :modifiedbyid";
 
-        return (array)$DB->get_records_sql('select block_notices', ['createdbyid' => $userid, 'modifiedbyid' => $userid]);
+        return (array)$DB->get_records_sql($sql, ['createdbyid' => $userid, 'modifiedbyid' => $userid]);
     }
 
     /**
