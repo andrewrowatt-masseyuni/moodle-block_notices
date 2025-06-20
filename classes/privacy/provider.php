@@ -127,12 +127,14 @@ class provider implements
         global $DB;
         $context = $userlist->get_context();
 
-        list($userinsql, $userinparams) = $DB->get_in_or_equal($userlist->get_userids(), SQL_PARAMS_NAMED);
+        list($createdbyuserinsql, $userinparams) = $DB->get_in_or_equal($userlist->get_userids(), SQL_PARAMS_NAMED);
         $params = array_merge(['courseid' => $context->instanceid], $userinparams);
+        list($modifiedbyuserinsql, $userinparams) = $DB->get_in_or_equal($userlist->get_userids(), SQL_PARAMS_NAMED);
+        $params = array_merge($params, $userinparams);
 
         $DB->delete_records_select(
             'block_notices',
-            "courseid = :courseid AND (createdby {$userinsql} or modifiedby {$userinsql})", $params);
+            "courseid = :courseid AND (createdby {$createdbyuserinsql} or modifiedby {$modifiedbyuserinsql})", $params);
     }
 
     /**
@@ -141,11 +143,11 @@ class provider implements
      * @return void
      */
     public static function delete_data_for_all_users_in_context(\context $context) {
-        if (!is_a($context, \context_system::class)) {
+        if (!is_a($context, \context_course::class)) {
             return;
         }
 
-        \block_notices\notices::delete_all_notices();
+        \block_notices\notices::delete_all_notices($context->instanceid);
     }
 
 

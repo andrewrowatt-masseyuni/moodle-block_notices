@@ -150,6 +150,7 @@ class notices {
      *
      * @param int $courseid
      * @param bool $includepreview
+     * @param bool $includestaffonly
      * @return array
      */
     public static function get_notices(int $courseid, bool $includepreview = false, bool $includestaffonly = false): array {
@@ -194,7 +195,7 @@ class notices {
      * @param int $courseid
      * @return array
      */
-    public static function get_notices_admin($courseid): array {
+    public static function get_notices_admin(int $courseid): array {
         global $DB;
 
         $sql = 'SELECT b.*,
@@ -225,6 +226,21 @@ class notices {
     }
 
     /**
+     * Get a single notice.
+     *
+     * @param int $userid
+     * @return object
+     */
+    public static function get_notices_by_user(int $userid): array {
+        global $DB;
+
+        $sql = "select * from {block_notices}
+            where createdby = :createdbyid or modifiedby = :modifiedbyid";
+
+        return (array)$DB->get_records_sql('select block_notices', ['createdbyid' => $userid, 'modifiedbyid' => $userid]);
+    }
+
+    /**
      * Delete a notice.
      *
      * @param int $id
@@ -233,6 +249,17 @@ class notices {
         global $DB;
 
         $DB->delete_records('block_notices', ['id' => $id]);
+    }
+
+    /**
+     * Delete all notices for a course.
+     *
+     * @param int $courseid
+     */
+    public static function delete_all_notices(int $courseid) {
+        global $DB;
+
+        $DB->delete_records('block_notices', ['courseid' => $courseid]);
     }
 
     /**
@@ -250,7 +277,7 @@ class notices {
         $data['timemodified'] = time();
         $data['modifiedby'] = $USER->id;
 
-        $DB->update_record('block_notices', $data);
+        $DB->update_record('block_notices', (object)$data);
 
         // Through this method, visibility may change from visible to preview
         // so we will need to recalculate the sortorder in that case.

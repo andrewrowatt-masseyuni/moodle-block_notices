@@ -135,32 +135,31 @@ final class provider_test extends \core_privacy\tests\provider_testcase {
      * @covers \local_faultreporting\privacy
      */
     public function test_delete_data_for_users() {
-        $reports = faultreport::get_reports();
-        $this->assertCount(3, $reports);
+        $notices = notices::get_notices_admin(1);
+        $this->assertCount(3, $notices);
 
-        $context = \context_system::instance();
         $approveduserlist = new \core_privacy\local\request\approved_userlist(
-            $context, 'local_faultreporting',
+            \context_course::instance(1), 'local_faultreporting',
             [$this->user1->id, $this->user3->id]);
         privacy\provider::delete_data_for_users($approveduserlist);
 
-        $reports = faultreport::get_reports();
-        $this->assertCount(1, $reports);
+        $notices = notices::get_notices_admin(1);
+        $this->assertCount(2, $notices);
     }
 
-        /**
-         * Test for provider::delete_data_for_all_users_in_context
-         *
-         * @covers \local_faultreporting\privacy
-         */
+    /**
+     * Test for provider::delete_data_for_all_users_in_context
+     *
+     * @covers \local_faultreporting\privacy
+     */
     public function test_delete_data_for_all_users_in_context() {
-        $context = \context_system::instance();
+        $context = \context_course::instance(1);
 
         privacy\provider::delete_data_for_all_users_in_context($context);
 
         // Check that the fault reports have been deleted.
-        $reports = faultreport::get_reports();
-        $this->assertCount(0, $reports);
+        $notices = notices::get_notices_admin(1);
+        $this->assertCount(0, $notices);
     }
 
 }
