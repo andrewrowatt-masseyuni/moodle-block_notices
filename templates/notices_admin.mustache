@@ -44,7 +44,10 @@
         </div>
         <hr />
         <div class="d-flex justify-content-between align-items-center">
-            <span style="font-size: inherit; font-weight: 300;" class="badge badge-{{css}}">{{description}}</span>
+            <div>
+                <span style="font-size: inherit; font-weight: 300;" class="badge badge-{{css}} noticegroup">{{description}}</span>
+                {{#staffonly}}<span style="font-size: inherit; font-weight: 300;" class="badge badge-info staffonly">{{#str}} staffonly, block_notices {{/str}}</span>{{/staffonly}}
+            </div>
             <div class="d-flex justify-content-end" style="gap: 1em;">
                 {{#canmoveup}}<a role="button" href="manage.php?sesskey={{sesskey}}&courseid={{courseid}}&action=moveup&id={{id}}" data-notice-action"moveup">{{#pix}} t/up, core, {{#str}} moveup, core {{/str}} {{/pix}}{{#str}} moveup, core {{/str}}</a>{{/canmoveup}}
                 {{#canmovedown}}<a role="button" href="manage.php?sesskey={{sesskey}}&courseid={{courseid}}&action=movedown&id={{id}}" data-notice-action="movedown">{{#pix}} t/down, core, {{#str}} movedown, core {{/str}} {{/pix}}{{#str}} movedown, core {{/str}}</a>{{/canmovedown}}

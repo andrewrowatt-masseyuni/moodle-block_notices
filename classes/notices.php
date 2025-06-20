@@ -152,7 +152,7 @@ class notices {
      * @param bool $includepreview
      * @return array
      */
-    public static function get_notices(int $courseid, bool $includepreview = false): array {
+    public static function get_notices(int $courseid, bool $includepreview = false, bool $includestaffonly = false): array {
         global $DB;
 
         $visible = [self::NOTICE_VISIBLE];
@@ -163,11 +163,11 @@ class notices {
         [$insql, $inparams] = $DB->get_in_or_equal($visible);
 
         $sql = "SELECT * FROM {block_notices}
-            WHERE courseid = ? and
+            WHERE courseid = ? and staffonly <= ? and
             visible $insql
             order by sortorder asc";
 
-        return $DB->get_records_sql($sql, ['courseid' => $courseid] + $inparams);
+        return $DB->get_records_sql($sql, ['courseid' => $courseid, 'staffonly' => (int)$includestaffonly] + $inparams);
     }
 
     /**

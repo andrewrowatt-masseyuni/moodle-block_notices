@@ -15,6 +15,7 @@
 // along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
 
 use block_notices\notices;
+use block_notices\util;
 
 /**
  * Block notices is defined here.
@@ -74,7 +75,9 @@ class block_notices extends block_base {
                 'notices' => [],
             ];
 
-            foreach (notices::get_notices($courseid, $canmanage) as $noticeobject) {
+            foreach (notices::get_notices($courseid,
+                $canmanage,
+                util::is_staff()) as $noticeobject) {
                 $noticearray = (array)$noticeobject;
 
                 if ($noticearray['moreinformationurl']) {

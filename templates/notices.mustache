@@ -31,13 +31,16 @@
         <div class="swiper-wrapper">
         {{#notices}}
             <div class="swiper-slide">
-                <div class="item item__visible_{{visible}}">
+                <div class="item item__visible_{{visible}} {{#staffonly}}item__staffonly{{/staffonly}}">
                     <div>
-                        <div class="item__heading">
-                            <h6 title="{{title}}">{{title}}</h6>
-                            <div class="item__info">{{updatedescription}}</div>
-                        </div>
-                        <div class="item__content">{{{content}}}</div>
+                        
+                            <div class="item__heading">
+                                <h6 title="{{title}}">{{title}}</h6>
+                                {{#staffonly}}<div style="font-weight: 300;" class="badge badge-light item__staffonly_tag ml-1">{{#str}} staffonly, block_notices {{/str}}</div>{{/staffonly}}
+                                <div class="item__info">{{updatedescription}}</div>
+                            </div>
+                            <div class="item__content">{{{content}}}</div>
+                        
                         <div class="item__more_info">
                         <a target="_blank" href="{{moreinformationlink}}">{{moreinformationtext}}</a>
                         </div>

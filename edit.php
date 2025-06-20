@@ -61,6 +61,7 @@ if ($noticeform->is_cancelled()) {
         'owner' => $formdata->owner,
         'owneremail' => $formdata->owneremail,
         'notes' => $formdata->notes,
+        'staffonly' => !empty($formdata->staffonly),
     ];
 
     notices::update_notice($data);

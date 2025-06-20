@@ -57,6 +57,7 @@ $string['privacy:metadata:blocks_notices'] = 'Information about individual notic
 $string['privacy:metadata:blocks_notices:content'] = 'Content of the notice';
 $string['privacy:metadata:blocks_notices:createdby'] = 'The use who created the notice';
 $string['privacy:metadata:blocks_notices:modifiedby'] = 'The user who last modified the notice';
+$string['staffonly'] = 'Staff only';
 $string['title'] = 'Title';
 $string['title_help'] = 'Title of notice. Maximum of 64 characters.';
 $string['updatedescription'] = 'Update description';

@@ -46,6 +46,8 @@ class notice extends \moodleform {
             get_string('visible', 'block_notices'),
             get_string('visibility_preview', 'block_notices'));
 
+        $mform->addElement('checkbox', 'staffonly', get_string('staffonly', 'block_notices'));
+
         $mform->addElement('text', 'title', get_string('title', 'block_notices'), ['size' => 64]);
         $mform->setDefault('title', '');
         $mform->setType('title', PARAM_TEXT);
