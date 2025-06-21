@@ -98,6 +98,10 @@ section.block_notices {
         /* stylelint-disable-next-line function-url-scheme-disallowed-list */
         background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' version='1.1' height='100px' width='100px'><text transform='translate(20, 100) rotate(-45)' fill='rgb(239,239,239)' font-size='20'>PREVIEW</text></svg>");
     }
+    &.item__single {
+        margin: 0;
+        height: var(--height);
+    }
 }
 
 .item > div {

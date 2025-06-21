@@ -68,16 +68,21 @@ class block_notices extends block_base {
             $this->content->text = $this->config->text;
         } else {
 
+            $notices = notices::get_notices($courseid,
+                $canmanage,
+                util::is_staff());
+
             $data = [
                 'canmanage' => $canmanage,
                 'courseid' => $courseid,
                 'wwwroot' => $CFG->wwwroot,
+                'singlenotice' => count($notices) === 1,
+                'oneormorenotices' => count($notices) >= 1,
+                'noticecount' => count($notices),
                 'notices' => [],
             ];
 
-            foreach (notices::get_notices($courseid,
-                $canmanage,
-                util::is_staff()) as $noticeobject) {
+            foreach ($notices as $noticeobject) {
                 $noticearray = (array)$noticeobject;
 
                 if ($noticearray['moreinformationurl']) {
