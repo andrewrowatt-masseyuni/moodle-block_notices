@@ -34,23 +34,73 @@ class behat_block_notices_generator extends behat_generator_base {
                 'singular' => 'notice',
                 'datagenerator' => 'notice',
                 'required' => [
-                    'courseid',
+                    'course',
                     'visible',
                     'title',
                     'content',
-                    'contentformat',
-                    'updatedescription',
                     'moreinformationurl',
                     'owner',
                     'owneremail',
-                    'sortorder',
-                    'notes',
-                    'timecreated',
-                    'timemodified',
-                    'createdby',
-                    'modifiedby',
+                ],
+                'switchids' => [
+                    'course' => 'courseid',
+                    'visible' => 'visible',    
+                    'createdby' => 'createdbyuserid',
+                    'modifiedby' => 'modifiedbyuserid',
                 ],
             ],
         ];
+    }
+
+    /**
+     * Gets the user id from it's username.
+     *
+     * @throws Exception
+     * @param string $username
+     * @return int
+     */
+    protected function get_createdby_id(string $username): int {
+        global $DB;
+
+        if (!$id = $DB->get_field('user', 'id', ['username' => $username])) {
+            throw new Exception('The specified user with username "' . $username . '" does not exist');
+        }
+        return $id;
+    }
+
+    /**
+     * Gets the user id from it's username.
+     *
+     * @throws Exception
+     * @param string $username
+     * @return int
+     */
+    protected function get_modifiedby_id(string $username): int {
+        global $DB;
+
+        if (!$id = $DB->get_field('user', 'id', ['username' => $username])) {
+            throw new Exception('The specified user with username "' . $username . '" does not exist');
+        }
+        return $id;
+    }
+
+    /**
+     * Returns the visibility id based on the string provided.
+     *
+     * @param string $visible
+     * @return int
+     * @throws Exception
+     */
+    protected function get_visible_id(string $visible): int {
+        switch ($visible) {
+            case 'NOTICE_VISIBLE':
+                return 1;
+            case 'NOTICE_HIDDEN':
+                return 0;
+            case 'NOTICE_IN_PREVIEW':
+                return 2;
+            default:
+                throw new Exception('The specified visibility "' . $visible . '" is not valid. Use NOTICE_VISIBLE, NOTICE_HIDDEN, or NOTICE_IN_PREVIEW.');
+        }
     }
 }

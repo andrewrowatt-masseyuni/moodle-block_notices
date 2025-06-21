@@ -7,74 +7,96 @@ Feature: Add and manage notices
     and set the order of notices
 
   Background:
+    Given the following "users" exist:
+      | username | firstname | lastname | email                |
+      | 98186700 | Sam1      | Student1 | student1@example.com |
+      | arowatt  | Andrew1   | Teacher1 | teacher1@example.com |
     And I log in as "admin"
     And I am on site homepage
     And I turn editing mode on
-    When I add the "Notices" block
-    Then I should see "No notices"
-    And I should see "Manage notices"
-    And I change the window size to "large"
+    And I add the "Notices" block
+    And the following "block_notices > notice" exists:
+      | course             | Acceptance test site          |
+      | visible            | NOTICE_VISIBLE                |
+      | staffonly          | 0                             |
+      | title              | Notice1title                  |
+      | content            | Notice1content                |
+      | moreinformationurl | http://massey.ac.nz           |
+      | owner              | notice1owner                  |
+      | owneremail         | Notice1owneremail@noreply.com |
+      | createdby          | arowatt                       |
+      | modifiedby         | arowatt                       |
+    And the following "block_notices > notice" exists:
+      | course             | Acceptance test site          |
+      | visible            | NOTICE_VISIBLE                |
+      | staffonly          | 1                             |
+      | title              | Notice2title                  |
+      | content            | Notice2content                |
+      | moreinformationurl | http://massey.ac.nz           |
+      | owner              | notice2owner                  |
+      | owneremail         | Notice2owneremail@noreply.com |
+      | createdby          | arowatt                       |
+      | modifiedby         | arowatt                       |
+    And the following "block_notices > notice" exists:
+      | course             | Acceptance test site          |
+      | visible            | NOTICE_IN_PREVIEW             |
+      | staffonly          | 0                             |
+      | title              | Notice3title                  |
+      | content            | Notice3content                |
+      | moreinformationurl | http://massey.ac.nz           |
+      | owner              | notice3owner                  |
+      | owneremail         | Notice3owneremail@noreply.com |
+      | createdby          | arowatt                       |
+      | modifiedby         | arowatt                       |
 
   Scenario: Add and manage notices as admin
     And I am on site homepage
     And I follow "Manage notices"
-
-    And I should see "No notices" in the ".block-notices-group-visibility-preview .block-notices-count" "css_element"
-    And I should see "No notices" in the ".block-notices-group-visibility-visible .block-notices-count" "css_element"
-    And I should see "No notices" in the ".block-notices-group-visibility-hidden .block-notices-count" "css_element"
-
-    And I follow "Add notice"
-    And I should see "Add notice"
-    And I set the following fields to these values:
-      | Staff only               | No                            |
-      | Title                    | Notice1title                  |
-      | Content                  | Notice1content                |
-      | Update description       | Added 1 Jan                   |
-      | URL for more information | http://massey.ac.nz           |
-      | Owner                    | notice1owner                  |
-      | Owner email address      | Notice1owneremail@noreply.com |
-      | Notes                    | Remove 1 November 2024        |
-    And I press "Save"
-
-    And I should see "Manage notices"
-    And I follow "Add notice"
-    And I should see "Add notice"
-    And I set the following fields to these values:
-      | Staff only               | Yes                           |
-      | Title                    | Notice2title                  |
-      | Content                  | Notice2content                |
-      | Update description       | Added 1 Jan                   |
-      | URL for more information | http://massey.ac.nz           |
-      | Owner                    | notice2owner                  |
-      | Owner email address      | Notice2owneremail@noreply.com |
-      | Notes                    | Remove 2 November 2024        |
-    And I press "Save"
 
     And I should see "Manage notices"
     Then I should see "Notice1title"
     And I should see "Notice1content"
     Then I should see "Notice2title"
     And I should see "Notice2content"
+    Then I should see "Notice3title"
+    And I should see "Notice3content"
 
-    And I should see "2 notice(s)" in the ".block-notices-group-visibility-preview .block-notices-count" "css_element"
-    And I should see "No notices" in the ".block-notices-group-visibility-visible .block-notices-count" "css_element"
+    # Notice3
+    And I should see "1 notice(s)" in the ".block-notices-group-visibility-preview .block-notices-count" "css_element"
 
-    And I click on ".block-notices-group-visibility-preview [data-notice-title=\"Notice1title\"] [data-notice-action=\"show\"]" "css_element"
-    And I click on ".block-notices-group-visibility-preview [data-notice-title=\"Notice2title\"] [data-notice-action=\"show\"]" "css_element"
-
-    And I should see "No notices" in the ".block-notices-group-visibility-preview .block-notices-count" "css_element"
+    # Notice1 and Notice2
     And I should see "2 notice(s)" in the ".block-notices-group-visibility-visible .block-notices-count" "css_element"
     And I should see "No notices" in the ".block-notices-group-visibility-hidden .block-notices-count" "css_element"
 
-    And I should see "Move down" in the "[data-notice-title=\"Notice1title\"]" "css_element"
-    And I should see "Move up" in the "[data-notice-title=\"Notice2title\"]" "css_element"
+    And I click on ".block-notices-group-visibility-visible [data-notice-title=\"Notice1title\"] [data-notice-action=\"hide\"]" "css_element"
 
-    And I click on "[data-notice-title=\"Notice1title\"] [data-notice-action=\"movedown\"]" "css_element"
+    # Notice3
+    And I should see "1 notice(s)" in the ".block-notices-group-visibility-preview .block-notices-count" "css_element"
 
-    And I should see "Move up" in the "[data-notice-title=\"Notice1title\"]" "css_element"
+    # Notice2
+    And I should see "1 notice(s)" in the ".block-notices-group-visibility-visible .block-notices-count" "css_element"
+
+    # Notice1
+    And I should see "1 notice(s)" in the ".block-notices-group-visibility-hidden .block-notices-count" "css_element"
+
+    And I click on ".block-notices-group-visibility-preview [data-notice-title=\"Notice3title\"] [data-notice-action=\"show\"]" "css_element"
+    And I should see "No notices" in the ".block-notices-group-visibility-preview .block-notices-count" "css_element"
+
+    # Notice2 and Notice3
+    And I should see "2 notice(s)" in the ".block-notices-group-visibility-visible .block-notices-count" "css_element"
+
+    # Notice1
+    And I should see "1 notice(s)" in the ".block-notices-group-visibility-hidden .block-notices-count" "css_element"
+
     And I should see "Move down" in the "[data-notice-title=\"Notice2title\"]" "css_element"
+    And I should see "Move up" in the "[data-notice-title=\"Notice3title\"]" "css_element"
+
+    And I click on "[data-notice-title=\"Notice2title\"] [data-notice-action=\"movedown\"]" "css_element"
+
+    And I should see "Move up" in the "[data-notice-title=\"Notice2title\"]" "css_element"
+    And I should see "Move down" in the "[data-notice-title=\"Notice3title\"]" "css_element"
 
     And I click on "[data-notice-title=\"Notice1title\"] [data-notice-action=\"delete\"]" "css_element"
-    And I should see "1 notice(s)" in the ".block-notices-group-visibility-visible .block-notices-count" "css_element"
+    And I should see "No notices" in the ".block-notices-group-visibility-hidden .block-notices-count" "css_element"
 
     And I should see "Staff only" in the "[data-notice-title=\"Notice2title\"] .staffonly" "css_element"

@@ -183,10 +183,10 @@ class notices {
 
         $DB->delete_records_select(
             'block_notices',
-            'courseid = :courseid and (createdby = :createdby or modifiedby = :modifiedby)',
+            'courseid = :courseid and (createdbyuserid = :createdbyuserid or modifiedbyuserid = :modifiedbyuserid)',
             ['courseid' => $courseid,
-            'createdby' => $userid,
-            'modifiedby' => $userid]);
+            'createdbyuserid' => $userid,
+            'modifiedbyuserid' => $userid]);
     }
 
     /**
@@ -199,15 +199,15 @@ class notices {
         global $DB;
 
         $sql = 'SELECT b.*,
-            trim(concat(cb.firstname, \' \', cb.lastname)) as createdbyname,
-            trim(concat(mb.firstname, \' \', mb.lastname)) as modifiedbyname,
+            trim(concat(cb.firstname, \' \', cb.lastname)) as createdby,
+            trim(concat(mb.firstname, \' \', mb.lastname)) as modifiedby,
             b.sortorder = (select min(sortorder) from {block_notices}
                 where courseid = b.courseid and visible=:visiblemin) as isfirst,
             b.sortorder = (select max(sortorder) from {block_notices}
                 where courseid = b.courseid and visible=:visiblemax) as islast
             FROM {block_notices} b
-            join {user} cb on b.createdby = cb.id
-            join {user} mb on b.modifiedby = mb.id
+            join {user} cb on b.createdbyuserid = cb.id
+            join {user} mb on b.modifiedbyuserid = mb.id
             WHERE b.courseid = :courseid order by b.visible, b.sortorder';
         return $DB->get_records_sql($sql,
              ['courseid' => $courseid, 'visiblemin' => self::NOTICE_VISIBLE, 'visiblemax' => self::NOTICE_VISIBLE]);
@@ -235,9 +235,9 @@ class notices {
         global $DB;
 
         $sql = "select * from {block_notices}
-            where createdby = :createdbyid or modifiedby = :modifiedbyid";
+            where createdbyuserid = :createdbyuseridid or modifiedbyuserid = :modifiedbyuseridid";
 
-        return (array)$DB->get_records_sql($sql, ['createdbyid' => $userid, 'modifiedbyid' => $userid]);
+        return (array)$DB->get_records_sql($sql, ['createdbyuseridid' => $userid, 'modifiedbyuseridid' => $userid]);
     }
 
     /**
@@ -275,7 +275,7 @@ class notices {
         $data['visible'] = self::NOTICE_IN_PREVIEW;
         $data['sortorder'] = 0;
         $data['timemodified'] = time();
-        $data['modifiedby'] = $USER->id;
+        $data['modifiedbyuserid'] = $USER->id;
 
         $DB->update_record('block_notices', (object)$data);
 
@@ -287,7 +287,7 @@ class notices {
 
         $event = \block_notices\event\notice_updated::create([
             'objectid' => $data['id'],
-            'userid' => $data['modifiedby'],
+            'userid' => $data['modifiedbyuserid'],
             'context' => \context_course::instance($noticepreviousversion['courseid']),
         ]);
 
@@ -311,8 +311,8 @@ class notices {
             'visible' => self::NOTICE_IN_PREVIEW,
             'timecreated' => $timecreated,
             'timemodified' => $timecreated,
-            'createdby' => $USER->id,
-            'modifiedby' => $USER->id,
+            'createdbyuserid' => $USER->id,
+            'modifiedbyuserid' => $USER->id,
             'sortorder' => 0,
         ];
 

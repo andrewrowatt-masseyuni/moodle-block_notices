@@ -26,10 +26,25 @@ class block_notices_generator extends component_generator_base {
     /**
      * Create a notice.
      *
-     * @param array $notice
+     * @param array|stdClass $notice
      */
     public function create_notice($notice) {
-        global $DB;
+        global $DB, $USER;
+
+        $notice = (array) $notice;
+
+        $notice = (object) array_merge([
+            'contentformat' => FORMAT_HTML,
+            'updatedescription' => '',
+            'sortorder' => 0,
+            'notes' => '',
+            'staffonly' => 0,
+            'timecreated' => time(),
+            'timemodified' => time(),
+            'createdbyuserid' => $USER->id,
+            'modifiedbyuserid' => $USER->id,
+        ], $notice);
+
         $DB->insert_record('block_notices', $notice);
     }
 }

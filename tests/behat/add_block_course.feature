@@ -23,11 +23,11 @@ Feature: Notices block a course
   Scenario: Adding Notice block on a course
     When I log in as "teacher1"
     And I am on "Course 1" course homepage
-    Then I should see "No notices"
+    Then I should see "There are no notices. Have a great day!"
     Then I should see "Manage notices"
 
   Scenario: Block is visible to students
     When I log in as "student1"
     And I am on "Course 1" course homepage
-    Then I should see "No notices"
+    Then I should see "There are no notices. Have a great day!"
     Then I should not see "Manage notices"

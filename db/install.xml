@@ -17,13 +17,13 @@
 <FIELD NAME="staffonly" TYPE="int" LENGTH="1" NOTNULL="false" DEFAULT="0" SEQUENCE="false" COMMENT="Determines if the notice should be only visible to staff"/>
 <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
 <FIELD NAME="timemodified" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
-<FIELD NAME="createdby" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="User Id who created this notice."/>
-<FIELD NAME="modifiedby" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="User Id who last modified this notice."/>
+<FIELD NAME="createdbyuserid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="User Id who created this notice."/>
+<FIELD NAME="modifiedbyuserid" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="User Id who last modified this notice."/>
 </FIELDS>
 <KEYS>
 <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
-<KEY NAME="createdbyuserid" TYPE="foreign" FIELDS="createdby" REFTABLE="user" REFFIELDS="id"/>
-<KEY NAME="modifiedbyuser" TYPE="foreign" FIELDS="modifiedby" REFTABLE="user" REFFIELDS="id"/>
+<KEY NAME="createdbyuserid" TYPE="foreign" FIELDS="createdbyuserid" REFTABLE="user" REFFIELDS="id"/>
+<KEY NAME="modifiedbyuserid" TYPE="foreign" FIELDS="modifiedbyuserid" REFTABLE="user" REFFIELDS="id"/>
 </KEYS>
 </TABLE>
 </TABLES>

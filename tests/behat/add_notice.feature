@@ -11,9 +11,8 @@ Feature: Add a notice
     And I am on site homepage
     And I turn editing mode on
     When I add the "Notices" block
-    Then I should see "No notices"
+    Then I should see "There are no notices. Have a great day!"
     And I should see "Manage notices"
-    And I change the window size to "large"
 
   Scenario: Add and manage notices as admin
     And I am on site homepage

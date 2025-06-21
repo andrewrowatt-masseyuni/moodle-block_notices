@@ -16,11 +16,11 @@ Feature: Notices block on the dashboard (my) page
   Scenario: Checking the empty layout of the Notice block on the my dashboard page as admin
     When I log in as "admin"
     And I am on site homepage
-    Then I should see "No notices"
+    Then I should see "There are no notices. Have a great day!"
     And I should see "Manage notices"
 
   Scenario: Checking the empty layout of the Notice block on the my dashboard page as a regular user
     When I log in as "student1"
     And I am on site homepage
-    Then I should see "No notices"
+    Then I should see "There are no notices. Have a great day!"
     And I should not see "Manage notices"

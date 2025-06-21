@@ -25,7 +25,7 @@
 defined('MOODLE_INTERNAL') || die();
 
 $plugin->component = 'block_notices';
-$plugin->release = '1.0.11';
-$plugin->version = 2025010211;
+$plugin->release = '1.0.12';
+$plugin->version = 2025010212;
 $plugin->requires = 2022112800;
 $plugin->maturity = MATURITY_ALPHA;

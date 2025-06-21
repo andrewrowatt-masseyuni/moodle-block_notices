@@ -48,7 +48,7 @@ if ($noticeform->is_cancelled()) {
     redirect(new moodle_url('/blocks/notices/manage.php', ['courseid' => $courseid]));
 } else if ($formdata = $noticeform->get_data()) {
     $data = [
-        'staffonly' => $formdata->staffonly,
+        'staffonly' => !empty($formdata->staffonly),
         'title' => $formdata->title,
         'content' => $formdata->content['text'],
         'contentformat' => $formdata->content['format'],
