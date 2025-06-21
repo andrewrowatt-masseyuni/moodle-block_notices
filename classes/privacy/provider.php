@@ -134,7 +134,9 @@ class provider implements
 
         $DB->delete_records_select(
             'block_notices',
-            "courseid = :courseid AND (createdbyuserid {$createdbyuseriduserinsql} or modifiedbyuserid {$modifiedbyuseriduserinsql})", $params);
+            "courseid = :courseid
+                AND (createdbyuserid {$createdbyuseriduserinsql} or modifiedbyuserid {$modifiedbyuseriduserinsql})",
+            $params);
     }
 
     /**

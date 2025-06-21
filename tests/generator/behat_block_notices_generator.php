@@ -44,7 +44,7 @@ class behat_block_notices_generator extends behat_generator_base {
                 ],
                 'switchids' => [
                     'course' => 'courseid',
-                    'visible' => 'visible',    
+                    'visible' => 'visible',
                     'createdby' => 'createdbyuserid',
                     'modifiedby' => 'modifiedbyuserid',
                 ],
@@ -100,7 +100,8 @@ class behat_block_notices_generator extends behat_generator_base {
             case 'NOTICE_IN_PREVIEW':
                 return 2;
             default:
-                throw new Exception('The specified visibility "' . $visible . '" is not valid. Use NOTICE_VISIBLE, NOTICE_HIDDEN, or NOTICE_IN_PREVIEW.');
+                throw new Exception('The specified visibility "' . $visible
+                    . '" is not valid. Use NOTICE_VISIBLE, NOTICE_HIDDEN, or NOTICE_IN_PREVIEW.');
         }
     }
 }
