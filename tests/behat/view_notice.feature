@@ -43,6 +43,7 @@ Feature: View notice
       | owneremail         | Notice3owneremail@noreply.com |
       | createdby          | arowatt                       |
       | modifiedby         | arowatt                       |
+    And I change the window size to "large"
 
   Scenario: Checking the layout of the Notice block as admin
     When I log in as "admin"
