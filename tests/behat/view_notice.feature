@@ -68,7 +68,8 @@ Feature: View notice
 
     And I should see "Notice1title"
     And I should see "Notice1content"
-    
+    And I click on ".swiper-button-playpause" "css_element"
+
     And I click on ".swiper-button-next" "css_element"
     And I should see "Notice2title"
     And I should see "Notice2content"

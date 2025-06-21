@@ -21,29 +21,43 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+import $ from 'jquery';
 
 export const init = () => {
   /* global Swiper */
   /* eslint no-undef: "error" */
-    new Swiper('.swiper', {
-        direction: 'horizontal',
-        spaceBetween: 30,
-        autoplay: {
-            delay: 5000,
-            pauseOnMouseEnter: true,
-            disableOnInteraction: true,
-        },
-        loop: true,
+  let swiper = new Swiper('.swiper', {
+    direction: 'horizontal',
+    spaceBetween: 30,
+    autoplay: {
+        delay: 5000,
+        pauseOnMouseEnter: true,
+        disableOnInteraction: true,
+    },
+    loop: true,
 
-        // We need pagination
-        pagination: {
-          el: '.swiper-pagination',
-        },
+    // We need pagination
+    pagination: {
+      el: '.swiper-pagination',
+    },
 
-        // Navigation arrows
-        navigation: {
-          nextEl: '.swiper-button-next',
-          prevEl: '.swiper-button-prev',
-        },
-      });
+    // Navigation arrows
+    navigation: {
+      nextEl: '.swiper-button-next',
+      prevEl: '.swiper-button-prev',
+    },
+  });
+
+  window.console.log($('.swiper-button-playpause'));
+
+  $('.swiper-button-playpause').on('click', function() {
+    window.console.log('play/pause clicked');
+    if (swiper.autoplay.running) {
+      swiper.autoplay.stop();
+      $(this).removeClass('fa-pause').addClass('fa-play');
+    } else {
+      swiper.autoplay.start();
+      $(this).removeClass('fa-play').addClass('fa-pause');
+    }
+  });
 };

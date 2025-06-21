@@ -64,6 +64,16 @@ section.block_notices {
     --controls_margin: calc(var(--default_spacing) + 40px);
     --height: 224px;
     --max_image_width: 200px;
+
+    .swiper-button-playpause {
+        position: absolute;
+        bottom: 0;
+        right: 0;
+        z-index: 11; /* To be above .swiper-pagination*/
+        border: none;
+        padding: 8px;
+        border-radius: 8px;
+    }
 }
 
 .swiper {
