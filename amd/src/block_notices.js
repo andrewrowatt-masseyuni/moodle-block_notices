@@ -46,6 +46,4 @@ export const init = () => {
           prevEl: '.swiper-button-prev',
         },
       });
-
-    window.console.log(`Hello from JavaScript.`);
 };
