@@ -1,3 +1,5 @@
+[![Moodle Plugin CI](https://github.com/andrewrowatt-masseyuni/moodle-block_notices/actions/workflows/moodle-ci.yml/badge.svg)](https://github.com/andrewrowatt-masseyuni/moodle-block_notices/actions/workflows/moodle-ci.yml)
+
 # Notices
 
 Provides a mechanism for managing notices, events, and items of interest and displaying them in a carousel-style presentation.
