@@ -59,7 +59,6 @@ class block_notices extends block_base {
         $canmanage = has_capability('block/notices:managenotices', $this->context);
         $courseid = $this->page->course->id;
 
-        $this->page->requires->css('/blocks/notices/styles.css');
         $this->page->requires->js('/blocks/notices/swiper/swiper-bundle.min.js', false);
         $this->page->requires->css('/blocks/notices/swiper/swiper-bundle.min.css');
         $this->page->requires->js_call_amd('block_notices/block_notices', 'init', []);
