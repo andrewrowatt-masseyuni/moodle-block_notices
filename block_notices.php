@@ -113,11 +113,10 @@ class block_notices extends block_base {
      * The function is called immediately after init().
      */
     public function specialization() {
-        // Load user defined title and make sure it's never empty.
         if (isset($this->config->title)) {
             $this->title = $this->config->title;
         } else {
-            $this->title = get_string('pluginname', 'block_notices');
+            $this->title = '';
         }
     }
 
