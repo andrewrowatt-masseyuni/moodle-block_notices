@@ -104,7 +104,7 @@ jobs:
         if: ${{ !cancelled() }}
         run: moodle/vendor/bin/phpunit --configuration moodle/phpunit.xml moodle/privacy/tests/privacy/provider_test.php
 
-      - name: Behat features
+      - name: Behat features (AJR)
         id: behat
         if: ${{ !cancelled() }}
         run: moodle-plugin-ci behat --profile chrome --scss-deprecations --selenium selenium/standalone-chrome:4
