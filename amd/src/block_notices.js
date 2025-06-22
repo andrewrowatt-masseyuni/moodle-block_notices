@@ -48,10 +48,7 @@ export const init = () => {
     },
   });
 
-  window.console.log($('.swiper-button-playpause'));
-
   $('.swiper-button-playpause').on('click', function() {
-    window.console.log('play/pause clicked');
     if (swiper.autoplay.running) {
       swiper.autoplay.stop();
       $(this).removeClass('fa-pause').addClass('fa-play');
