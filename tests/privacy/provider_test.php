@@ -38,6 +38,7 @@ final class provider_test extends \core_privacy\tests\provider_testcase {
      * {@inheritdoc}
      */
     protected function setUp(): void {
+        parent::setUp();
         $this->resetAfterTest();
         $this->setAdminUser();
 
@@ -66,7 +67,7 @@ final class provider_test extends \core_privacy\tests\provider_testcase {
      *
      * @covers \local_faultreporting\privacy
      */
-    public function test_get_metadata() {
+    public function test_get_metadata(): void {
         $this->resetAfterTest();
         $this->setAdminUser();
 
@@ -83,7 +84,7 @@ final class provider_test extends \core_privacy\tests\provider_testcase {
      *
      * @covers \local_faultreporting\privacy
      */
-    public function test_get_users_in_context() {
+    public function test_get_users_in_context(): void {
         $cmcontext = \context_course::instance(1);
 
         $userlist = new \core_privacy\local\request\userlist($cmcontext, 'block_notices');
@@ -104,7 +105,7 @@ final class provider_test extends \core_privacy\tests\provider_testcase {
      *
      * @covers \local_faultreporting\privacy
      */
-    public function test_get_contexts_for_userid() {
+    public function test_get_contexts_for_userid(): void {
         $contextlist = privacy\provider::get_contexts_for_userid($this->user1->id);
         $this->assertCount(1, $contextlist);
 
@@ -117,7 +118,7 @@ final class provider_test extends \core_privacy\tests\provider_testcase {
      *
      * @covers \local_faultreporting\privacy
      */
-    public function test_delete_data_for_user() {
+    public function test_delete_data_for_user(): void {
         $notices = notices::get_notices_admin(1);
         $this->assertCount(3, $notices);
 
@@ -134,7 +135,7 @@ final class provider_test extends \core_privacy\tests\provider_testcase {
      *
      * @covers \local_faultreporting\privacy
      */
-    public function test_delete_data_for_users() {
+    public function test_delete_data_for_users(): void {
         $notices = notices::get_notices_admin(1);
         $this->assertCount(3, $notices);
 
@@ -152,7 +153,7 @@ final class provider_test extends \core_privacy\tests\provider_testcase {
      *
      * @covers \local_faultreporting\privacy
      */
-    public function test_delete_data_for_all_users_in_context() {
+    public function test_delete_data_for_all_users_in_context(): void {
         $context = \context_course::instance(1);
 
         privacy\provider::delete_data_for_all_users_in_context($context);
@@ -167,7 +168,7 @@ final class provider_test extends \core_privacy\tests\provider_testcase {
      *
      * @covers \local_faultreporting\privacy
      */
-    public function test_export_user_data() {
+    public function test_export_user_data(): void {
         $contextlist = new \core_privacy\local\request\approved_contextlist(
             $this->user1, 'block_notices', [\context_course::instance(1)->id]);
 
