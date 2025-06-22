@@ -53,7 +53,8 @@
 section.block_notices {
     div.card-text.content {
         /* stylelint-disable-next-line declaration-no-important */
-        margin: 0 !important; /* needed due to mt-3 */
+        margin: 0 !important;
+        /* needed due to mt-3 */
     }
 }
 
@@ -69,7 +70,8 @@ section.block_notices {
         position: absolute;
         bottom: 0;
         right: 0;
-        z-index: 11; /* To be above .swiper-pagination*/
+        z-index: 11;
+        /* To be above .swiper-pagination*/
         border: none;
         padding: 8px;
         border-radius: 8px;
@@ -98,6 +100,7 @@ section.block_notices {
         /* stylelint-disable-next-line function-url-scheme-disallowed-list */
         background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' version='1.1' height='100px' width='100px'><text transform='translate(20, 100) rotate(-45)' fill='rgb(239,239,239)' font-size='20'>PREVIEW</text></svg>");
     }
+
     &.item__single {
         margin: 0;
         height: var(--height);
@@ -163,6 +166,13 @@ section.block_notices {
 .item__content {
     line-height: 27px;
     overflow: hidden auto;
+
+    mask-image:
+        linear-gradient(
+            to top,
+            transparent,
+            black 0.5em
+        );
 }
 
 .item__content p {
@@ -239,6 +249,7 @@ div.img {
 }
 
 @media only screen and (max-width: 768px) {
+
     /* For mobile phones: */
     .item {
         margin: 0;
