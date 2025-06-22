@@ -126,7 +126,7 @@ final class notices_test extends \advanced_testcase {
         $this->assertTrue(notices::get_notice_count(1) == 0);
         $id = notices::add_notice(1, self::TEST_DATA[0]);
 
-        $this->assertTrue(notices::get_notice_count(1) == 1);
+        $this->assertTrue(notices::get_notice_count(1, true, true) == 1);
 
         $notice = notices::get_notice($id);
         $this->assertEquals($notice['visible'], notices::NOTICE_IN_PREVIEW);
@@ -144,7 +144,7 @@ final class notices_test extends \advanced_testcase {
         $this->assertTrue(notices::get_notice_count(1) == 0);
         $id1 = notices::add_notice(1, self::TEST_DATA[0]);
         $id2 = notices::add_notice(1, self::TEST_DATA[1]);
-        $this->assertTrue(notices::get_notice_count(1) == 2);
+        $this->assertTrue(notices::get_notice_count(1, true, true) == 2);
     }
 
     /**

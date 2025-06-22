@@ -40,6 +40,11 @@ class notices {
     public const NOTICE_IN_PREVIEW = 2;
 
     /**
+     * @var int defining so it can be used for filtering
+     */
+    public const NOTICE_CRITICAL = 3;
+
+    /**
      * @var array lookup table for attributes based on notice visibility
      */
     public const NOTICE_VISIBLITY_BOOTSTRAP_CSS_CLASS = [
@@ -131,18 +136,20 @@ class notices {
             'notes' => 'ITS manage this resource.',
         ],
     ];
+
     /**
      * Get the count of notices for a given instance
      *
      * @param int $courseid
      * @return int
      */
-    public static function get_notice_count(int $courseid): int {
-        global $DB;
+    public static function get_notice_count(int $courseid, bool $includepreview = false, bool $includestaffonly = false): int {
+        // Rather that duplicating the logic to get the count of notices,
+        // we can just call the get_notices method and count the results.
 
-        // ...TODO: Implement "bool $includepreview = false".
+        $notices = self::get_notices($courseid, $includepreview, $includestaffonly);
 
-        return $DB->count_records('block_notices', ['courseid' => $courseid]);
+        return count($notices);
     }
 
     /**
@@ -155,6 +162,12 @@ class notices {
      */
     public static function get_notices(int $courseid, bool $includepreview = false, bool $includestaffonly = false): array {
         global $DB;
+
+        $criticalnotice = self::get_critical_notice($courseid);
+        if (count($criticalnotice) != 0) {
+            // If there is a critical notice, we only return that.
+            return $criticalnotice;
+        }
 
         $visible = [self::NOTICE_VISIBLE];
         if ($includepreview) {
@@ -169,6 +182,29 @@ class notices {
             order by sortorder asc";
 
         return $DB->get_records_sql($sql, ['courseid' => $courseid, 'staffonly' => (int)$includestaffonly] + $inparams);
+    }
+
+    /**
+     * Get the critical notice for a given course.
+     *
+     * @param int $courseid
+     * @return array
+     */
+    public static function get_critical_notice(int $courseid): array {
+        global $DB;
+
+        $sql = "SELECT * FROM {block_notices}
+            WHERE courseid = :courseid and visible = :visible";
+
+        $criticalnotice = $DB->get_record_sql($sql, ['courseid' => $courseid, 'visible' => self::NOTICE_CRITICAL]);
+        
+        if($criticalnotice) {
+            // If there is a critical notice, we only return that.
+            return (array)$criticalnotice;
+        }
+
+        // No critical notice found, return an empty array.
+        return [];
     }
 
     /**
