@@ -76,6 +76,16 @@ section.block_notices {
     }
 }
 
+#stream-dashboard-notices .swiper-button-playpause {
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    z-index: 11; /* To be above .swiper-pagination*/
+    border: none;
+    padding: 8px;
+    border-radius: 8px;
+}
+
 .swiper {
     height: var(--height);
     width: 100%;
