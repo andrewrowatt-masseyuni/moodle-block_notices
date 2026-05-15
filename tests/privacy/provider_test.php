@@ -94,9 +94,9 @@ final class provider_test extends \core_privacy\tests\provider_testcase {
         $this->assertEquals(
             [],
             array_diff(
-            [$this->user1->id, $this->user2->id],
-            $userlist->get_userids()
-        )
+                [$this->user1->id, $this->user2->id],
+                $userlist->get_userids()
+            )
         );
     }
 
@@ -123,7 +123,10 @@ final class provider_test extends \core_privacy\tests\provider_testcase {
         $this->assertCount(3, $notices);
 
         $contextlist = new \core_privacy\local\request\approved_contextlist(
-            $this->user1, 'block_notices', [\context_course::instance(1)->id]);
+            $this->user1,
+            'block_notices',
+            [\context_course::instance(1)->id]
+        );
         privacy\provider::delete_data_for_user($contextlist);
 
         $notices = notices::get_notices_admin(1);
@@ -140,8 +143,10 @@ final class provider_test extends \core_privacy\tests\provider_testcase {
         $this->assertCount(3, $notices);
 
         $approveduserlist = new \core_privacy\local\request\approved_userlist(
-            \context_course::instance(1), 'local_faultreporting',
-            [$this->user1->id, $this->user3->id]);
+            \context_course::instance(1),
+            'local_faultreporting',
+            [$this->user1->id, $this->user3->id]
+        );
         privacy\provider::delete_data_for_users($approveduserlist);
 
         $notices = notices::get_notices_admin(1);
@@ -170,7 +175,10 @@ final class provider_test extends \core_privacy\tests\provider_testcase {
      */
     public function test_export_user_data(): void {
         $contextlist = new \core_privacy\local\request\approved_contextlist(
-            $this->user1, 'block_notices', [\context_course::instance(1)->id]);
+            $this->user1,
+            'block_notices',
+            [\context_course::instance(1)->id]
+        );
 
         privacy\provider::export_user_data($contextlist);
     }

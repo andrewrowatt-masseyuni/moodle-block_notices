@@ -65,7 +65,6 @@ if ($action && $noticeid) {
         case 'movedown':
             notices::move_down($noticeid);
             break;
-
     }
 
     // Redirect as Moodle good practice to remove the session key from the URL.

@@ -197,8 +197,8 @@ class notices {
             WHERE courseid = :courseid and visible = :visible";
 
         $criticalnotice = $DB->get_record_sql($sql, ['courseid' => $courseid, 'visible' => self::NOTICE_CRITICAL]);
-        
-        if($criticalnotice) {
+
+        if ($criticalnotice) {
             // If there is a critical notice, we only return that.
             return (array)$criticalnotice;
         }
@@ -222,7 +222,8 @@ class notices {
             'courseid = :courseid and (createdbyuserid = :createdbyuserid or modifiedbyuserid = :modifiedbyuserid)',
             ['courseid' => $courseid,
             'createdbyuserid' => $userid,
-            'modifiedbyuserid' => $userid]);
+            'modifiedbyuserid' => $userid]
+        );
     }
 
     /**
@@ -245,8 +246,10 @@ class notices {
             join {user} cb on b.createdbyuserid = cb.id
             join {user} mb on b.modifiedbyuserid = mb.id
             WHERE b.courseid = :courseid order by b.visible, b.sortorder';
-        return $DB->get_records_sql($sql,
-             ['courseid' => $courseid, 'visiblemin' => self::NOTICE_VISIBLE, 'visiblemax' => self::NOTICE_VISIBLE]);
+        return $DB->get_records_sql(
+            $sql,
+            ['courseid' => $courseid, 'visiblemin' => self::NOTICE_VISIBLE, 'visiblemax' => self::NOTICE_VISIBLE]
+        );
     }
 
     /**
@@ -366,10 +369,12 @@ class notices {
         $notice = self::get_notice($id);
 
         $sortorder = $notice['sortorder'];
-        $prevnotice = $DB->get_record_sql('select * from {block_notices}
+        $prevnotice = $DB->get_record_sql(
+            'select * from {block_notices}
                 where courseid = :courseid and visible=:visible and
                 sortorder < :sortorder order by sortorder desc limit 1',
-            ['courseid' => $notice['courseid'], 'visible' => self::NOTICE_VISIBLE, 'sortorder' => $sortorder]);
+            ['courseid' => $notice['courseid'], 'visible' => self::NOTICE_VISIBLE, 'sortorder' => $sortorder]
+        );
 
         if ($prevnotice) {
             $notice['sortorder'] = $prevnotice->sortorder;
@@ -391,10 +396,12 @@ class notices {
         $notice = self::get_notice($id);
 
         $sortorder = $notice['sortorder'];
-        $nextnotice = $DB->get_record_sql('select * from {block_notices}
+        $nextnotice = $DB->get_record_sql(
+            'select * from {block_notices}
                 where courseid = :courseid and visible=:visible and
                 sortorder > :sortorder order by sortorder asc limit 1',
-            ['courseid' => $notice['courseid'], 'visible' => self::NOTICE_VISIBLE, 'sortorder' => $sortorder]);
+            ['courseid' => $notice['courseid'], 'visible' => self::NOTICE_VISIBLE, 'sortorder' => $sortorder]
+        );
 
         if ($nextnotice) {
             $notice['sortorder'] = $nextnotice->sortorder;
@@ -422,7 +429,8 @@ class notices {
         $maxsortorder = $DB->get_field_sql(
             'SELECT MAX(sortorder) FROM {block_notices}
                 where courseid = :courseid and visible=:visible',
-            ['courseid' => $notice['courseid'], 'visible' => self::NOTICE_VISIBLE]);
+            ['courseid' => $notice['courseid'], 'visible' => self::NOTICE_VISIBLE]
+        );
 
         $notice['sortorder'] = $maxsortorder + 1;
         $notice['visible'] = self::NOTICE_VISIBLE;
@@ -463,9 +471,11 @@ class notices {
         global $DB;
 
         $sortorder = 1;
-        $notices = $DB->get_records('block_notices',
+        $notices = $DB->get_records(
+            'block_notices',
             ['courseid' => $courseid, 'visible' => self::NOTICE_VISIBLE],
-            'sortorder ASC');
+            'sortorder ASC'
+        );
 
         foreach ($notices as $notice) {
             $notice->sortorder = $sortorder++;

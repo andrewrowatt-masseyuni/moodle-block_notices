@@ -34,7 +34,8 @@ if ($hassiteconfig) {
             'block_notices/customcss',
             get_string('customcss', 'block_notices'),
             get_string('customcssdesc', 'block_notices'),
-            '', PARAM_RAW
+            '',
+            PARAM_RAW
         ));
     }
 }

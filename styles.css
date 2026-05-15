@@ -284,3 +284,20 @@ div.img {
         display: none;
     }
 }
+
+#page-blocks-notices-manage {
+    .list-group-item {
+        position: relative;
+
+        span.badge-sortorder {
+            position: absolute;
+            top: 1px;
+            right: 1px;
+            font-size: 75%;
+        }
+
+        hr {
+            margin: 1em 0;
+        }
+    }
+}

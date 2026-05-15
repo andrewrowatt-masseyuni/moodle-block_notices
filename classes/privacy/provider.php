@@ -23,6 +23,7 @@ use core_privacy\local\request\writer;
 use core_privacy\local\metadata\collection;
 use core_privacy\local\request\contextlist;
 
+// phpcs:disable Universal.OOStructures.AlphabeticExtendsImplements.ImplementsWrongOrderWithComments
 /**
  * Privacy Subsystem for blocks_notices.
  *
@@ -39,6 +40,7 @@ class provider implements
 
     // This plugin is capable of determining which users have data within it.
     \core_privacy\local\request\core_userlist_provider {
+// phpcs:enable Universal.OOStructures.AlphabeticExtendsImplements.ImplementsWrongOrderWithComments
 
     /**
      * Return the fields which contain personal data.
@@ -127,16 +129,17 @@ class provider implements
         global $DB;
         $context = $userlist->get_context();
 
-        list($createdbyuseriduserinsql, $userinparams) = $DB->get_in_or_equal($userlist->get_userids(), SQL_PARAMS_NAMED);
+        [$createdbyuseriduserinsql, $userinparams] = $DB->get_in_or_equal($userlist->get_userids(), SQL_PARAMS_NAMED);
         $params = array_merge(['courseid' => $context->instanceid], $userinparams);
-        list($modifiedbyuseriduserinsql, $userinparams) = $DB->get_in_or_equal($userlist->get_userids(), SQL_PARAMS_NAMED);
+        [$modifiedbyuseriduserinsql, $userinparams] = $DB->get_in_or_equal($userlist->get_userids(), SQL_PARAMS_NAMED);
         $params = array_merge($params, $userinparams);
 
         $DB->delete_records_select(
             'block_notices',
             "courseid = :courseid
                 AND (createdbyuserid {$createdbyuseriduserinsql} or modifiedbyuserid {$modifiedbyuseriduserinsql})",
-            $params);
+            $params
+        );
     }
 
     /**

@@ -24,7 +24,6 @@ namespace block_notices\event;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class notice_updated extends \core\event\base {
-
     /**
      * Set basic properties for the event.
      */
@@ -47,7 +46,7 @@ class notice_updated extends \core\event\base {
      * @return \lang_string|string|null
      */
     public function get_description() {
-        $obj = new \stdClass;
+        $obj = new \stdClass();
         $obj->userid = $this->userid;
         $obj->objectid = $this->objectid;
         return get_string('event_notice_updated_desc', 'block_notices', $obj);

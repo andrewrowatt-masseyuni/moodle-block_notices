@@ -25,7 +25,6 @@ use block_notices\util;
  * @license     https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class block_notices extends block_base {
-
     /**
      * Initializes class member variables.
      */
@@ -66,10 +65,11 @@ class block_notices extends block_base {
         if (!empty($this->config->text)) {
             $this->content->text = $this->config->text;
         } else {
-
-            $notices = notices::get_notices($courseid,
+            $notices = notices::get_notices(
+                $courseid,
                 $canmanage,
-                util::is_staff());
+                util::is_staff()
+            );
 
             $data = [
                 'canmanage' => $canmanage,

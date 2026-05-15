@@ -33,21 +33,23 @@
 <ul class="list-group pb-3">
     {{#notices}}
     <li class="list-group-item visibility-{{visible}}" data-notice-id="{{id}}" data-notice-title="{{title}}">
-        <div class="d-flex w-100 justify-content-start" style="gap: 1em;">
-            <h5 class="mb-1">{{#showsortorder}}<span class="badge badge-secondary">{{sortorder}}</span> {{/showsortorder}}{{title}}</h5>
+        <span class="badge badge-light badge-sortorder">{{sortorder}}</span>
+        <div class="d-flex w-100 justify-content-start align-items-center mb-1" style="gap: 1em;">
+            <h5 class="mb-0">{{#showsortorder}}{{/showsortorder}}{{title}}</h5>
             <small>{{updatedescription}}</small>
         </div>
+        <hr>
         <p class="mb-1">{{{content}}}</p>
         <div class="d-flex justify-content-start" style="gap: 1em;">
             <small>{{#str}} moreinformationurl, block_notices {{/str}}: <a href="{{moreinformationurl}}" target="_blank">{{moreinformationurl}}</a></small>
             <small>{{#str}} owner, block_notices {{/str}}: <a title="Click to email" href="mailto:{{owneremail}}">{{owner}}</a></small>
         </div>
-        <hr />
+        <hr>
         <div class="d-flex justify-content-start" style="gap: 1em;">
             <small>{{#str}} createdby, block_notices {{/str}}: <a href="/user/view.php?id={{createdbyuserid}}&course={{courseid}}" target="_blank">{{createdby}}</a></small>
             <small>{{#str}} modifiedby, block_notices {{/str}}: <a href="/user/view.php?id={{modifiedbyuserid}}&course={{courseid}}" target="_blank">{{modifiedby}}</a></small>
         </div>
-        <hr />
+        <hr>
         <div class="d-flex justify-content-between align-items-center">
             <div>
                 <span style="font-size: inherit; font-weight: 300;" class="badge badge-{{css}} noticegroup">{{description}}</span>
@@ -70,7 +72,7 @@
 </ul>
 </div>
 {{/groups}}
-<hr />
+<hr>
 
 <div>
 <a role="button" href="add.php?courseid={{courseid}}">

@@ -42,9 +42,12 @@ class notice extends \moodleform {
 
         $mform->addElement('header', 'general', get_string('basicinformationgroup', 'block_notices'));
 
-        $mform->addElement('static', 'visible_label',
+        $mform->addElement(
+            'static',
+            'visible_label',
             get_string('visible', 'block_notices'),
-            get_string('visibility_preview', 'block_notices'));
+            get_string('visibility_preview', 'block_notices')
+        );
 
         $mform->addElement('checkbox', 'staffonly', get_string('staffonly', 'block_notices'));
 
@@ -68,7 +71,9 @@ class notice extends \moodleform {
         // Arguably a bit of a hack to get the help text to display in my preferred place.
         $mform->addElement('html', html_writer::div(
             '<i class="icon fa fa-info-circle " aria-hidden="true"></i>' . get_string('content_help_additional', 'block_notices'),
-            'alert alert-info help_text', ['style' => 'margin-left: calc(25% + 7px );']));
+            'alert alert-info help_text',
+            ['style' => 'margin-left: calc(25% + 7px );']
+        ));
         $mform->addElement('html', html_writer::tag('hr', ''));
 
         $mform->addElement('text', 'moreinformationurl', get_string('moreinformationurl', 'block_notices'), ['size' => 128]);
@@ -82,7 +87,8 @@ class notice extends \moodleform {
 
         $mform->addElement('html', html_writer::div(
             get_string('ownergroupdescription', 'block_notices'),
-            'alert alert-warning help_text'));
+            'alert alert-warning help_text'
+        ));
 
         $mform->addElement('text', 'owner', get_string('owner', 'block_notices'));
         $mform->setDefault('owner', '');
