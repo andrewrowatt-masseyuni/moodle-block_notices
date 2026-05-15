@@ -25,10 +25,11 @@
 
 defined('MOODLE_INTERNAL') || die();
 
+$string['additionaleditordescription'] = 'You can optionally specify an additional editor. This is a Stream user who can directly edit the notice.';
 $string['additionaleditorid'] = 'Additional editor';
-$string['additionaleditorid_help'] = 'The Moodle user who will be able to edit this notice in addition to Notices managers. Leave blank to default to yourself when creating, or to clear the additional editor when editing (so only Notices managers can edit it).';
+$string['additionaleditorid_help'] = 'The Moodle user who will be able to edit this notice in addition to Notices managers. Leave blank for no additional editor (so only Notices managers can edit it).';
 $string['additionaleditorid_none'] = 'No additional editor';
-$string['additionaleditorid_unset'] = 'Default (you)';
+$string['additionaleditorid_unset'] = 'No additional editor';
 $string['addnotice'] = 'Add notice';
 $string['basicinformationgroup'] = 'General';
 $string['block_notices:missingblock'] = 'Unable to to manage notices for a course without a Notices block.';

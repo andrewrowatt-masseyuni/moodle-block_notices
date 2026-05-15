@@ -542,9 +542,9 @@ class notices {
         ];
 
         $record = $presets + $data;
-        // If the caller didn't supply an explicit additionaleditorid (e.g. seed/test data), default to the creator.
+        // New notices default to no additional editor; never fall back to the current user.
         if (empty($record['additionaleditorid'])) {
-            $record['additionaleditorid'] = $USER->id;
+            $record['additionaleditorid'] = null;
         }
 
         return $DB->insert_record('block_notices', $record);
