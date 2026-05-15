@@ -21,3 +21,15 @@
  * @copyright  2025 Andrew Rowatt <A.J.Rowatt@massey.ac.nz>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
+
+/**
+ * Inplace-editable callback. Dispatched to by core_update_inplace_editable web service.
+ *
+ * @param string $itemtype
+ * @param int $itemid
+ * @param string $newvalue
+ * @return \core\output\inplace_editable
+ */
+function block_notices_inplace_editable(string $itemtype, int $itemid, string $newvalue) {
+    return \block_notices\output\editable_notice_field::update($itemtype, $itemid, $newvalue);
+}

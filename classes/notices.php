@@ -302,6 +302,35 @@ class notices {
     }
 
     /**
+     * Update a single inline-editable field on a notice.
+     *
+     * Updates timemodified and modifiedbyuserid; intentionally leaves visibility
+     * and sortorder untouched (unlike update_notice() which resets to PREVIEW).
+     *
+     * @param int $id
+     * @param string $field One of 'title', 'updatedescription'.
+     * @param string $newvalue
+     */
+    public static function update_notice_field(int $id, string $field, string $newvalue): void {
+        global $DB, $USER;
+        if (!in_array($field, ['title', 'updatedescription'], true)) {
+            throw new \coding_exception("Field not inline-editable: $field");
+        }
+        $notice = $DB->get_record('block_notices', ['id' => $id], 'id, courseid', MUST_EXIST);
+        $DB->update_record('block_notices', (object)[
+            'id' => $id,
+            $field => $newvalue,
+            'timemodified' => time(),
+            'modifiedbyuserid' => $USER->id,
+        ]);
+        \block_notices\event\notice_updated::create([
+            'objectid' => $id,
+            'userid' => $USER->id,
+            'context' => \context_course::instance($notice->courseid),
+        ])->trigger();
+    }
+
+    /**
      * Update a notice.
      *
      * @param array $data

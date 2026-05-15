@@ -284,4 +284,121 @@ final class notices_test extends \advanced_testcase {
 
         $this->assertEquals(notices::get_notice($id2)['sortorder'], 1);
     }
+
+    /**
+     * Inline title edit updates the field, timemodified, and modifiedbyuserid;
+     * leaves visibility and sortorder untouched.
+     *
+     * @covers \block_notices\output\editable_notice_field::update
+     * @covers ::update_notice_field
+     */
+    public function test_inplace_update_title_happy_path(): void {
+        $this->resetAfterTest(true);
+        $course = $this->getDataGenerator()->create_course();
+        $this->setAdminUser();
+
+        $id = notices::add_notice($course->id, self::TEST_DATA[0]);
+        notices::show_notice($id);
+        $before = notices::get_notice($id);
+        $this->assertEquals(notices::NOTICE_VISIBLE, $before['visible']);
+        $this->assertEquals(1, $before['sortorder']);
+
+        // Force timemodified to the past so we can detect that it gets bumped.
+        global $DB;
+        $DB->set_field('block_notices', 'timemodified', $before['timemodified'] - 100, ['id' => $id]);
+
+        $result = \block_notices\output\editable_notice_field::update('title', $id, '  New title  ');
+        $this->assertInstanceOf(\core\output\inplace_editable::class, $result);
+
+        $after = notices::get_notice($id);
+        $this->assertEquals('New title', $after['title']);
+        $this->assertEquals(notices::NOTICE_VISIBLE, $after['visible'], 'visibility must NOT be reset');
+        $this->assertEquals(1, $after['sortorder'], 'sortorder must NOT change');
+        $this->assertGreaterThan($before['timemodified'] - 100, $after['timemodified']);
+    }
+
+    /**
+     * updatedescription may be set to an empty string.
+     *
+     * @covers \block_notices\output\editable_notice_field::update
+     */
+    public function test_inplace_update_updatedescription_allows_empty(): void {
+        $this->resetAfterTest(true);
+        $course = $this->getDataGenerator()->create_course();
+        $this->setAdminUser();
+
+        $id = notices::add_notice($course->id, self::TEST_DATA[0]);
+        \block_notices\output\editable_notice_field::update('updatedescription', $id, '');
+
+        $this->assertEquals('', notices::get_notice($id)['updatedescription']);
+    }
+
+    /**
+     * Title cannot be set to an empty string.
+     *
+     * @covers \block_notices\output\editable_notice_field::update
+     */
+    public function test_inplace_update_title_rejects_empty(): void {
+        $this->resetAfterTest(true);
+        $course = $this->getDataGenerator()->create_course();
+        $this->setAdminUser();
+
+        $id = notices::add_notice($course->id, self::TEST_DATA[0]);
+
+        $this->expectException(\moodle_exception::class);
+        $this->expectExceptionMessageMatches('/Title cannot be empty/');
+        \block_notices\output\editable_notice_field::update('title', $id, '   ');
+    }
+
+    /**
+     * Values longer than 64 characters are rejected.
+     *
+     * @covers \block_notices\output\editable_notice_field::update
+     */
+    public function test_inplace_update_rejects_too_long(): void {
+        $this->resetAfterTest(true);
+        $course = $this->getDataGenerator()->create_course();
+        $this->setAdminUser();
+
+        $id = notices::add_notice($course->id, self::TEST_DATA[0]);
+
+        $this->expectException(\moodle_exception::class);
+        $this->expectExceptionMessageMatches('/64 characters/');
+        \block_notices\output\editable_notice_field::update('title', $id, str_repeat('a', 65));
+    }
+
+    /**
+     * Users without block/notices:managenotices cannot inline-edit.
+     *
+     * @covers \block_notices\output\editable_notice_field::update
+     */
+    public function test_inplace_update_requires_capability(): void {
+        $this->resetAfterTest(true);
+        $course = $this->getDataGenerator()->create_course();
+        $student = $this->getDataGenerator()->create_user();
+        $this->getDataGenerator()->enrol_user($student->id, $course->id, 'student');
+
+        $this->setAdminUser();
+        $id = notices::add_notice($course->id, self::TEST_DATA[0]);
+
+        $this->setUser($student);
+        $this->expectException(\required_capability_exception::class);
+        \block_notices\output\editable_notice_field::update('title', $id, 'hacked');
+    }
+
+    /**
+     * Unknown itemtype is rejected (defensive — the lib.php callback dispatches by name).
+     *
+     * @covers \block_notices\output\editable_notice_field::update
+     */
+    public function test_inplace_update_rejects_unknown_itemtype(): void {
+        $this->resetAfterTest(true);
+        $course = $this->getDataGenerator()->create_course();
+        $this->setAdminUser();
+
+        $id = notices::add_notice($course->id, self::TEST_DATA[0]);
+
+        $this->expectException(\coding_exception::class);
+        \block_notices\output\editable_notice_field::update('content', $id, 'nope');
+    }
 }

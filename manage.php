@@ -108,6 +108,16 @@ foreach (notices::get_notices_admin($courseid) as $noticeobject) {
     // Convert the dataset to an array ready for using with a template.
     $noticearray = (array)$noticeobject;
 
+    // Render inplace-editable HTML for the title and updatedescription so they can be edited from the list.
+    // export_for_template() requires a real renderer_base (the global $OUTPUT is the bootstrap_renderer
+    // shim), and the renderable's own render() method targets the standard core/inplace_editable template.
+    $renderer = $PAGE->get_renderer('core');
+    $noticearray['titlehtml'] = (new \block_notices\output\editable_notice_field('title', $noticeobject))
+        ->render($renderer);
+    $noticearray['updatedescriptionhtml'] =
+        (new \block_notices\output\editable_notice_field('updatedescription', $noticeobject))
+        ->render($renderer);
+
     // Add extra properties to improve the template output.
     switch ($noticearray['visible']) {
         case notices::NOTICE_HIDDEN:
