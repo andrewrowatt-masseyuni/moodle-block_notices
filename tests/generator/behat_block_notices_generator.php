@@ -47,7 +47,7 @@ class behat_block_notices_generator extends behat_generator_base {
                     'visible' => 'visible',
                     'createdby' => 'createdbyuserid',
                     'modifiedby' => 'modifiedbyuserid',
-                    'noticeowner' => 'ownerid',
+                    'additionaleditor' => 'additionaleditorid',
                 ],
             ],
         ];
@@ -86,13 +86,13 @@ class behat_block_notices_generator extends behat_generator_base {
     }
 
     /**
-     * Gets the user id from their username for ownerid resolution.
+     * Gets the user id from their username for additionaleditorid resolution.
      *
      * @throws Exception
      * @param string $username
      * @return int
      */
-    protected function get_noticeowner_id(string $username): int {
+    protected function get_additionaleditor_id(string $username): int {
         global $DB;
 
         if (!$id = $DB->get_field('user', 'id', ['username' => $username])) {

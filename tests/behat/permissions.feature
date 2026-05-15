@@ -1,8 +1,8 @@
 @block @block_notices @javascript
-Feature: Notice ownership grants edit rights without needing a role
+Feature: Additional editor assignment grants edit rights without needing a role
     In order to delegate notice maintenance safely
     As an admin
-    I need notices managers to handle everything and assigned owners to be able to edit only their own notices
+    I need notices managers to handle everything and additional editors to be able to edit only their own notices
 
   Background:
     Given the following "users" exist:
@@ -28,7 +28,7 @@ Feature: Notice ownership grants edit rights without needing a role
       | owneremail         | notice1@noreply.com  |
       | createdby          | admin                |
       | modifiedby         | admin                |
-      | noticeowner        | editor1              |
+      | additionaleditor   | editor1              |
     And the following "block_notices > notice" exists:
       | course             | Acceptance test site |
       | visible            | NOTICE_VISIBLE       |
@@ -40,7 +40,7 @@ Feature: Notice ownership grants edit rights without needing a role
       | owneremail         | notice2@noreply.com  |
       | createdby          | admin                |
       | modifiedby         | admin                |
-      | noticeowner        | editor2              |
+      | additionaleditor   | editor2              |
 
   Scenario: Notices manager sees the full manage page and can add notices
     Given I log in as "manager1"
@@ -50,7 +50,7 @@ Feature: Notice ownership grants edit rights without needing a role
     And I should see "EditorTwoNotice"
     And "Add notice" "link" should exist
 
-  Scenario: Assigned owner sees only their own notice and cannot add new ones
+  Scenario: Additional editor sees only their own notice and cannot add new ones
     Given I log in as "editor1"
     And I am on site homepage
     Then I should see "Manage my notices"
@@ -60,7 +60,7 @@ Feature: Notice ownership grants edit rights without needing a role
     And I should not see "EditorTwoNotice"
     And "Add notice" "link" should not exist
 
-  Scenario: User who owns nothing sees no manage link at all
+  Scenario: User who is not an additional editor on any notice sees no manage link at all
     Given the following "users" exist:
       | username   | firstname | lastname | email                  |
       | nonowner1  | Nina      | NonOwner | nonowner1@example.com  |
@@ -69,25 +69,25 @@ Feature: Notice ownership grants edit rights without needing a role
     Then I should not see "Manage my notices"
     And I should not see "Manage notices"
 
-  Scenario: Notices manager can reassign a notice's owner from the edit form
+  Scenario: Notices manager can reassign a notice's additional editor from the edit form
     Given I log in as "manager1"
     And I am on site homepage
     And I follow "Manage notices"
     And I click on "[data-notice-title=\"EditorOneNotice\"] [data-notice-action=\"edit\"]" "css_element"
-    And I set the field "Assigned editor" to "Ethan Editor2"
+    And I set the field "Additional editor" to "Ethan Editor2"
     And I press "Save"
     # After reassignment, editor1 should no longer have anything to manage.
     And I log in as "editor1"
     And I am on site homepage
     Then I should not see "Manage my notices"
-    # editor2 now owns both notices.
+    # editor2 is now the additional editor for both notices.
     And I log in as "editor2"
     And I am on site homepage
     And I follow "Manage my notices"
     Then I should see "EditorOneNotice"
     And I should see "EditorTwoNotice"
 
-  Scenario: Owner sees no delete or move buttons and is rejected on direct URL
+  Scenario: Additional editor sees no delete or move buttons and is rejected on direct URL
     Given I log in as "editor1"
     And I am on site homepage
     And I follow "Manage my notices"

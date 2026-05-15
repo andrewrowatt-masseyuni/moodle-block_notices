@@ -368,7 +368,7 @@ final class notices_test extends \advanced_testcase {
     }
 
     /**
-     * Users who are neither the owner of the notice nor a notices manager cannot inline-edit.
+     * Users who are neither an additional editor on the notice nor a notices manager cannot inline-edit.
      *
      * @covers \block_notices\output\editable_notice_field::update
      */

@@ -54,14 +54,15 @@ $exclusivevalue = optional_param('exclusive', null, PARAM_INT);
 if ($action && $noticeid) {
     require_sesskey();
 
-    // Per-action ownership check: prevents crafted URLs from acting on
-    // notices the user does not own.
+    // Per-action edit-rights check: prevents crafted URLs from acting on
+    // notices the user is not the additional editor for.
     $targetnotice = notices::get_notice($noticeid);
     if (!$targetnotice || !notices::user_can_edit($targetnotice)) {
         throw new moodle_exception('errornopermission', 'block_notices');
     }
 
-    // Reorder, delete and exclusive-flagging are reserved for manage-all users; owners can only show/hide and edit.
+    // Reorder, delete and exclusive-flagging are reserved for manage-all users;
+    // additional editors can only show/hide and edit.
     if (!$canmanageall && in_array($action, ['delete', 'moveup', 'movedown', 'setexclusive'], true)) {
         throw new moodle_exception('errornopermission', 'block_notices');
     }
@@ -132,9 +133,9 @@ $noticegroupinpreview = [
 ];
 
 // Iterate over all notices, add additional properties to improve the template output, and then add them to the correct "group".
-// Manage-own users only see notices they have been assigned ownership of.
-$ownerfilter = $canmanageall ? null : (int)$USER->id;
-foreach (notices::get_notices_admin($courseid, $ownerfilter) as $noticeobject) {
+// Manage-own users only see notices they have been assigned as an additional editor on.
+$additionaleditorfilter = $canmanageall ? null : (int)$USER->id;
+foreach (notices::get_notices_admin($courseid, $additionaleditorfilter) as $noticeobject) {
     // Convert the dataset to an array ready for using with a template.
     $noticearray = (array)$noticeobject;
 

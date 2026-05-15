@@ -44,7 +44,7 @@ $PAGE->set_url($url);
 $PAGE->set_title(get_string('addnotice', 'block_notices'));
 $PAGE->set_heading(get_string('addnotice', 'block_notices'));
 
-$noticeform = new \block_notices\form\notice($url, ['canpickowner' => true]);
+$noticeform = new \block_notices\form\notice($url, ['canpickadditionaleditor' => true]);
 
 if ($noticeform->is_cancelled()) {
     redirect(new moodle_url('/blocks/notices/manage.php', ['courseid' => $courseid]));
@@ -59,7 +59,7 @@ if ($noticeform->is_cancelled()) {
         'owner' => $formdata->owner,
         'owneremail' => $formdata->owneremail,
         'notes' => $formdata->notes,
-        'ownerid' => !empty($formdata->ownerid) ? (int)$formdata->ownerid : null,
+        'additionaleditorid' => !empty($formdata->additionaleditorid) ? (int)$formdata->additionaleditorid : null,
     ];
 
     notices::add_notice($courseid, $data);

@@ -47,9 +47,9 @@ $PAGE->set_url($url);
 $PAGE->set_title(get_string('addnotice', 'block_notices'));
 $PAGE->set_heading(get_string('addnotice', 'block_notices'));
 
-// Only manage-all users may reassign ownership during edit.
-$canpickowner = has_capability('block/notices:manageallnotices', context_system::instance());
-$noticeform = new \block_notices\form\notice($url, ['canpickowner' => $canpickowner]);
+// Only manage-all users may reassign the additional editor during edit.
+$canpickadditionaleditor = has_capability('block/notices:manageallnotices', context_system::instance());
+$noticeform = new \block_notices\form\notice($url, ['canpickadditionaleditor' => $canpickadditionaleditor]);
 
 if ($noticeform->is_cancelled()) {
     redirect(new moodle_url('/blocks/notices/manage.php', ['courseid' => $courseid]));
@@ -68,9 +68,10 @@ if ($noticeform->is_cancelled()) {
         'staffonly' => !empty($formdata->staffonly),
     ];
 
-    // Only manage-all users can reassign ownership. If the picker was empty, leave the existing ownerid unchanged.
-    if ($canpickowner && !empty($formdata->ownerid)) {
-        $data['ownerid'] = (int)$formdata->ownerid;
+    // Only manage-all users can reassign the additional editor. If the picker was empty,
+    // leave the existing additionaleditorid unchanged.
+    if ($canpickadditionaleditor && !empty($formdata->additionaleditorid)) {
+        $data['additionaleditorid'] = (int)$formdata->additionaleditorid;
     }
 
     notices::update_notice($data);

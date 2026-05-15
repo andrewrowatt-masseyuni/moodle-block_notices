@@ -38,13 +38,13 @@ class notice extends \moodleform {
         $mform->addElement('hidden', 'id', 0);
         $mform->setType('id', PARAM_INT);
 
-        $canpickowner = !empty($this->_customdata['canpickowner']);
+        $canpickadditionaleditor = !empty($this->_customdata['canpickadditionaleditor']);
 
         // Start of general group.
 
         $mform->addElement('header', 'general', get_string('basicinformationgroup', 'block_notices'));
 
-        if ($canpickowner) {
+        if ($canpickadditionaleditor) {
             global $DB;
             // Pull the same identity fields that the site admin has chosen to expose elsewhere (showuseridentity).
             $identityfields = \core_user\fields::for_identity(\context_system::instance(), false)->get_required_fields();
@@ -57,7 +57,7 @@ class notice extends \moodleform {
                 'lastname, firstname',
                 implode(', ', $selectfields)
             );
-            $options = ['' => get_string('ownerid_unset', 'block_notices')];
+            $options = ['' => get_string('additionaleditorid_unset', 'block_notices')];
             foreach ($eligible as $user) {
                 $label = fullname($user);
                 $extras = [];
@@ -73,16 +73,16 @@ class notice extends \moodleform {
             }
             $mform->addElement(
                 'autocomplete',
-                'ownerid',
-                get_string('ownerid', 'block_notices'),
+                'additionaleditorid',
+                get_string('additionaleditorid', 'block_notices'),
                 $options,
                 ['multiple' => false]
             );
-            $mform->setType('ownerid', PARAM_INT);
-            $mform->addHelpButton('ownerid', 'ownerid', 'block_notices');
+            $mform->setType('additionaleditorid', PARAM_INT);
+            $mform->addHelpButton('additionaleditorid', 'additionaleditorid', 'block_notices');
         } else {
-            $mform->addElement('hidden', 'ownerid', 0);
-            $mform->setType('ownerid', PARAM_INT);
+            $mform->addElement('hidden', 'additionaleditorid', 0);
+            $mform->setType('additionaleditorid', PARAM_INT);
         }
 
         $mform->addElement(

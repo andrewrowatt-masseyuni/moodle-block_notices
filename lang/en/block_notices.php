@@ -25,6 +25,9 @@
 
 defined('MOODLE_INTERNAL') || die();
 
+$string['additionaleditorid'] = 'Additional editor';
+$string['additionaleditorid_help'] = 'The Moodle user who will be able to edit this notice in addition to Notices managers. Leave blank to default to yourself when creating, or to keep the existing additional editor when editing.';
+$string['additionaleditorid_unset'] = 'Default (you)';
 $string['addnotice'] = 'Add notice';
 $string['basicinformationgroup'] = 'General';
 $string['block_notices:missingblock'] = 'Unable to to manage notices for a course without a Notices block.';
@@ -64,16 +67,13 @@ $string['owneremail'] = 'Owner email address';
 $string['owneremail_help'] = "Valid email address for the owner or person responsible for this notice. This is not displayed unless 'URL for more information.";
 $string['ownergroup'] = 'Owner details';
 $string['ownergroupdescription'] = 'Specify the details for the person responsible ("owner") of the notice i.e., the person who requested or authorized the notice. This will not be displayed on the notice unless the "URL for more information" field is blank.';
-$string['ownerid'] = 'Assigned editor';
-$string['ownerid_help'] = 'The Moodle user who will be able to edit this notice in addition to Notices managers. Leave blank to default to yourself when creating, or to keep the existing owner when editing.';
-$string['ownerid_unset'] = 'Default (you)';
 $string['pluginname'] = 'Notices';
 $string['privacy:metadata'] = 'TBA';
 $string['privacy:metadata:blocks_notices'] = 'Information about individual notices';
+$string['privacy:metadata:blocks_notices:additionaleditorid'] = 'The user given additional edit rights for the notice';
 $string['privacy:metadata:blocks_notices:content'] = 'Content of the notice';
 $string['privacy:metadata:blocks_notices:createdbyuserid'] = 'The user who created the notice';
 $string['privacy:metadata:blocks_notices:modifiedbyuserid'] = 'The user who last modified the notice';
-$string['privacy:metadata:blocks_notices:ownerid'] = 'The user assigned ownership/edit rights for the notice';
 $string['role_manager_description'] = 'Users with this role can create, edit, delete, reorder, show and hide any notice in any course.';
 $string['role_manager_name'] = 'Notices manager';
 $string['setexclusiveimportant'] = 'Make exclusive (Important)';

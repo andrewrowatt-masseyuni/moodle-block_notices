@@ -155,7 +155,7 @@ class notices {
     /**
      * Can the current user create new notices?
      *
-     * Only manage-all users may create. The ownerid is set at creation and never changes,
+     * Only manage-all users may create. The additionaleditorid is set at creation and never changes,
      * so manage-own users have no entry point for authoring.
      *
      * @param \context|null $context Defaults to the system context (where the new caps live).
@@ -171,9 +171,10 @@ class notices {
      *
      * Editing rights are granted to two groups:
      *  - users with the block/notices:manageallnotices capability (typically admins / notices managers); and
-     *  - the assigned owner of the notice (ownerid). Ownership alone grants edit rights — no role is required.
+     *  - the additional editor assigned to the notice (additionaleditorid). Being the additional editor alone
+     *    grants edit rights — no role is required.
      *
-     * @param \stdClass|array $notice A notice record (must contain ownerid).
+     * @param \stdClass|array $notice A notice record (must contain additionaleditorid).
      * @param \context|null $context Defaults to the system context.
      * @return bool
      */
@@ -183,12 +184,14 @@ class notices {
         if (has_capability('block/notices:manageallnotices', $context)) {
             return true;
         }
-        $ownerid = is_array($notice) ? ($notice['ownerid'] ?? null) : ($notice->ownerid ?? null);
-        return $ownerid !== null && (int)$ownerid === (int)$USER->id;
+        $additionaleditorid = is_array($notice)
+            ? ($notice['additionaleditorid'] ?? null)
+            : ($notice->additionaleditorid ?? null);
+        return $additionaleditorid !== null && (int)$additionaleditorid === (int)$USER->id;
     }
 
     /**
-     * Does the current user have any access (manage-all or as an owner of at least one notice)?
+     * Does the current user have any access (manage-all or as an additional editor of at least one notice)?
      *
      * Used to decide whether to show a 'Manage' link on the block.
      *
@@ -201,7 +204,7 @@ class notices {
         if (has_capability('block/notices:manageallnotices', $context)) {
             return true;
         }
-        return $DB->record_exists('block_notices', ['ownerid' => $USER->id]);
+        return $DB->record_exists('block_notices', ['additionaleditorid' => $USER->id]);
     }
 
     /**
@@ -370,11 +373,11 @@ class notices {
         $DB->delete_records_select(
             'block_notices',
             'courseid = :courseid and (createdbyuserid = :createdbyuserid or
-                modifiedbyuserid = :modifiedbyuserid or ownerid = :ownerid)',
+                modifiedbyuserid = :modifiedbyuserid or additionaleditorid = :additionaleditorid)',
             ['courseid' => $courseid,
             'createdbyuserid' => $userid,
             'modifiedbyuserid' => $userid,
-            'ownerid' => $userid]
+            'additionaleditorid' => $userid]
         );
     }
 
@@ -382,17 +385,18 @@ class notices {
      * Get full details for all notices for a given course.
      *
      * @param int $courseid
-     * @param int|null $ownerid If provided, restricts results to notices with this ownerid (used for manage-own users).
+     * @param int|null $additionaleditorid If provided, restricts results to notices with this additionaleditorid
+     *                                      (used for manage-own users).
      * @return array
      */
-    public static function get_notices_admin(int $courseid, ?int $ownerid = null): array {
+    public static function get_notices_admin(int $courseid, ?int $additionaleditorid = null): array {
         global $DB;
 
         $params = ['courseid' => $courseid, 'visiblemin' => self::NOTICE_VISIBLE, 'visiblemax' => self::NOTICE_VISIBLE];
-        $ownerwhere = '';
-        if ($ownerid !== null) {
-            $ownerwhere = ' AND b.ownerid = :ownerid';
-            $params['ownerid'] = $ownerid;
+        $additionaleditorwhere = '';
+        if ($additionaleditorid !== null) {
+            $additionaleditorwhere = ' AND b.additionaleditorid = :additionaleditorid';
+            $params['additionaleditorid'] = $additionaleditorid;
         }
 
         $sql = "SELECT b.*,
@@ -405,7 +409,7 @@ class notices {
             FROM {block_notices} b
             join {user} cb on b.createdbyuserid = cb.id
             join {user} mb on b.modifiedbyuserid = mb.id
-            WHERE b.courseid = :courseid{$ownerwhere} order by b.visible, b.sortorder";
+            WHERE b.courseid = :courseid{$additionaleditorwhere} order by b.visible, b.sortorder";
         return $DB->get_records_sql($sql, $params);
     }
 
@@ -433,12 +437,12 @@ class notices {
         $sql = "select * from {block_notices}
             where createdbyuserid = :createdbyuseridid
                or modifiedbyuserid = :modifiedbyuseridid
-               or ownerid = :ownerid";
+               or additionaleditorid = :additionaleditorid";
 
         return (array)$DB->get_records_sql($sql, [
             'createdbyuseridid' => $userid,
             'modifiedbyuseridid' => $userid,
-            'ownerid' => $userid,
+            'additionaleditorid' => $userid,
         ]);
     }
 
@@ -548,9 +552,9 @@ class notices {
         ];
 
         $record = $presets + $data;
-        // If the caller didn't supply an explicit ownerid (e.g. seed/test data), default to the creator.
-        if (empty($record['ownerid'])) {
-            $record['ownerid'] = $USER->id;
+        // If the caller didn't supply an explicit additionaleditorid (e.g. seed/test data), default to the creator.
+        if (empty($record['additionaleditorid'])) {
+            $record['additionaleditorid'] = $USER->id;
         }
 
         return $DB->insert_record('block_notices', $record);

@@ -24,7 +24,7 @@ Feature: Notices block a course
     When I log in as "teacher1"
     And I am on "Course 1" course homepage
     Then I should see "There are no notices. Have a great day!"
-    # An editingteacher with no notice ownership and no notices manager role sees no manage link.
+    # An editingteacher who is not the additional editor on any notice and has no notices manager role sees no manage link.
     And I should not see "Manage notices"
     And I should not see "Manage my notices"
 
