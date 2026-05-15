@@ -92,7 +92,7 @@ class notice extends \moodleform {
 
         // Start of owner group.
 
-        $mform->addElement('html', html_writer::tag('h3',get_string('ownergroup', 'block_notices')));
+        $mform->addElement('html', html_writer::tag('h3', get_string('ownergroup', 'block_notices')));
 
         $mform->addElement('html', html_writer::div(
             get_string('ownergroupdescription', 'block_notices'),
@@ -118,7 +118,7 @@ class notice extends \moodleform {
                 get_string('additionaleditordescription', 'block_notices'),
                 'alert alert-info help_text'
             ));
-            
+
             global $DB;
             // Pull the same identity fields that the site admin has chosen to expose elsewhere (showuseridentity).
             $identityfields = \core_user\fields::for_identity(\context_system::instance(), false)->get_required_fields();
