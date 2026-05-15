@@ -45,6 +45,21 @@ class notices {
     public const NOTICE_CRITICAL = 3;
 
     /**
+     * @var int notice.exclusive value: not exclusive.
+     */
+    public const NOTICE_EXCLUSIVE_NONE = 0;
+
+    /**
+     * @var int notice.exclusive value: exclusive with red/urgent styling.
+     */
+    public const NOTICE_EXCLUSIVE_IMPORTANT = 1;
+
+    /**
+     * @var int notice.exclusive value: exclusive with blue/information styling.
+     */
+    public const NOTICE_EXCLUSIVE_INFORMATION = 2;
+
+    /**
      * @var array lookup table for attributes based on notice visibility
      */
     public const NOTICE_VISIBLITY_BOOTSTRAP_CSS_CLASS = [
@@ -217,6 +232,12 @@ class notices {
     public static function get_notices(int $courseid, bool $includepreview = false, bool $includestaffonly = false): array {
         global $DB;
 
+        // If there is an exclusive notice for this course and it is currently visible, only return that.
+        $exclusive = self::get_active_exclusive_notice($courseid);
+        if ($exclusive !== null) {
+            return [$exclusive->id => $exclusive];
+        }
+
         $criticalnotice = self::get_critical_notice($courseid);
         if (count($criticalnotice) != 0) {
             // If there is a critical notice, we only return that.
@@ -236,6 +257,81 @@ class notices {
             order by sortorder asc";
 
         return $DB->get_records_sql($sql, ['courseid' => $courseid, 'staffonly' => (int)$includestaffonly] + $inparams);
+    }
+
+    /**
+     * Resolve the active exclusive notice for the given course, if any.
+     *
+     * Returns the notice record only when one notice in $courseid has a non-zero
+     * exclusive value AND is currently NOTICE_VISIBLE. Anything else falls back to
+     * normal notice behaviour (no exclusive set / hidden / deleted => null).
+     *
+     * @param int $courseid
+     * @return \stdClass|null
+     */
+    public static function get_active_exclusive_notice(int $courseid): ?\stdClass {
+        global $DB;
+
+        $records = $DB->get_records_select(
+            'block_notices',
+            'courseid = :courseid AND exclusive > 0 AND visible = :visible',
+            ['courseid' => $courseid, 'visible' => self::NOTICE_VISIBLE],
+            'id ASC',
+            '*',
+            0,
+            1
+        );
+
+        return $records ? reset($records) : null;
+    }
+
+    /**
+     * Set the per-course exclusive flag for a notice.
+     *
+     * Enforces the "at most one exclusive notice per course" invariant by zeroing
+     * any other exclusive notices in the same course inside a transaction.
+     *
+     * @param int $noticeid
+     * @param int $value One of NOTICE_EXCLUSIVE_NONE/IMPORTANT/INFORMATION.
+     */
+    public static function set_exclusive(int $noticeid, int $value): void {
+        global $DB, $USER;
+
+        $allowed = [
+            self::NOTICE_EXCLUSIVE_NONE,
+            self::NOTICE_EXCLUSIVE_IMPORTANT,
+            self::NOTICE_EXCLUSIVE_INFORMATION,
+        ];
+        if (!\in_array($value, $allowed, true)) {
+            throw new \coding_exception("Invalid exclusive value: $value");
+        }
+
+        $notice = $DB->get_record('block_notices', ['id' => $noticeid], 'id, courseid', MUST_EXIST);
+
+        $transaction = $DB->start_delegated_transaction();
+
+        if ($value !== self::NOTICE_EXCLUSIVE_NONE) {
+            $DB->execute(
+                'UPDATE {block_notices} SET exclusive = 0
+                  WHERE courseid = :courseid AND exclusive > 0 AND id <> :id',
+                ['courseid' => $notice->courseid, 'id' => $noticeid]
+            );
+        }
+
+        $DB->update_record('block_notices', (object)[
+            'id' => $noticeid,
+            'exclusive' => $value,
+            'timemodified' => time(),
+            'modifiedbyuserid' => $USER->id,
+        ]);
+
+        $transaction->allow_commit();
+
+        \block_notices\event\notice_updated::create([
+            'objectid' => $noticeid,
+            'userid' => $USER->id,
+            'context' => \context_course::instance($notice->courseid),
+        ])->trigger();
     }
 
     /**

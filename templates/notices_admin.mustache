@@ -54,6 +54,8 @@
             <div>
                 <span style="font-size: inherit; font-weight: 300;" class="badge badge-{{css}} noticegroup">{{description}}</span>
                 {{#staffonly}}<span style="font-size: inherit; font-weight: 300;" class="badge badge-info staffonly">{{#str}} staffonly, block_notices {{/str}}</span>{{/staffonly}}
+                {{#isexclusive_important}}<span style="font-size: inherit; font-weight: 300;" class="badge badge-danger exclusive">{{#str}} exclusive_important, block_notices {{/str}}</span>{{/isexclusive_important}}
+                {{#isexclusive_information}}<span style="font-size: inherit; font-weight: 300;" class="badge badge-primary exclusive">{{#str}} exclusive_information, block_notices {{/str}}</span>{{/isexclusive_information}}
             </div>
             <div class="d-flex justify-content-end" style="gap: 1em;">
                 {{#canmoveup}}<a role="button" href="manage.php?sesskey={{sesskey}}&courseid={{courseid}}&action=moveup&id={{id}}" data-notice-action"moveup">{{#pix}} t/up, core, {{#str}} moveup, core {{/str}} {{/pix}}{{#str}} moveup, core {{/str}}</a>{{/canmoveup}}
@@ -61,7 +63,11 @@
 
                 {{#canshow}}<a role="button" href="manage.php?sesskey={{sesskey}}&courseid={{courseid}}&action=show&id={{id}}" data-notice-action="show">{{#pix}} t/hide, core, {{#str}} show, core {{/str}} {{/pix}}{{#str}} show, core {{/str}}</a>{{/canshow}}
                 {{#canhide}}<a role="button" href="manage.php?sesskey={{sesskey}}&courseid={{courseid}}&action=hide&id={{id}}" data-notice-action="hide">{{#pix}} t/show, core, {{#str}} hide, core {{/str}} {{/pix}}{{#str}} hide, core {{/str}}</a>{{/canhide}}
-                
+
+                {{#cansetexclusive_important}}<a role="button" href="manage.php?sesskey={{sesskey}}&courseid={{courseid}}&action=setexclusive&exclusive=1&id={{id}}" data-notice-action="setexclusive-important">{{#pix}} i/star, core, {{#str}} setexclusiveimportant, block_notices {{/str}} {{/pix}}{{#str}} setexclusiveimportant, block_notices {{/str}}</a>{{/cansetexclusive_important}}
+                {{#cansetexclusive_information}}<a role="button" href="manage.php?sesskey={{sesskey}}&courseid={{courseid}}&action=setexclusive&exclusive=2&id={{id}}" data-notice-action="setexclusive-information">{{#pix}} i/star, core, {{#str}} setexclusiveinformation, block_notices {{/str}} {{/pix}}{{#str}} setexclusiveinformation, block_notices {{/str}}</a>{{/cansetexclusive_information}}
+                {{#canclearexclusive}}<a role="button" href="manage.php?sesskey={{sesskey}}&courseid={{courseid}}&action=setexclusive&exclusive=0&id={{id}}" data-notice-action="clearexclusive">{{#pix}} i/star, core, {{#str}} clearexclusive, block_notices {{/str}} {{/pix}}{{#str}} clearexclusive, block_notices {{/str}}</a>{{/canclearexclusive}}
+
                 <a role="button" href="edit.php?id={{id}}" data-notice-action="edit">{{#pix}} t/edit, core, {{#str}} edit, core {{/str}} {{/pix}}{{#str}} edit, core {{/str}}</a>
                 {{#candelete}}<a role="button" href="manage.php?sesskey={{sesskey}}&courseid={{courseid}}&action=delete&id={{id}}" data-notice-action="delete">{{#pix}} t/delete, core, {{#str}} delete, core {{/str}} {{/pix}}{{#str}} delete, core {{/str}}</a>{{/candelete}}
             </div>

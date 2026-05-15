@@ -146,4 +146,27 @@ class block_notices extends block_base {
             'course-view' => true,
           ];
     }
+
+    /**
+     * Add custom html attributes to aid with theming and styling.
+     *
+     * @return array
+     */
+    public function html_attributes() {
+        global $CFG;
+
+        $attributes = parent::html_attributes();
+
+        // If this block is going to render the exclusive notice for its course, tag it for styling.
+        if (!empty($this->page->course->id)) {
+            $exclusive = notices::get_active_exclusive_notice((int)$this->page->course->id);
+            if ($exclusive !== null) {
+                $suffix = (int)$exclusive->exclusive === notices::NOTICE_EXCLUSIVE_INFORMATION
+                    ? 'information' : 'important';
+                $attributes['class'] .= ' block_notices_exclusive block_notices_exclusive_' . $suffix;
+            }
+        }
+
+        return $attributes;
+    }
 }

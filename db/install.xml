@@ -1,4 +1,4 @@
-<XMLDB xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" PATH="blocks/notices/db" VERSION="20260515" COMMENT="XMLDB file for Moodle blocks/notices" xsi:noNamespaceSchemaLocation="../../../lib/xmldb/xmldb.xsd">
+<XMLDB xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" PATH="blocks/notices/db" VERSION="20260516" COMMENT="XMLDB file for Moodle blocks/notices" xsi:noNamespaceSchemaLocation="../../../lib/xmldb/xmldb.xsd">
 <TABLES>
 <TABLE NAME="block_notices" COMMENT="Contains notices for a course">
 <FIELDS>
@@ -15,6 +15,7 @@
 <FIELD NAME="sortorder" TYPE="int" LENGTH="4" NOTNULL="true" SEQUENCE="false" COMMENT="Provides a mechanism or order or prioritise notices"/>
 <FIELD NAME="notes" TYPE="text" NOTNULL="true" SEQUENCE="false" COMMENT="Administrative notes and next steps/actions for this notice e.g., when to hide or remove it. These notes are not displayed."/>
 <FIELD NAME="staffonly" TYPE="int" LENGTH="1" NOTNULL="false" DEFAULT="0" SEQUENCE="false" COMMENT="Determines if the notice should be only visible to staff"/>
+<FIELD NAME="exclusive" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="Per-course exclusive flag: 0=normal, 1=important (red), 2=information (blue). At most one per course is non-zero."/>
 <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
 <FIELD NAME="timemodified" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
 <FIELD NAME="createdbyuserid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="User Id who created this notice."/>

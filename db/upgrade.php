@@ -52,5 +52,23 @@ function xmldb_block_notices_upgrade($oldversion) {
         upgrade_block_savepoint(true, 2026051500, 'notices');
     }
 
+    if ($oldversion < 2026051501) {
+        $table = new xmldb_table('block_notices');
+        $field = new xmldb_field(
+            'exclusive',
+            XMLDB_TYPE_INTEGER,
+            '1',
+            null,
+            XMLDB_NOTNULL,
+            null,
+            '0',
+            'staffonly'
+        );
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+        upgrade_block_savepoint(true, 2026051501, 'notices');
+    }
+
     return true;
 }

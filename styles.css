@@ -58,6 +58,22 @@ section.block_notices {
     }
 }
 
+section.block_notices {
+    border: 2px solid rgb(0 0 0 / .15);
+    background-color: #fff;
+    border-radius: 0.5rem;
+}
+
+section.block_notices.block_notices_exclusive_information {
+    border-color: #0d6efd;
+    background-color: #e7f1ff;
+}
+
+section.block_notices.block_notices_exclusive_important {
+    border: 2px solid #dc3545;
+    background-color: rgba(220, 53, 69, 0.08);
+}
+
 
 #stream-dashboard-notices {
     --item_margin: 20px;

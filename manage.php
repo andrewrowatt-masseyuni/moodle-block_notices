@@ -49,6 +49,7 @@ $PAGE->set_heading(get_string('managenotices', 'block_notices'));
 
 $action = optional_param('action', null, PARAM_TEXT);
 $noticeid = optional_param('id', null, PARAM_INT);
+$exclusivevalue = optional_param('exclusive', null, PARAM_INT);
 
 if ($action && $noticeid) {
     require_sesskey();
@@ -60,8 +61,8 @@ if ($action && $noticeid) {
         throw new moodle_exception('errornopermission', 'block_notices');
     }
 
-    // Reorder and delete are reserved for manage-all users; owners can only show/hide and edit their notice.
-    if (!$canmanageall && in_array($action, ['delete', 'moveup', 'movedown'], true)) {
+    // Reorder, delete and exclusive-flagging are reserved for manage-all users; owners can only show/hide and edit.
+    if (!$canmanageall && in_array($action, ['delete', 'moveup', 'movedown', 'setexclusive'], true)) {
         throw new moodle_exception('errornopermission', 'block_notices');
     }
 
@@ -80,6 +81,17 @@ if ($action && $noticeid) {
             break;
         case 'movedown':
             notices::move_down($noticeid);
+            break;
+        case 'setexclusive':
+            $allowedexclusive = [
+                notices::NOTICE_EXCLUSIVE_NONE,
+                notices::NOTICE_EXCLUSIVE_IMPORTANT,
+                notices::NOTICE_EXCLUSIVE_INFORMATION,
+            ];
+            if (!in_array($exclusivevalue, $allowedexclusive, true)) {
+                throw new moodle_exception('errornopermission', 'block_notices');
+            }
+            notices::set_exclusive($noticeid, $exclusivevalue);
             break;
     }
 
@@ -138,6 +150,9 @@ foreach (notices::get_notices_admin($courseid, $ownerfilter) as $noticeobject) {
 
     // Add extra properties to improve the template output. Reorder and delete are restricted to manage-all.
     $noticearray['candelete'] = $canmanageall;
+    $exclusivevalue = (int)$noticearray['exclusive'];
+    $noticearray['isexclusive_important'] = $exclusivevalue === notices::NOTICE_EXCLUSIVE_IMPORTANT;
+    $noticearray['isexclusive_information'] = $exclusivevalue === notices::NOTICE_EXCLUSIVE_INFORMATION;
     switch ($noticearray['visible']) {
         case notices::NOTICE_HIDDEN:
             $noticearray += [
@@ -151,6 +166,12 @@ foreach (notices::get_notices_admin($courseid, $ownerfilter) as $noticeobject) {
                 'canhide' => true,
                 'canmoveup' => $canmanageall && $noticearray['isfirst'] == 'f',
                 'canmovedown' => $canmanageall && $noticearray['islast'] == 'f',
+                'cansetexclusive_important' => $canmanageall
+                    && $exclusivevalue !== notices::NOTICE_EXCLUSIVE_IMPORTANT,
+                'cansetexclusive_information' => $canmanageall
+                    && $exclusivevalue !== notices::NOTICE_EXCLUSIVE_INFORMATION,
+                'canclearexclusive' => $canmanageall
+                    && $exclusivevalue !== notices::NOTICE_EXCLUSIVE_NONE,
                 'showsortorder' => true,
             ];
             $noticegroupvisible['notices'][] = $noticearray;
