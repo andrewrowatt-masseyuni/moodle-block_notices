@@ -52,6 +52,7 @@ $canpickadditionaleditor = has_capability('block/notices:manageallnotices', cont
 $noticeform = new \block_notices\form\notice($url, [
     'canpickadditionaleditor' => $canpickadditionaleditor,
     'isedit' => true,
+    'currentvisible' => (int)$notice['visible'],
 ]);
 
 if ($noticeform->is_cancelled()) {
@@ -59,7 +60,6 @@ if ($noticeform->is_cancelled()) {
 } else if ($formdata = $noticeform->get_data()) {
     $data = [
         'id' => $formdata->id,
-        'visible' => notices::NOTICE_IN_PREVIEW, // Force into preview mode.
         'title' => $formdata->title,
         'content' => $formdata->content['text'],
         'contentformat' => $formdata->content['format'],

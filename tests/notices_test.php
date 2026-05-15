@@ -270,14 +270,15 @@ final class notices_test extends \advanced_testcase {
 
         $notice = notices::get_notice($id1);
 
+        $beforesortorder = $notice['sortorder'];
         $notice['title'] = 'test_notice_update_basic';
         notices::update_notice($notice);
 
-        $this->assertEquals(notices::get_notice($id1)['sortorder'], 0);
-        $this->assertEquals(notices::get_notice($id1)['visible'], notices::NOTICE_IN_PREVIEW);
-        $this->assertEquals(notices::get_notice($id1)['title'], 'test_notice_update_basic');
+        $this->assertEquals(notices::NOTICE_VISIBLE, notices::get_notice($id1)['visible'], 'visibility must be preserved on edit');
+        $this->assertEquals($beforesortorder, notices::get_notice($id1)['sortorder'], 'sortorder must be preserved on edit');
+        $this->assertEquals('test_notice_update_basic', notices::get_notice($id1)['title']);
 
-        $this->assertEquals(notices::get_notice($id2)['sortorder'], 1);
+        $this->assertEquals(2, notices::get_notice($id2)['sortorder']);
     }
 
     /**

@@ -55,6 +55,11 @@ section.block_notices {
         /* stylelint-disable-next-line declaration-no-important */
         margin: 0 !important;
         /* needed due to mt-3 */
+
+        hr {
+            margin: 0.75em 0;
+            background-color: rgb(0 0 0 / .125);
+        }
     }
 }
 

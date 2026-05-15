@@ -40,6 +40,7 @@ class notice extends \moodleform {
 
         $canpickadditionaleditor = !empty($this->_customdata['canpickadditionaleditor']);
         $isedit = !empty($this->_customdata['isedit']);
+        $currentvisible = $this->_customdata['currentvisible'] ?? null;
 
         // Start of general group.
 
@@ -89,11 +90,21 @@ class notice extends \moodleform {
             $mform->setType('additionaleditorid', PARAM_INT);
         }
 
+        $visibilitystringkey = [
+            notices::NOTICE_HIDDEN => 'visibility_hidden',
+            notices::NOTICE_VISIBLE => 'visibility_visible',
+            notices::NOTICE_IN_PREVIEW => 'visibility_preview',
+        ];
+        if ($isedit && isset($visibilitystringkey[$currentvisible])) {
+            $visibilitydisplay = get_string($visibilitystringkey[$currentvisible], 'block_notices');
+        } else {
+            $visibilitydisplay = get_string('visibility_preview', 'block_notices');
+        }
         $mform->addElement(
             'static',
             'visible_label',
             get_string('visible', 'block_notices'),
-            get_string('visibility_preview', 'block_notices')
+            $visibilitydisplay
         );
 
         $mform->addElement('checkbox', 'staffonly', get_string('staffonly', 'block_notices'));

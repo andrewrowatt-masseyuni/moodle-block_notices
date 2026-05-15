@@ -466,8 +466,7 @@ class notices {
     /**
      * Update a single inline-editable field on a notice.
      *
-     * Updates timemodified and modifiedbyuserid; intentionally leaves visibility
-     * and sortorder untouched (unlike update_notice() which resets to PREVIEW).
+     * Updates timemodified and modifiedbyuserid; leaves visibility and sortorder untouched.
      *
      * @param int $id
      * @param string $field Currently only 'title' is supported.
@@ -495,6 +494,9 @@ class notices {
     /**
      * Update a notice.
      *
+     * The notice's existing visibility (and sortorder) is preserved; callers that
+     * need to change visibility should use the dedicated show/hide/preview methods.
+     *
      * @param array $data
      */
     public static function update_notice(array $data) {
@@ -502,18 +504,11 @@ class notices {
 
         $noticepreviousversion = self::get_notice($data['id']);
 
-        $data['visible'] = self::NOTICE_IN_PREVIEW;
-        $data['sortorder'] = 0;
+        unset($data['visible'], $data['sortorder']);
         $data['timemodified'] = time();
         $data['modifiedbyuserid'] = $USER->id;
 
         $DB->update_record('block_notices', (object)$data);
-
-        // Through this method, visibility may change from visible to preview
-        // so we will need to recalculate the sortorder in that case.
-        if ($noticepreviousversion['visible'] == self::NOTICE_VISIBLE) {
-            self::recalc_visible_notices_sortorder($noticepreviousversion['courseid']);
-        }
 
         $event = \block_notices\event\notice_updated::create([
             'objectid' => $data['id'],
