@@ -141,6 +141,8 @@ class notices {
      * Get the count of notices for a given instance
      *
      * @param int $courseid
+     * @param bool $includepreview
+     * @param bool $includestaffonly
      * @return int
      */
     public static function get_notice_count(int $courseid, bool $includepreview = false, bool $includestaffonly = false): int {
