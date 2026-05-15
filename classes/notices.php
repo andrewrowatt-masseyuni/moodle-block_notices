@@ -138,6 +138,58 @@ class notices {
     ];
 
     /**
+     * Can the current user create new notices?
+     *
+     * Only manage-all users may create. The ownerid is set at creation and never changes,
+     * so manage-own users have no entry point for authoring.
+     *
+     * @param \context|null $context Defaults to the system context (where the new caps live).
+     * @return bool
+     */
+    public static function user_can_create(?\context $context = null): bool {
+        $context = $context ?? \context_system::instance();
+        return has_capability('block/notices:manageallnotices', $context);
+    }
+
+    /**
+     * Can the current user edit (or delete / reorder / show / hide) the given notice?
+     *
+     * Editing rights are granted to two groups:
+     *  - users with the block/notices:manageallnotices capability (typically admins / notices managers); and
+     *  - the assigned owner of the notice (ownerid). Ownership alone grants edit rights — no role is required.
+     *
+     * @param \stdClass|array $notice A notice record (must contain ownerid).
+     * @param \context|null $context Defaults to the system context.
+     * @return bool
+     */
+    public static function user_can_edit($notice, ?\context $context = null): bool {
+        global $USER;
+        $context = $context ?? \context_system::instance();
+        if (has_capability('block/notices:manageallnotices', $context)) {
+            return true;
+        }
+        $ownerid = is_array($notice) ? ($notice['ownerid'] ?? null) : ($notice->ownerid ?? null);
+        return $ownerid !== null && (int)$ownerid === (int)$USER->id;
+    }
+
+    /**
+     * Does the current user have any access (manage-all or as an owner of at least one notice)?
+     *
+     * Used to decide whether to show a 'Manage' link on the block.
+     *
+     * @param \context|null $context Defaults to the system context.
+     * @return bool
+     */
+    public static function user_can_manage_any(?\context $context = null): bool {
+        global $DB, $USER;
+        $context = $context ?? \context_system::instance();
+        if (has_capability('block/notices:manageallnotices', $context)) {
+            return true;
+        }
+        return $DB->record_exists('block_notices', ['ownerid' => $USER->id]);
+    }
+
+    /**
      * Get the count of notices for a given instance
      *
      * @param int $courseid
@@ -221,10 +273,12 @@ class notices {
 
         $DB->delete_records_select(
             'block_notices',
-            'courseid = :courseid and (createdbyuserid = :createdbyuserid or modifiedbyuserid = :modifiedbyuserid)',
+            'courseid = :courseid and (createdbyuserid = :createdbyuserid or
+                modifiedbyuserid = :modifiedbyuserid or ownerid = :ownerid)',
             ['courseid' => $courseid,
             'createdbyuserid' => $userid,
-            'modifiedbyuserid' => $userid]
+            'modifiedbyuserid' => $userid,
+            'ownerid' => $userid]
         );
     }
 
@@ -232,14 +286,22 @@ class notices {
      * Get full details for all notices for a given course.
      *
      * @param int $courseid
+     * @param int|null $ownerid If provided, restricts results to notices with this ownerid (used for manage-own users).
      * @return array
      */
-    public static function get_notices_admin(int $courseid): array {
+    public static function get_notices_admin(int $courseid, ?int $ownerid = null): array {
         global $DB;
 
-        $sql = 'SELECT b.*,
-            trim(concat(cb.firstname, \' \', cb.lastname)) as createdby,
-            trim(concat(mb.firstname, \' \', mb.lastname)) as modifiedby,
+        $params = ['courseid' => $courseid, 'visiblemin' => self::NOTICE_VISIBLE, 'visiblemax' => self::NOTICE_VISIBLE];
+        $ownerwhere = '';
+        if ($ownerid !== null) {
+            $ownerwhere = ' AND b.ownerid = :ownerid';
+            $params['ownerid'] = $ownerid;
+        }
+
+        $sql = "SELECT b.*,
+            trim(concat(cb.firstname, ' ', cb.lastname)) as createdby,
+            trim(concat(mb.firstname, ' ', mb.lastname)) as modifiedby,
             b.sortorder = (select min(sortorder) from {block_notices}
                 where courseid = b.courseid and visible=:visiblemin) as isfirst,
             b.sortorder = (select max(sortorder) from {block_notices}
@@ -247,11 +309,8 @@ class notices {
             FROM {block_notices} b
             join {user} cb on b.createdbyuserid = cb.id
             join {user} mb on b.modifiedbyuserid = mb.id
-            WHERE b.courseid = :courseid order by b.visible, b.sortorder';
-        return $DB->get_records_sql(
-            $sql,
-            ['courseid' => $courseid, 'visiblemin' => self::NOTICE_VISIBLE, 'visiblemax' => self::NOTICE_VISIBLE]
-        );
+            WHERE b.courseid = :courseid{$ownerwhere} order by b.visible, b.sortorder";
+        return $DB->get_records_sql($sql, $params);
     }
 
     /**
@@ -276,9 +335,15 @@ class notices {
         global $DB;
 
         $sql = "select * from {block_notices}
-            where createdbyuserid = :createdbyuseridid or modifiedbyuserid = :modifiedbyuseridid";
+            where createdbyuserid = :createdbyuseridid
+               or modifiedbyuserid = :modifiedbyuseridid
+               or ownerid = :ownerid";
 
-        return (array)$DB->get_records_sql($sql, ['createdbyuseridid' => $userid, 'modifiedbyuseridid' => $userid]);
+        return (array)$DB->get_records_sql($sql, [
+            'createdbyuseridid' => $userid,
+            'modifiedbyuseridid' => $userid,
+            'ownerid' => $userid,
+        ]);
     }
 
     /**
@@ -386,7 +451,13 @@ class notices {
             'sortorder' => 0,
         ];
 
-        return $DB->insert_record('block_notices', $presets + $data);
+        $record = $presets + $data;
+        // If the caller didn't supply an explicit ownerid (e.g. seed/test data), default to the creator.
+        if (empty($record['ownerid'])) {
+            $record['ownerid'] = $USER->id;
+        }
+
+        return $DB->insert_record('block_notices', $record);
     }
 
     /**

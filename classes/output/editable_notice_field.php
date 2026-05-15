@@ -53,7 +53,7 @@ class editable_notice_field extends inplace_editable {
             throw new \coding_exception("Unknown notice field: $itemtype");
         }
         $context = \context_course::instance($notice->courseid);
-        $editable = has_capability('block/notices:managenotices', $context);
+        $editable = notices::user_can_edit($notice);
         $value = (string)$notice->{$itemtype};
         $displayvalue = format_string($value, true, ['context' => $context]);
 
@@ -92,7 +92,9 @@ class editable_notice_field extends inplace_editable {
         $notice = $DB->get_record('block_notices', ['id' => $itemid], '*', MUST_EXIST);
         $context = \context_course::instance($notice->courseid);
         \core_external\external_api::validate_context($context);
-        require_capability('block/notices:managenotices', $context);
+        if (!notices::user_can_edit($notice)) {
+            throw new \moodle_exception('errornopermission', 'block_notices');
+        }
 
         $newvalue = trim(clean_param($newvalue, PARAM_TEXT));
         if (\core_text::strlen($newvalue) > self::MAX_LENGTH) {

@@ -54,4 +54,34 @@ class util {
     public static function is_staff(): bool {
         return !self::is_student() && !self::is_st_account();
     }
+
+    /**
+     * Create the default 'Notices manager' system role shipped with block_notices, if not already present.
+     *
+     * Called from db/install.php (fresh installs) and db/upgrade.php (upgrades from before 2026051500).
+     * Safe to re-run — the role is only created when its shortname is absent.
+     *
+     * @return void
+     */
+    public static function provision_default_roles(): void {
+        global $CFG, $DB;
+        require_once($CFG->libdir . '/accesslib.php');
+
+        // When called from db/upgrade.php, Moodle has not yet processed the updated
+        // db/access.php for this plugin (that happens after xmldb_*_upgrade returns).
+        // Force capabilities to be installed first so assign_capability() can find them.
+        update_capabilities('block_notices');
+
+        if ($DB->record_exists('role', ['shortname' => 'block_notices_manager'])) {
+            return;
+        }
+
+        $roleid = create_role(
+            get_string('role_manager_name', 'block_notices'),
+            'block_notices_manager',
+            get_string('role_manager_description', 'block_notices')
+        );
+        set_role_contextlevels($roleid, [CONTEXT_SYSTEM]);
+        assign_capability('block/notices:manageallnotices', CAP_ALLOW, $roleid, \context_system::instance()->id);
+    }
 }

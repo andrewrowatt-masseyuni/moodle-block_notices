@@ -55,6 +55,7 @@ class provider implements
             [
                 'createdbyuserid' => 'privacy:metadata:blocks_notices:createdbyuserid',
                 'modifiedbyuserid' => 'privacy:metadata:blocks_notices:modifiedbyuserid',
+                'ownerid' => 'privacy:metadata:blocks_notices:ownerid',
                 'content' => 'privacy:metadata:blocks_notices:content',
             ],
             'privacy:metadata:blocks_notices'
@@ -78,6 +79,9 @@ class provider implements
             // Note that the add_user function convieniently handles duplicates.
             $userlist->add_user($notice->createdbyuserid);
             $userlist->add_user($notice->modifiedbyuserid);
+            if (!empty($notice->ownerid)) {
+                $userlist->add_user($notice->ownerid);
+            }
         }
     }
 
@@ -95,13 +99,16 @@ class provider implements
             'contextlevel'  => CONTEXT_COURSE,
             'createdbyuserid' => $userid,
             'modifiedbyuserid' => $userid,
+            'ownerid' => $userid,
         ];
 
         // Coures with the block.
         $sql = "SELECT c.id
                   FROM {block_notices} b
                   JOIN {context} c on c.instanceid = b.courseid and c.contextlevel = :contextlevel
-                  WHERE b.createdbyuserid = :createdbyuserid or b.modifiedbyuserid = :modifiedbyuserid
+                  WHERE b.createdbyuserid = :createdbyuserid
+                     or b.modifiedbyuserid = :modifiedbyuserid
+                     or b.ownerid = :ownerid
         ";
         $contextlist->add_from_sql($sql, $params);
 
@@ -133,11 +140,15 @@ class provider implements
         $params = array_merge(['courseid' => $context->instanceid], $userinparams);
         [$modifiedbyuseriduserinsql, $userinparams] = $DB->get_in_or_equal($userlist->get_userids(), SQL_PARAMS_NAMED);
         $params = array_merge($params, $userinparams);
+        [$owneriduserinsql, $userinparams] = $DB->get_in_or_equal($userlist->get_userids(), SQL_PARAMS_NAMED);
+        $params = array_merge($params, $userinparams);
 
         $DB->delete_records_select(
             'block_notices',
             "courseid = :courseid
-                AND (createdbyuserid {$createdbyuseriduserinsql} or modifiedbyuserid {$modifiedbyuseriduserinsql})",
+                AND (createdbyuserid {$createdbyuseriduserinsql}
+                     OR modifiedbyuserid {$modifiedbyuseriduserinsql}
+                     OR ownerid {$owneriduserinsql})",
             $params
         );
     }

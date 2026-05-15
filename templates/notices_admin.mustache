@@ -63,7 +63,7 @@
                 {{#canhide}}<a role="button" href="manage.php?sesskey={{sesskey}}&courseid={{courseid}}&action=hide&id={{id}}" data-notice-action="hide">{{#pix}} t/show, core, {{#str}} hide, core {{/str}} {{/pix}}{{#str}} hide, core {{/str}}</a>{{/canhide}}
                 
                 <a role="button" href="edit.php?id={{id}}" data-notice-action="edit">{{#pix}} t/edit, core, {{#str}} edit, core {{/str}} {{/pix}}{{#str}} edit, core {{/str}}</a>
-                <a role="button" href="manage.php?sesskey={{sesskey}}&courseid={{courseid}}&action=delete&id={{id}}" data-notice-action="delete">{{#pix}} t/delete, core, {{#str}} delete, core {{/str}} {{/pix}}{{#str}} delete, core {{/str}}</a>
+                {{#candelete}}<a role="button" href="manage.php?sesskey={{sesskey}}&courseid={{courseid}}&action=delete&id={{id}}" data-notice-action="delete">{{#pix}} t/delete, core, {{#str}} delete, core {{/str}} {{/pix}}{{#str}} delete, core {{/str}}</a>{{/candelete}}
             </div>
         </div>
     
@@ -74,8 +74,10 @@
 {{/groups}}
 <hr>
 
+{{#canmanageall}}
 <div>
 <a role="button" href="add.php?courseid={{courseid}}">
 {{#pix}} t/preferences, core, {{#str}} addnotice, block_notices {{/str}} {{/pix}}{{#str}} addnotice, block_notices {{/str}}
 </a>
 </div>
+{{/canmanageall}}

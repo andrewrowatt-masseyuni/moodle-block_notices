@@ -24,7 +24,9 @@ Feature: Notices block a course
     When I log in as "teacher1"
     And I am on "Course 1" course homepage
     Then I should see "There are no notices. Have a great day!"
-    Then I should see "Manage notices"
+    # An editingteacher with no notice ownership and no notices manager role sees no manage link.
+    And I should not see "Manage notices"
+    And I should not see "Manage my notices"
 
   Scenario: Block is visible to students
     When I log in as "student1"

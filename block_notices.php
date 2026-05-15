@@ -55,7 +55,11 @@ class block_notices extends block_base {
         $this->content->icons = [];
         $this->content->footer = '';
 
-        $canmanage = has_capability('block/notices:managenotices', $this->context);
+        $canmanageall = has_capability('block/notices:manageallnotices', context_system::instance());
+        $canmanage = $canmanageall || notices::user_can_manage_any();
+        $managelabel = $canmanageall
+            ? get_string('managenotices', 'block_notices')
+            : get_string('managemynotices', 'block_notices');
         $courseid = $this->page->course->id;
 
         $this->page->requires->js('/blocks/notices/swiper/swiper-bundle.min.js', false);
@@ -67,12 +71,13 @@ class block_notices extends block_base {
         } else {
             $notices = notices::get_notices(
                 $courseid,
-                $canmanage,
+                $canmanageall,
                 util::is_staff()
             );
 
             $data = [
                 'canmanage' => $canmanage,
+                'managelabel' => $managelabel,
                 'courseid' => $courseid,
                 'wwwroot' => $CFG->wwwroot,
                 'singlenotice' => count($notices) === 1,

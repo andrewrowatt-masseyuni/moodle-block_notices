@@ -43,6 +43,7 @@ class block_notices_generator extends component_generator_base {
             'timemodified' => time(),
             'createdbyuserid' => $USER->id,
             'modifiedbyuserid' => $USER->id,
+            'ownerid' => $notice['createdbyuserid'] ?? $USER->id,
         ], $notice);
 
         $DB->insert_record('block_notices', $notice);

@@ -38,9 +38,52 @@ class notice extends \moodleform {
         $mform->addElement('hidden', 'id', 0);
         $mform->setType('id', PARAM_INT);
 
+        $canpickowner = !empty($this->_customdata['canpickowner']);
+
         // Start of general group.
 
         $mform->addElement('header', 'general', get_string('basicinformationgroup', 'block_notices'));
+
+        if ($canpickowner) {
+            global $DB;
+            // Pull the same identity fields that the site admin has chosen to expose elsewhere (showuseridentity).
+            $identityfields = \core_user\fields::for_identity(\context_system::instance(), false)->get_required_fields();
+            $namefields = \core_user\fields::get_name_fields();
+            $selectfields = array_unique(array_merge(['id'], $namefields, $identityfields));
+            $eligible = $DB->get_records_select(
+                'user',
+                "deleted = 0 AND suspended = 0 AND username <> 'guest'",
+                null,
+                'lastname, firstname',
+                implode(', ', $selectfields)
+            );
+            $options = ['' => get_string('ownerid_unset', 'block_notices')];
+            foreach ($eligible as $user) {
+                $label = fullname($user);
+                $extras = [];
+                foreach ($identityfields as $field) {
+                    if (!empty($user->$field)) {
+                        $extras[] = s($user->$field);
+                    }
+                }
+                if ($extras) {
+                    $label .= ' (' . implode(', ', $extras) . ')';
+                }
+                $options[$user->id] = $label;
+            }
+            $mform->addElement(
+                'autocomplete',
+                'ownerid',
+                get_string('ownerid', 'block_notices'),
+                $options,
+                ['multiple' => false]
+            );
+            $mform->setType('ownerid', PARAM_INT);
+            $mform->addHelpButton('ownerid', 'ownerid', 'block_notices');
+        } else {
+            $mform->addElement('hidden', 'ownerid', 0);
+            $mform->setType('ownerid', PARAM_INT);
+        }
 
         $mform->addElement(
             'static',

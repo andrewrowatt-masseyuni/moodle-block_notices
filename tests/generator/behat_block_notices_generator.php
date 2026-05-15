@@ -47,6 +47,7 @@ class behat_block_notices_generator extends behat_generator_base {
                     'visible' => 'visible',
                     'createdby' => 'createdbyuserid',
                     'modifiedby' => 'modifiedbyuserid',
+                    'noticeowner' => 'ownerid',
                 ],
             ],
         ];
@@ -76,6 +77,22 @@ class behat_block_notices_generator extends behat_generator_base {
      * @return int
      */
     protected function get_modifiedby_id(string $username): int {
+        global $DB;
+
+        if (!$id = $DB->get_field('user', 'id', ['username' => $username])) {
+            throw new Exception('The specified user with username "' . $username . '" does not exist');
+        }
+        return $id;
+    }
+
+    /**
+     * Gets the user id from their username for ownerid resolution.
+     *
+     * @throws Exception
+     * @param string $username
+     * @return int
+     */
+    protected function get_noticeowner_id(string $username): int {
         global $DB;
 
         if (!$id = $DB->get_field('user', 'id', ['username' => $username])) {

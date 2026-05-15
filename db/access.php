@@ -49,12 +49,11 @@ $capabilities = [
         'clonepermissionsfrom' => 'moodle/course:manageblocks',
     ],
 
-    'block/notices:managenotices' => [
+    'block/notices:manageallnotices' => [
         'captype' => 'write',
         'riskbitmask' => RISK_XSS | RISK_SPAM,
-        'contextlevel' => CONTEXT_COURSE,
+        'contextlevel' => CONTEXT_SYSTEM,
         'archetypes' => [
-            'editingteacher' => CAP_ALLOW,
             'manager' => CAP_ALLOW,
         ],
     ],

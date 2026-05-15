@@ -35,8 +35,12 @@ if ($courseid == 1) {
 } else {
     require_login($courseid);
 }
-require_capability('block/notices:managenotices', $PAGE->context);
+if (!notices::user_can_manage_any()) {
+    throw new moodle_exception('errornopermission', 'block_notices');
+}
 notices::require_notice_block($courseid);
+
+$canmanageall = has_capability('block/notices:manageallnotices', context_system::instance());
 
 $url = new moodle_url('/blocks/notices/manage.php', ['courseid' => $courseid]);
 $PAGE->set_url($url);
@@ -48,6 +52,18 @@ $noticeid = optional_param('id', null, PARAM_INT);
 
 if ($action && $noticeid) {
     require_sesskey();
+
+    // Per-action ownership check: prevents crafted URLs from acting on
+    // notices the user does not own.
+    $targetnotice = notices::get_notice($noticeid);
+    if (!$targetnotice || !notices::user_can_edit($targetnotice)) {
+        throw new moodle_exception('errornopermission', 'block_notices');
+    }
+
+    // Reorder and delete are reserved for manage-all users; owners can only show/hide and edit their notice.
+    if (!$canmanageall && in_array($action, ['delete', 'moveup', 'movedown'], true)) {
+        throw new moodle_exception('errornopermission', 'block_notices');
+    }
 
     switch ($action) {
         case 'hide':
@@ -104,7 +120,9 @@ $noticegroupinpreview = [
 ];
 
 // Iterate over all notices, add additional properties to improve the template output, and then add them to the correct "group".
-foreach (notices::get_notices_admin($courseid) as $noticeobject) {
+// Manage-own users only see notices they have been assigned ownership of.
+$ownerfilter = $canmanageall ? null : (int)$USER->id;
+foreach (notices::get_notices_admin($courseid, $ownerfilter) as $noticeobject) {
     // Convert the dataset to an array ready for using with a template.
     $noticearray = (array)$noticeobject;
 
@@ -118,7 +136,8 @@ foreach (notices::get_notices_admin($courseid) as $noticeobject) {
         (new \block_notices\output\editable_notice_field('updatedescription', $noticeobject))
         ->render($renderer);
 
-    // Add extra properties to improve the template output.
+    // Add extra properties to improve the template output. Reorder and delete are restricted to manage-all.
+    $noticearray['candelete'] = $canmanageall;
     switch ($noticearray['visible']) {
         case notices::NOTICE_HIDDEN:
             $noticearray += [
@@ -130,8 +149,8 @@ foreach (notices::get_notices_admin($courseid) as $noticeobject) {
         case notices::NOTICE_VISIBLE:
             $noticearray += [
                 'canhide' => true,
-                'canmoveup' => $noticearray['isfirst'] == 'f',
-                'canmovedown' => $noticearray['islast'] == 'f',
+                'canmoveup' => $canmanageall && $noticearray['isfirst'] == 'f',
+                'canmovedown' => $canmanageall && $noticearray['islast'] == 'f',
                 'showsortorder' => true,
             ];
             $noticegroupvisible['notices'][] = $noticearray;
@@ -152,6 +171,7 @@ foreach (notices::get_notices_admin($courseid) as $noticeobject) {
 $data = [
     'sesskey' => sesskey(),
     'courseid' => $courseid,
+    'canmanageall' => $canmanageall,
     'groups' => [
         $noticegroupinpreview,
         $noticegroupvisible,

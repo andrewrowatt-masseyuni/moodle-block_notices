@@ -38,14 +38,18 @@ if ($courseid == 1) {
 } else {
     require_login($courseid);
 }
-require_capability('block/notices:managenotices', $PAGE->context);
+if (!notices::user_can_edit($notice)) {
+    throw new moodle_exception('errornopermission', 'block_notices');
+}
 
 $url = new moodle_url('/blocks/notices/edit.php', ['noticeid' => $noticeid]);
 $PAGE->set_url($url);
 $PAGE->set_title(get_string('addnotice', 'block_notices'));
 $PAGE->set_heading(get_string('addnotice', 'block_notices'));
 
-$noticeform = new \block_notices\form\notice($url);
+// Only manage-all users may reassign ownership during edit.
+$canpickowner = has_capability('block/notices:manageallnotices', context_system::instance());
+$noticeform = new \block_notices\form\notice($url, ['canpickowner' => $canpickowner]);
 
 if ($noticeform->is_cancelled()) {
     redirect(new moodle_url('/blocks/notices/manage.php', ['courseid' => $courseid]));
@@ -63,6 +67,11 @@ if ($noticeform->is_cancelled()) {
         'notes' => $formdata->notes,
         'staffonly' => !empty($formdata->staffonly),
     ];
+
+    // Only manage-all users can reassign ownership. If the picker was empty, leave the existing ownerid unchanged.
+    if ($canpickowner && !empty($formdata->ownerid)) {
+        $data['ownerid'] = (int)$formdata->ownerid;
+    }
 
     notices::update_notice($data);
 

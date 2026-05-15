@@ -368,7 +368,7 @@ final class notices_test extends \advanced_testcase {
     }
 
     /**
-     * Users without block/notices:managenotices cannot inline-edit.
+     * Users who are neither the owner of the notice nor a notices manager cannot inline-edit.
      *
      * @covers \block_notices\output\editable_notice_field::update
      */
@@ -382,7 +382,8 @@ final class notices_test extends \advanced_testcase {
         $id = notices::add_notice($course->id, self::TEST_DATA[0]);
 
         $this->setUser($student);
-        $this->expectException(\required_capability_exception::class);
+        $this->expectException(\moodle_exception::class);
+        $this->expectExceptionMessage(get_string('errornopermission', 'block_notices'));
         \block_notices\output\editable_notice_field::update('title', $id, 'hacked');
     }
 
