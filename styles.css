@@ -310,16 +310,60 @@ div.img {
     .list-group-item {
         position: relative;
 
+        /* Kept in the DOM for Behat selectors, hidden from sighted users. */
         span.badge-sortorder {
             position: absolute;
-            top: 1px;
-            right: 1px;
-            font-size: 75%;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            white-space: nowrap;
+            border: 0;
         }
 
-        hr {
-            margin: 0.75em 0;
-            background-color: rgb(0 0 0 / .125);
+        .block-notices-primary {
+            margin-bottom: 0.25em;
+            min-height: 1.75em;
+        }
+
+        .block-notices-content {
+            margin: 0.25em 0 0.5em;
+        }
+
+        .block-notices-details {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.25em 1em;
+            color: var(--color-grey-65, #616161);
+        }
+
+        .block-notices-actions-secondary a {
+            line-height: 1;
+        }
+
+        /* Normalise icon spacing so the flex gap is the only inter-icon space.
+           Moodle's pix helper adds margin-right: 0.5rem on .icon; strip it here. */
+        .block-notices-actions-secondary .icon,
+        .block-notices-actions-secondary .fa-solid {
+            margin: 0;
+        }
+
+        /* Hover-reveal only on pointer-fine devices; touch always shows everything. */
+        @media (hover: hover) {
+            .block-notices-actions-secondary,
+            .block-notices-details {
+                opacity: 0;
+                transition: opacity 0.15s ease;
+            }
+
+            &:hover .block-notices-actions-secondary,
+            &:focus-within .block-notices-actions-secondary,
+            &:hover .block-notices-details,
+            &:focus-within .block-notices-details {
+                opacity: 1;
+            }
         }
     }
 }

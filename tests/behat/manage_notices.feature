@@ -88,13 +88,13 @@ Feature: Add and manage notices
     # Notice1
     And I should see "1 notice(s)" in the ".block-notices-group-visibility-hidden .block-notices-count" "css_element"
 
-    And I should see "Move down" in the "[data-notice-title=\"Notice2title\"]" "css_element"
-    And I should see "Move up" in the "[data-notice-title=\"Notice3title\"]" "css_element"
+    And "[data-notice-title=\"Notice2title\"] [data-notice-action=\"movedown\"]" "css_element" should exist
+    And "[data-notice-title=\"Notice3title\"] [data-notice-action=\"moveup\"]" "css_element" should exist
 
     And I click on "[data-notice-title=\"Notice2title\"] [data-notice-action=\"movedown\"]" "css_element"
 
-    And I should see "Move up" in the "[data-notice-title=\"Notice2title\"]" "css_element"
-    And I should see "Move down" in the "[data-notice-title=\"Notice3title\"]" "css_element"
+    And "[data-notice-title=\"Notice2title\"] [data-notice-action=\"moveup\"]" "css_element" should exist
+    And "[data-notice-title=\"Notice3title\"] [data-notice-action=\"movedown\"]" "css_element" should exist
 
     And I click on "[data-notice-title=\"Notice1title\"] [data-notice-action=\"delete\"]" "css_element"
     And I should see "No notices" in the ".block-notices-group-visibility-hidden .block-notices-count" "css_element"
