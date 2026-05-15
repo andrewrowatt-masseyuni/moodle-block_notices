@@ -34,9 +34,9 @@
     {{#notices}}
     <li class="list-group-item visibility-{{visible}}" data-notice-id="{{id}}" data-notice-title="{{title}}">
         <span class="badge badge-light badge-sortorder">{{sortorder}}</span>
-        <div class="d-flex w-100 justify-content-start align-items-center mb-1" style="gap: 1em;">
+        <div class="d-flex w-100 justify-content-start align-items-center">
             <h5 class="mb-0">{{#showsortorder}}{{/showsortorder}}{{title}}</h5>
-            <small>{{updatedescription}}</small>
+            <small class="item__info">{{updatedescription}}</small>
         </div>
         <hr>
         <p class="mb-1">{{{content}}}</p>
