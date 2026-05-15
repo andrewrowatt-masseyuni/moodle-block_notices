@@ -17,7 +17,11 @@
 {{!
     @template block_notices/notices_admin
 
-    TODO describe template notices_admin
+    Renders the Manage notices admin list. Per notice the primary row
+    (status badges, show/hide, title, content, timestamp) is always
+    visible; details (owner, URL, attribution) and secondary action
+    icons (move, exclusive, edit, delete) are hover-revealed on
+    pointer-fine devices and always visible on touch devices.
 
     Example context (json):
     {
@@ -32,47 +36,46 @@
 {{/notices}}
 <ul class="list-group pb-3">
     {{#notices}}
-    <li class="list-group-item visibility-{{visible}}" data-notice-id="{{id}}" data-notice-title="{{title}}">
-        <span class="badge badge-light badge-sortorder">{{sortorder}}</span>
-        <div class="d-flex w-100 justify-content-start align-items-center">
-            <h5 class="mb-0">{{#showsortorder}}{{/showsortorder}}{{{titlehtml}}}</h5>
-            <small class="item__info" data-block-notices-updatedescription data-timecreated="{{timecreated}}" data-timemodified="{{timemodified}}"><i class="fa-regular fa-hourglass"></i></small>
+    <li class="list-group-item visibility-{{visible}} block-notices-item" data-notice-id="{{id}}" data-notice-title="{{title}}">
+        <span class="badge badge-light badge-sortorder sr-only">{{sortorder}}</span>
+
+        <div class="block-notices-primary d-flex align-items-center">
+            <div class="block-notices-status d-flex align-items-center" style="gap: 0.5em;">
+                <span style="font-weight: 300;" class="badge badge-{{css}} noticegroup">{{description}}</span>
+                {{#staffonly}}<span style="font-weight: 300;" class="badge badge-info staffonly">{{#str}} staffonly, block_notices {{/str}}</span>{{/staffonly}}
+                {{#isexclusive_important}}<span style="font-weight: 300;" class="badge badge-danger exclusive">{{#str}} exclusive_important, block_notices {{/str}}</span>{{/isexclusive_important}}
+                {{#isexclusive_information}}<span style="font-weight: 300;" class="badge badge-primary exclusive">{{#str}} exclusive_information, block_notices {{/str}}</span>{{/isexclusive_information}}
+
+                {{#canshow}}<a class="block-notices-action" role="button" href="manage.php?sesskey={{sesskey}}&courseid={{courseid}}&action=show&id={{id}}" data-notice-action="show" title="{{#str}} show, core {{/str}}" aria-label="{{#str}} show, core {{/str}}">{{#pix}} t/hide, core, {{#str}} show, core {{/str}} {{/pix}}</a>{{/canshow}}
+                {{#canhide}}<a class="block-notices-action" role="button" href="manage.php?sesskey={{sesskey}}&courseid={{courseid}}&action=hide&id={{id}}" data-notice-action="hide" title="{{#str}} hide, core {{/str}}" aria-label="{{#str}} hide, core {{/str}}">{{#pix}} t/show, core, {{#str}} hide, core {{/str}} {{/pix}}</a>{{/canhide}}
+            </div>
+
+            <div class="block-notices-actions-secondary d-flex align-items-center" style="gap: 0.5em;">
+                {{#canmoveup}}<a role="button" href="manage.php?sesskey={{sesskey}}&courseid={{courseid}}&action=moveup&id={{id}}" data-notice-action="moveup" title="{{#str}} moveup, core {{/str}}" aria-label="{{#str}} moveup, core {{/str}}">{{#pix}} t/up, core, {{#str}} moveup, core {{/str}} {{/pix}}</a>{{/canmoveup}}
+                {{#canmovedown}}<a role="button" href="manage.php?sesskey={{sesskey}}&courseid={{courseid}}&action=movedown&id={{id}}" data-notice-action="movedown" title="{{#str}} movedown, core {{/str}}" aria-label="{{#str}} movedown, core {{/str}}">{{#pix}} t/down, core, {{#str}} movedown, core {{/str}} {{/pix}}</a>{{/canmovedown}}
+
+                {{#cansetexclusive_important}}<a role="button" href="manage.php?sesskey={{sesskey}}&courseid={{courseid}}&action=setexclusive&exclusive=1&id={{id}}" data-notice-action="setexclusive-important" title="{{#str}} setexclusiveimportant, block_notices {{/str}}" aria-label="{{#str}} setexclusiveimportant, block_notices {{/str}}"><i class="fa-solid fa-fw fa-triangle-exclamation" aria-hidden="true"></i></a>{{/cansetexclusive_important}}
+                {{#cansetexclusive_information}}<a role="button" href="manage.php?sesskey={{sesskey}}&courseid={{courseid}}&action=setexclusive&exclusive=2&id={{id}}" data-notice-action="setexclusive-information" title="{{#str}} setexclusiveinformation, block_notices {{/str}}" aria-label="{{#str}} setexclusiveinformation, block_notices {{/str}}"><i class="fa-solid fa-fw fa-circle-info" aria-hidden="true"></i></a>{{/cansetexclusive_information}}
+                {{#canclearexclusive}}<a role="button" href="manage.php?sesskey={{sesskey}}&courseid={{courseid}}&action=setexclusive&exclusive=0&id={{id}}" data-notice-action="clearexclusive" title="{{#str}} clearexclusive, block_notices {{/str}}" aria-label="{{#str}} clearexclusive, block_notices {{/str}}"><i class="fa-solid fa-fw fa-info" aria-hidden="true"></i></a>{{/canclearexclusive}}
+
+                <a role="button" href="edit.php?id={{id}}" data-notice-action="edit" title="{{#str}} edit, core {{/str}}" aria-label="{{#str}} edit, core {{/str}}">{{#pix}} t/edit, core, {{#str}} edit, core {{/str}} {{/pix}}</a>
+                {{#candelete}}<a role="button" href="manage.php?sesskey={{sesskey}}&courseid={{courseid}}&action=delete&id={{id}}" data-notice-action="delete" title="{{#str}} delete, core {{/str}}" aria-label="{{#str}} delete, core {{/str}}">{{#pix}} t/delete, core, {{#str}} delete, core {{/str}} {{/pix}}</a>{{/candelete}}
+            </div>
         </div>
-        <hr>
-        <p class="mb-1">{{{content}}}</p>
-        <div class="d-flex justify-content-start" style="gap: 1em;">
+
+        <div class="block-notices-title-row d-flex w-100 justify-content-start align-items-center">
+            <h5 class="mb-0">{{{titlehtml}}}</h5>
+            <small class="item__info" data-block-notices-updatedescription data-timecreated="{{timecreated}}" data-timemodified="{{timemodified}}"><i class="fa-regular fa-hourglass" aria-hidden="true"></i></small>
+        </div>
+
+        <div class="block-notices-content mb-1">{{{content}}}</div>
+
+        <div class="block-notices-details">
             <small>{{#str}} moreinformationurl, block_notices {{/str}}: <a href="{{moreinformationurl}}" target="_blank">{{moreinformationurl}}</a></small>
             <small>{{#str}} owner, block_notices {{/str}}: <a title="Click to email" href="mailto:{{owneremail}}">{{owner}}</a></small>
-        </div>
-        <hr>
-        <div class="d-flex justify-content-start" style="gap: 1em;">
             <small>{{#str}} createdby, block_notices {{/str}}: <a href="/user/view.php?id={{createdbyuserid}}&course={{courseid}}" target="_blank">{{createdby}}</a></small>
             <small>{{#str}} modifiedby, block_notices {{/str}}: <a href="/user/view.php?id={{modifiedbyuserid}}&course={{courseid}}" target="_blank">{{modifiedby}}</a></small>
         </div>
-        <hr>
-        <div class="d-flex justify-content-between align-items-center">
-            <div>
-                <span style="font-size: inherit; font-weight: 300;" class="badge badge-{{css}} noticegroup">{{description}}</span>
-                {{#staffonly}}<span style="font-size: inherit; font-weight: 300;" class="badge badge-info staffonly">{{#str}} staffonly, block_notices {{/str}}</span>{{/staffonly}}
-                {{#isexclusive_important}}<span style="font-size: inherit; font-weight: 300;" class="badge badge-danger exclusive">{{#str}} exclusive_important, block_notices {{/str}}</span>{{/isexclusive_important}}
-                {{#isexclusive_information}}<span style="font-size: inherit; font-weight: 300;" class="badge badge-primary exclusive">{{#str}} exclusive_information, block_notices {{/str}}</span>{{/isexclusive_information}}
-            </div>
-            <div class="d-flex justify-content-end" style="gap: 1em;">
-                {{#canmoveup}}<a role="button" href="manage.php?sesskey={{sesskey}}&courseid={{courseid}}&action=moveup&id={{id}}" data-notice-action"moveup">{{#pix}} t/up, core, {{#str}} moveup, core {{/str}} {{/pix}}{{#str}} moveup, core {{/str}}</a>{{/canmoveup}}
-                {{#canmovedown}}<a role="button" href="manage.php?sesskey={{sesskey}}&courseid={{courseid}}&action=movedown&id={{id}}" data-notice-action="movedown">{{#pix}} t/down, core, {{#str}} movedown, core {{/str}} {{/pix}}{{#str}} movedown, core {{/str}}</a>{{/canmovedown}}
-
-                {{#canshow}}<a role="button" href="manage.php?sesskey={{sesskey}}&courseid={{courseid}}&action=show&id={{id}}" data-notice-action="show">{{#pix}} t/hide, core, {{#str}} show, core {{/str}} {{/pix}}{{#str}} show, core {{/str}}</a>{{/canshow}}
-                {{#canhide}}<a role="button" href="manage.php?sesskey={{sesskey}}&courseid={{courseid}}&action=hide&id={{id}}" data-notice-action="hide">{{#pix}} t/show, core, {{#str}} hide, core {{/str}} {{/pix}}{{#str}} hide, core {{/str}}</a>{{/canhide}}
-
-                {{#cansetexclusive_important}}<a role="button" href="manage.php?sesskey={{sesskey}}&courseid={{courseid}}&action=setexclusive&exclusive=1&id={{id}}" data-notice-action="setexclusive-important">{{#pix}} i/star, core, {{#str}} setexclusiveimportant, block_notices {{/str}} {{/pix}}{{#str}} setexclusiveimportant, block_notices {{/str}}</a>{{/cansetexclusive_important}}
-                {{#cansetexclusive_information}}<a role="button" href="manage.php?sesskey={{sesskey}}&courseid={{courseid}}&action=setexclusive&exclusive=2&id={{id}}" data-notice-action="setexclusive-information">{{#pix}} i/star, core, {{#str}} setexclusiveinformation, block_notices {{/str}} {{/pix}}{{#str}} setexclusiveinformation, block_notices {{/str}}</a>{{/cansetexclusive_information}}
-                {{#canclearexclusive}}<a role="button" href="manage.php?sesskey={{sesskey}}&courseid={{courseid}}&action=setexclusive&exclusive=0&id={{id}}" data-notice-action="clearexclusive">{{#pix}} i/star, core, {{#str}} clearexclusive, block_notices {{/str}} {{/pix}}{{#str}} clearexclusive, block_notices {{/str}}</a>{{/canclearexclusive}}
-
-                <a role="button" href="edit.php?id={{id}}" data-notice-action="edit">{{#pix}} t/edit, core, {{#str}} edit, core {{/str}} {{/pix}}{{#str}} edit, core {{/str}}</a>
-                {{#candelete}}<a role="button" href="manage.php?sesskey={{sesskey}}&courseid={{courseid}}&action=delete&id={{id}}" data-notice-action="delete">{{#pix}} t/delete, core, {{#str}} delete, core {{/str}} {{/pix}}{{#str}} delete, core {{/str}}</a>{{/candelete}}
-            </div>
-        </div>
-    
     </li>
     {{/notices}}
 </ul>
