@@ -35,7 +35,6 @@ class block_notices_generator extends component_generator_base {
 
         $notice = (object) array_merge([
             'contentformat' => FORMAT_HTML,
-            'updatedescription' => '',
             'sortorder' => 0,
             'notes' => '',
             'staffonly' => 0,

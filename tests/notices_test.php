@@ -42,7 +42,6 @@ final class notices_test extends \advanced_testcase {
                 . <a href="https://ost.massey.ac.nz" target="_blank">
                 Click here to tell us what you think</a>.</p>',
             'contentformat' => 1,
-            'updatedescription' => 'Added 14 October',
             'moreinformationurl' => 'https://ost.massey.ac.nz',
             'owner' => 'Ema Alter',
             'owneremail' => 'E.J.Alter@massey.ac.nz',
@@ -60,7 +59,6 @@ final class notices_test extends \advanced_testcase {
                 prohibited. Non-compliance with this warning may lead to legal action
                 for copyright infringement and/or disciplinary measures by the University.</p>',
             'contentformat' => 1,
-            'updatedescription' => 'Updated 11 January',
             'moreinformationurl' => 'https://www.massey.ac.nz/
                 study/study-and-assignment-support-and-guides/student-copyright-guide/',
             'owner' => 'Andrew Rowatt',
@@ -77,7 +75,6 @@ final class notices_test extends \advanced_testcase {
             avoid inconvenience. This includes semester two enrolments, scholarships
 	        , and special circumstance requests.</p>',
             'contentformat' => 1,
-            'updatedescription' => 'Updated 6pm, 19 June',
             'moreinformationurl' => 'https://www.massey.ac.nz/student-life/
 			services-and-support-for-students/it-services-and-support/',
             'owner' => 'Hayden Burnett',
@@ -93,7 +90,6 @@ final class notices_test extends \advanced_testcase {
                 university decisions through Student Voice, and explore extensive support for
                 study planning, course selection, and essential student resources.</p>',
             'contentformat' => 1,
-            'updatedescription' => 'Updated 8 January',
             'moreinformationurl' => 'https://myhub.massey.ac.nz',
             'owner' => 'Andrew Rowatt',
             'owneremail' => 'A.J.Rowatt@massey.ac.nz',
@@ -107,7 +103,6 @@ final class notices_test extends \advanced_testcase {
                 assignments and exams in the right format.
                 <a href="https://massey.ac.nz/freeoffice" target="_blank">Get Office 365 here</a>.</p>',
             'contentformat' => 1,
-            'updatedescription' => 'Updated 8 January',
             'moreinformationurl' => 'https://massey.ac.nz/freeoffice',
             'owner' => 'Andrew Rowatt',
             'owneremail' => 'A.J.Rowatt@massey.ac.nz',
@@ -315,22 +310,6 @@ final class notices_test extends \advanced_testcase {
         $this->assertEquals(notices::NOTICE_VISIBLE, $after['visible'], 'visibility must NOT be reset');
         $this->assertEquals(1, $after['sortorder'], 'sortorder must NOT change');
         $this->assertGreaterThan($before['timemodified'] - 100, $after['timemodified']);
-    }
-
-    /**
-     * updatedescription may be set to an empty string.
-     *
-     * @covers \block_notices\output\editable_notice_field::update
-     */
-    public function test_inplace_update_updatedescription_allows_empty(): void {
-        $this->resetAfterTest(true);
-        $course = $this->getDataGenerator()->create_course();
-        $this->setAdminUser();
-
-        $id = notices::add_notice($course->id, self::TEST_DATA[0]);
-        \block_notices\output\editable_notice_field::update('updatedescription', $id, '');
-
-        $this->assertEquals('', notices::get_notice($id)['updatedescription']);
     }
 
     /**

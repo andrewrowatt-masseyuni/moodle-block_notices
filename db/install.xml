@@ -1,4 +1,4 @@
-<XMLDB xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" PATH="blocks/notices/db" VERSION="20260516" COMMENT="XMLDB file for Moodle blocks/notices" xsi:noNamespaceSchemaLocation="../../../lib/xmldb/xmldb.xsd">
+<XMLDB xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" PATH="blocks/notices/db" VERSION="20260517" COMMENT="XMLDB file for Moodle blocks/notices" xsi:noNamespaceSchemaLocation="../../../lib/xmldb/xmldb.xsd">
 <TABLES>
 <TABLE NAME="block_notices" COMMENT="Contains notices for a course">
 <FIELDS>
@@ -8,7 +8,6 @@
 <FIELD NAME="title" TYPE="char" LENGTH="64" NOTNULL="true" SEQUENCE="false" COMMENT="Title of the notice"/>
 <FIELD NAME="content" TYPE="text" NOTNULL="true" SEQUENCE="false" COMMENT="HTML content of the notice"/>
 <FIELD NAME="contentformat" TYPE="int" LENGTH="4" NOTNULL="true" SEQUENCE="false"/>
-<FIELD NAME="updatedescription" TYPE="char" LENGTH="64" NOTNULL="true" SEQUENCE="false" COMMENT="Contains short description related to when the notice was added or updated. Use one of the conventions i.e., 'Added 5 January', 'Updated 6 Janurary', 'Updated 4pm, 6 January'"/>
 <FIELD NAME="moreinformationurl" TYPE="char" LENGTH="256" NOTNULL="true" SEQUENCE="false" COMMENT="URL for more information."/>
 <FIELD NAME="owner" TYPE="char" LENGTH="256" NOTNULL="true" SEQUENCE="false" COMMENT="Owner or person responsible for this notice"/>
 <FIELD NAME="owneremail" TYPE="char" LENGTH="256" NOTNULL="true" SEQUENCE="false" COMMENT="Owner or person responsible for this notice"/>

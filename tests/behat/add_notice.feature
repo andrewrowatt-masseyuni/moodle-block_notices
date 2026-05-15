@@ -28,7 +28,6 @@ Feature: Add a notice
       | Staff only               | No                            |
       | Title                    | Notice1title                  |
       | Content                  | Notice1content                |
-      | Update description       | Added 1 Jan                   |
       | URL for more information | http://massey.ac.nz           |
       | Owner                    | notice1owner                  |
       | Owner email address      | Notice1owneremail@noreply.com |

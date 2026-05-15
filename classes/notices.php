@@ -79,7 +79,6 @@ class notices {
                 . <a href="https://ost.massey.ac.nz" target="_blank">
                 Click here to tell us what you think</a>.</p>',
             'contentformat' => 1,
-            'updatedescription' => 'Added 14 October',
             'moreinformationurl' => 'https://ost.massey.ac.nz',
             'owner' => 'Ema Alter',
             'owneremail' => 'E.J.Alter@massey.ac.nz',
@@ -97,7 +96,6 @@ class notices {
                 prohibited. Non-compliance with this warning may lead to legal action
                 for copyright infringement and/or disciplinary measures by the University.</p>',
             'contentformat' => 1,
-            'updatedescription' => 'Updated 11 January',
             'moreinformationurl' => 'https://www.massey.ac.nz/
                 study/study-and-assignment-support-and-guides/student-copyright-guide/',
             'owner' => 'Andrew Rowatt',
@@ -114,7 +112,6 @@ class notices {
             avoid inconvenience. This includes semester two enrolments, scholarships
 	        , and special circumstance requests.</p>',
             'contentformat' => 1,
-            'updatedescription' => 'Updated 6pm, 19 June',
             'moreinformationurl' => 'https://www.massey.ac.nz/student-life/
 			services-and-support-for-students/it-services-and-support/',
             'owner' => 'Hayden Burnett',
@@ -130,7 +127,6 @@ class notices {
                 university decisions through Student Voice, and explore extensive support for
                 study planning, course selection, and essential student resources.</p>',
             'contentformat' => 1,
-            'updatedescription' => 'Updated 8 January',
             'moreinformationurl' => 'https://myhub.massey.ac.nz',
             'owner' => 'Andrew Rowatt',
             'owneremail' => 'A.J.Rowatt@massey.ac.nz',
@@ -144,7 +140,6 @@ class notices {
                 assignments and exams in the right format.
                 <a href="https://massey.ac.nz/freeoffice" target="_blank">Get Office 365 here</a>.</p>',
             'contentformat' => 1,
-            'updatedescription' => 'Updated 8 January',
             'moreinformationurl' => 'https://massey.ac.nz/freeoffice',
             'owner' => 'Andrew Rowatt',
             'owneremail' => 'A.J.Rowatt@massey.ac.nz',
@@ -475,12 +470,12 @@ class notices {
      * and sortorder untouched (unlike update_notice() which resets to PREVIEW).
      *
      * @param int $id
-     * @param string $field One of 'title', 'updatedescription'.
+     * @param string $field Currently only 'title' is supported.
      * @param string $newvalue
      */
     public static function update_notice_field(int $id, string $field, string $newvalue): void {
         global $DB, $USER;
-        if (!in_array($field, ['title', 'updatedescription'], true)) {
+        if (!in_array($field, ['title'], true)) {
             throw new \coding_exception("Field not inline-editable: $field");
         }
         $notice = $DB->get_record('block_notices', ['id' => $id], 'id, courseid', MUST_EXIST);

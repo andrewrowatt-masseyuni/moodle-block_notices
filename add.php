@@ -54,7 +54,6 @@ if ($noticeform->is_cancelled()) {
         'title' => $formdata->title,
         'content' => $formdata->content['text'],
         'contentformat' => $formdata->content['format'],
-        'updatedescription' => $formdata->updatedescription,
         'moreinformationurl' => $formdata->moreinformationurl,
         'owner' => $formdata->owner,
         'owneremail' => $formdata->owneremail,

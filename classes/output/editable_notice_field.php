@@ -20,7 +20,7 @@ use block_notices\notices;
 use core\output\inplace_editable;
 
 /**
- * Inplace-editable renderable for short text fields on a notice (title and updatedescription).
+ * Inplace-editable renderable for the notice title.
  *
  * @package    block_notices
  * @copyright  2025 Andrew Rowatt <A.J.Rowatt@massey.ac.nz>
@@ -33,20 +33,16 @@ class editable_notice_field extends inplace_editable {
             'edithint' => 'edittitle',
             'editlabel' => 'newtitlefor',
         ],
-        'updatedescription' => [
-            'edithint' => 'editupdatedescription',
-            'editlabel' => 'newupdatedescriptionfor',
-        ],
     ];
 
-    /** @var int Maximum length of either field, matches db/install.xml CHAR(64). */
+    /** @var int Maximum length of the field, matches db/install.xml CHAR(64). */
     public const MAX_LENGTH = 64;
 
     /**
      * Construct an inplace editable for a notice field.
      *
-     * @param string $itemtype Either 'title' or 'updatedescription'.
-     * @param \stdClass $notice Full notice record (must include id, courseid, title, updatedescription).
+     * @param string $itemtype Currently only 'title' is supported.
+     * @param \stdClass $notice Full notice record (must include id, courseid, title).
      */
     public function __construct(string $itemtype, \stdClass $notice) {
         if (!isset(self::FIELDS[$itemtype])) {
@@ -100,7 +96,7 @@ class editable_notice_field extends inplace_editable {
         if (\core_text::strlen($newvalue) > self::MAX_LENGTH) {
             throw new \moodle_exception('errorfieldtoolong', 'block_notices');
         }
-        if ($itemtype === 'title' && $newvalue === '') {
+        if ($newvalue === '') {
             throw new \moodle_exception('errortitlerequired', 'block_notices');
         }
 

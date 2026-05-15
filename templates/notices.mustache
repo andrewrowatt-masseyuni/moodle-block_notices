@@ -37,7 +37,7 @@
                         <div class="item__heading">
                             <h6 title="{{title}}">{{title}}</h6>
                             {{#staffonly}}<div style="font-weight: 300;" class="badge badge-light item__staffonly_tag ml-1">{{#str}} staffonly, block_notices {{/str}}</div>{{/staffonly}}
-                            <div class="item__info">{{updatedescription}}</div>
+                            <div class="item__info" data-block-notices-updatedescription data-timecreated="{{timecreated}}" data-timemodified="{{timemodified}}"><i class="fa-regular fa-hourglass"></i></div>
                         </div>
                         <div class="item__content">{{{content}}}</div>
                         <div class="item__more_info">
