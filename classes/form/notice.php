@@ -46,7 +46,79 @@ class notice extends \moodleform {
 
         $mform->addElement('header', 'general', get_string('basicinformationgroup', 'block_notices'));
 
+        $visibilitystringkey = [
+            notices::NOTICE_HIDDEN => 'visibility_hidden',
+            notices::NOTICE_VISIBLE => 'visibility_visible',
+            notices::NOTICE_IN_PREVIEW => 'visibility_preview',
+        ];
+        if ($isedit && isset($visibilitystringkey[$currentvisible])) {
+            $visibilitydisplay = get_string($visibilitystringkey[$currentvisible], 'block_notices');
+        } else {
+            $visibilitydisplay = get_string('visibility_preview', 'block_notices');
+        }
+        $mform->addElement(
+            'static',
+            'visible_label',
+            get_string('visible', 'block_notices'),
+            $visibilitydisplay
+        );
+
+        $mform->addElement('checkbox', 'staffonly', get_string('staffonly', 'block_notices'));
+
+        $mform->addElement('text', 'title', get_string('title', 'block_notices'), ['size' => 64]);
+        $mform->setDefault('title', '');
+        $mform->setType('title', PARAM_TEXT);
+        $mform->addHelpButton('title', 'title', 'block_notices');
+        $mform->addRule('title', null, 'required', null, 'client');
+
+        $editoroptions = ['maxfiles' => 0, 'noclean' => true, 'context' => null];
+        $mform->addElement('editor', 'content', get_string('content', 'block_notices'), null, $editoroptions);
+        $mform->setDefault('content', ['text' => '']);
+        $mform->addRule('content', null, 'required', null, 'client');
+        $mform->setType('content', PARAM_RAW); // XSS is prevented when printing the block contents and serving files.
+
+        // Arguably a bit of a hack to get the help text to display in my preferred place.
+        $mform->addElement('html', html_writer::div(
+            '<i class="icon fa fa-info-circle " aria-hidden="true"></i>' . get_string('content_help_additional', 'block_notices'),
+            'alert alert-info help_text'
+        ));
+        $mform->addElement('html', html_writer::tag('hr', ''));
+
+        $mform->addElement('text', 'moreinformationurl', get_string('moreinformationurl', 'block_notices'), ['size' => 128]);
+        $mform->setDefault('moreinformationurl', '');
+        $mform->setType('moreinformationurl', PARAM_TEXT);
+        $mform->addHelpButton('moreinformationurl', 'moreinformationurl', 'block_notices');
+        // End of general group. Don't need to close this group as it is automatically closed by the next group.
+
+        // Start of owner group.
+
+        $mform->addElement('html', html_writer::tag('h3',get_string('ownergroup', 'block_notices')));
+
+        $mform->addElement('html', html_writer::div(
+            get_string('ownergroupdescription', 'block_notices'),
+            'alert alert-warning help_text'
+        ));
+
+        $mform->addElement('text', 'owner', get_string('owner', 'block_notices'));
+        $mform->setDefault('owner', '');
+        $mform->setType('owner', PARAM_TEXT);
+        $mform->addHelpButton('owner', 'owner', 'block_notices');
+        $mform->addRule('owner', null, 'required', null, 'client');
+
+        $mform->addElement('text', 'owneremail', get_string('owneremail', 'block_notices'));
+        $mform->setDefault('owneremail', '');
+        $mform->setType('owneremail', PARAM_TEXT);
+        $mform->addHelpButton('owneremail', 'owneremail', 'block_notices');
+        $mform->addRule('owneremail', null, 'required', null, 'client');
+
+        // End of owner group.
+
         if ($canpickadditionaleditor) {
+            $mform->addElement('html', html_writer::div(
+                get_string('additionaleditordescription', 'block_notices'),
+                'alert alert-info help_text'
+            ));
+            
             global $DB;
             // Pull the same identity fields that the site admin has chosen to expose elsewhere (showuseridentity).
             $identityfields = \core_user\fields::for_identity(\context_system::instance(), false)->get_required_fields();
@@ -89,74 +161,6 @@ class notice extends \moodleform {
             $mform->addElement('hidden', 'additionaleditorid', 0);
             $mform->setType('additionaleditorid', PARAM_INT);
         }
-
-        $visibilitystringkey = [
-            notices::NOTICE_HIDDEN => 'visibility_hidden',
-            notices::NOTICE_VISIBLE => 'visibility_visible',
-            notices::NOTICE_IN_PREVIEW => 'visibility_preview',
-        ];
-        if ($isedit && isset($visibilitystringkey[$currentvisible])) {
-            $visibilitydisplay = get_string($visibilitystringkey[$currentvisible], 'block_notices');
-        } else {
-            $visibilitydisplay = get_string('visibility_preview', 'block_notices');
-        }
-        $mform->addElement(
-            'static',
-            'visible_label',
-            get_string('visible', 'block_notices'),
-            $visibilitydisplay
-        );
-
-        $mform->addElement('checkbox', 'staffonly', get_string('staffonly', 'block_notices'));
-
-        $mform->addElement('text', 'title', get_string('title', 'block_notices'), ['size' => 64]);
-        $mform->setDefault('title', '');
-        $mform->setType('title', PARAM_TEXT);
-        $mform->addHelpButton('title', 'title', 'block_notices');
-        $mform->addRule('title', null, 'required', null, 'client');
-
-        $editoroptions = ['maxfiles' => 0, 'noclean' => true, 'context' => null];
-        $mform->addElement('editor', 'content', get_string('content', 'block_notices'), null, $editoroptions);
-        $mform->setDefault('content', ['text' => '']);
-        $mform->addRule('content', null, 'required', null, 'client');
-        $mform->setType('content', PARAM_RAW); // XSS is prevented when printing the block contents and serving files.
-
-        // Arguably a bit of a hack to get the help text to display in my preferred place.
-        $mform->addElement('html', html_writer::div(
-            '<i class="icon fa fa-info-circle " aria-hidden="true"></i>' . get_string('content_help_additional', 'block_notices'),
-            'alert alert-info help_text',
-            ['style' => 'margin-left: calc(25% + 7px );']
-        ));
-        $mform->addElement('html', html_writer::tag('hr', ''));
-
-        $mform->addElement('text', 'moreinformationurl', get_string('moreinformationurl', 'block_notices'), ['size' => 128]);
-        $mform->setDefault('moreinformationurl', '');
-        $mform->setType('moreinformationurl', PARAM_TEXT);
-        $mform->addHelpButton('moreinformationurl', 'moreinformationurl', 'block_notices');
-        // End of general group. Don't need to close this group as it is automatically closed by the next group.
-
-        // Start of owner group.
-        $mform->addElement('header', 'ownergroup', get_string('ownergroup', 'block_notices'));
-
-        $mform->addElement('html', html_writer::div(
-            get_string('ownergroupdescription', 'block_notices'),
-            'alert alert-warning help_text'
-        ));
-
-        $mform->addElement('text', 'owner', get_string('owner', 'block_notices'));
-        $mform->setDefault('owner', '');
-        $mform->setType('owner', PARAM_TEXT);
-        $mform->addHelpButton('owner', 'owner', 'block_notices');
-        $mform->addRule('owner', null, 'required', null, 'client');
-
-        $mform->addElement('text', 'owneremail', get_string('owneremail', 'block_notices'));
-        $mform->setDefault('owneremail', '');
-        $mform->setType('owneremail', PARAM_TEXT);
-        $mform->addHelpButton('owneremail', 'owneremail', 'block_notices');
-        $mform->addRule('owneremail', null, 'required', null, 'client');
-
-        $mform->closeHeaderBefore('notes');
-        // End of owner group.
 
         $mform->addElement('text', 'notes', get_string('notes', 'block_notices'), ['size' => 128]);
         $mform->setDefault('notes', '');

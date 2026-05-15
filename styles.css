@@ -323,3 +323,15 @@ div.img {
         }
     }
 }
+
+#page-blocks-notices-edit {
+    .alert.help_text {
+        border-left-width: 4px;
+        margin: 0 0.5rem;
+    }
+
+    hr {
+        margin: 0.75em 0;
+        background-color: rgb(0 0 0 / .125);
+    }
+}
