@@ -49,7 +49,10 @@ $PAGE->set_heading(get_string('addnotice', 'block_notices'));
 
 // Only manage-all users may reassign the additional editor during edit.
 $canpickadditionaleditor = has_capability('block/notices:manageallnotices', context_system::instance());
-$noticeform = new \block_notices\form\notice($url, ['canpickadditionaleditor' => $canpickadditionaleditor]);
+$noticeform = new \block_notices\form\notice($url, [
+    'canpickadditionaleditor' => $canpickadditionaleditor,
+    'isedit' => true,
+]);
 
 if ($noticeform->is_cancelled()) {
     redirect(new moodle_url('/blocks/notices/manage.php', ['courseid' => $courseid]));
@@ -68,10 +71,10 @@ if ($noticeform->is_cancelled()) {
         'staffonly' => !empty($formdata->staffonly),
     ];
 
-    // Only manage-all users can reassign the additional editor. If the picker was empty,
-    // leave the existing additionaleditorid unchanged.
-    if ($canpickadditionaleditor && !empty($formdata->additionaleditorid)) {
-        $data['additionaleditorid'] = (int)$formdata->additionaleditorid;
+    // Only manage-all users can reassign the additional editor. An empty selection
+    // clears the additional editor (so only Notices managers can edit thereafter).
+    if ($canpickadditionaleditor) {
+        $data['additionaleditorid'] = !empty($formdata->additionaleditorid) ? (int)$formdata->additionaleditorid : null;
     }
 
     notices::update_notice($data);

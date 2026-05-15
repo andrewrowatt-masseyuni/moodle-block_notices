@@ -39,6 +39,7 @@ class notice extends \moodleform {
         $mform->setType('id', PARAM_INT);
 
         $canpickadditionaleditor = !empty($this->_customdata['canpickadditionaleditor']);
+        $isedit = !empty($this->_customdata['isedit']);
 
         // Start of general group.
 
@@ -57,7 +58,10 @@ class notice extends \moodleform {
                 'lastname, firstname',
                 implode(', ', $selectfields)
             );
-            $options = ['' => get_string('additionaleditorid_unset', 'block_notices')];
+            $emptylabel = $isedit
+                ? get_string('additionaleditorid_none', 'block_notices')
+                : get_string('additionaleditorid_unset', 'block_notices');
+            $options = ['' => $emptylabel];
             foreach ($eligible as $user) {
                 $label = fullname($user);
                 $extras = [];
