@@ -41,6 +41,7 @@ Feature: Additional editor assignment grants edit rights without needing a role
       | createdby          | admin                |
       | modifiedby         | admin                |
       | additionaleditor   | editor2              |
+    And I change window size to "large"
 
   Scenario: Notices manager sees the full manage page and can add notices
     Given I log in as "manager1"

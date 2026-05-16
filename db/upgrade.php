@@ -67,5 +67,37 @@ function xmldb_block_notices_upgrade($oldversion) {
         upgrade_block_savepoint(true, 2026051800, 'notices');
     }
 
+    if ($oldversion < 2026051802) {
+        // Grant the capabilities the block_notices_manager role needs to use the user
+        // picker on the notice edit form: viewalldetails lets core_user_search_identity
+        // run, viewuseridentity lets it return the configured showuseridentity fields.
+        $role = $DB->get_record('role', ['shortname' => 'block_notices_manager']);
+        if ($role) {
+            $systemcontextid = context_system::instance()->id;
+            assign_capability('moodle/user:viewalldetails', CAP_ALLOW, $role->id, $systemcontextid, true);
+            assign_capability('moodle/site:viewuseridentity', CAP_ALLOW, $role->id, $systemcontextid, true);
+        }
+
+        upgrade_block_savepoint(true, 2026051802, 'notices');
+    }
+
+    if ($oldversion < 2026051803) {
+        // Sites that ran the 2026051802 savepoint earlier only got viewalldetails;
+        // viewuseridentity is needed so the picker shows the configured identity
+        // fields (username, email, ...). Re-asserting is idempotent.
+        $role = $DB->get_record('role', ['shortname' => 'block_notices_manager']);
+        if ($role) {
+            assign_capability(
+                'moodle/site:viewuseridentity',
+                CAP_ALLOW,
+                $role->id,
+                context_system::instance()->id,
+                true
+            );
+        }
+
+        upgrade_block_savepoint(true, 2026051803, 'notices');
+    }
+
     return true;
 }

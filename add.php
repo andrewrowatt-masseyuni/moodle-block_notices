@@ -28,7 +28,7 @@ use block_notices\notices;
 
 // Setup page context and course and check permissions.
 $courseid = required_param('courseid', PARAM_INT);
-if ($courseid == 1) {
+if ($courseid == SITEID) {
     require_login();
     $context = context_system::instance();
     $PAGE->set_context($context);

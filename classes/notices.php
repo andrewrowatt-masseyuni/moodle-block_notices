@@ -457,15 +457,26 @@ class notices {
     public static function delete_notices_by_user(int $courseid, int $userid): void {
         global $DB;
 
-        $DB->delete_records_select(
-            'block_notices',
-            'courseid = :courseid and (createdbyuserid = :createdbyuserid or
-                modifiedbyuserid = :modifiedbyuserid or additionaleditorid = :additionaleditorid)',
-            ['courseid' => $courseid,
+        $params = [
+            'courseid' => $courseid,
             'createdbyuserid' => $userid,
             'modifiedbyuserid' => $userid,
-            'additionaleditorid' => $userid]
+            'additionaleditorid' => $userid,
+        ];
+        $noticefilter = 'courseid = :courseid AND (createdbyuserid = :createdbyuserid
+            OR modifiedbyuserid = :modifiedbyuserid
+            OR additionaleditorid = :additionaleditorid)';
+
+        // Delete every read row pointing at the notices about to be deleted (regardless
+        // of which user owns the read row) so the notice rows can go without leaving
+        // dangling references in block_notices_read.
+        $DB->delete_records_select(
+            'block_notices_read',
+            "noticeid IN (SELECT id FROM {block_notices} WHERE {$noticefilter})",
+            $params
         );
+
+        $DB->delete_records_select('block_notices', $noticefilter, $params);
     }
 
     /**
@@ -490,20 +501,25 @@ class notices {
         // guarantees one row per user/notice pair. readcountcurrent only counts reads of
         // the current notice version (timeread >= timemodified); for unmodified notices
         // it equals readcount.
+        // CASE WHEN ... THEN 1 ELSE 0 END (instead of bare equality cast) so the result
+        // is the integer 0/1 across all supported DB drivers — bare equality returns
+        // 't'/'f' on Postgres and 1/0 on MySQL/MariaDB.
         $sql = "SELECT b.*,
             trim(concat(cb.firstname, ' ', cb.lastname)) as createdby,
             trim(concat(mb.firstname, ' ', mb.lastname)) as modifiedby,
-            b.sortorder = (select min(sortorder) from {block_notices}
-                where courseid = b.courseid and visible=:visiblemin) as isfirst,
-            b.sortorder = (select max(sortorder) from {block_notices}
-                where courseid = b.courseid and visible=:visiblemax) as islast,
-            (select count(*) from {block_notices_read} r where r.noticeid = b.id) as readcount,
-            (select count(*) from {block_notices_read} r where r.noticeid = b.id
-                and r.timeread >= b.timemodified) as readcountcurrent
+            CASE WHEN b.sortorder = (SELECT MIN(sortorder) FROM {block_notices}
+                    WHERE courseid = b.courseid AND visible = :visiblemin)
+                 THEN 1 ELSE 0 END AS isfirst,
+            CASE WHEN b.sortorder = (SELECT MAX(sortorder) FROM {block_notices}
+                    WHERE courseid = b.courseid AND visible = :visiblemax)
+                 THEN 1 ELSE 0 END AS islast,
+            (SELECT count(*) FROM {block_notices_read} r WHERE r.noticeid = b.id) AS readcount,
+            (SELECT count(*) FROM {block_notices_read} r WHERE r.noticeid = b.id
+                AND r.timeread >= b.timemodified) AS readcountcurrent
             FROM {block_notices} b
-            join {user} cb on b.createdbyuserid = cb.id
-            join {user} mb on b.modifiedbyuserid = mb.id
-            WHERE b.courseid = :courseid{$additionaleditorwhere} order by b.visible, b.sortorder";
+            JOIN {user} cb ON b.createdbyuserid = cb.id
+            JOIN {user} mb ON b.modifiedbyuserid = mb.id
+            WHERE b.courseid = :courseid{$additionaleditorwhere} ORDER BY b.visible, b.sortorder";
         return $DB->get_records_sql($sql, $params);
     }
 
@@ -546,10 +562,18 @@ class notices {
      * @param int $id
      */
     public static function delete_notice($id) {
-        global $DB;
+        global $DB, $USER;
+
+        $notice = $DB->get_record('block_notices', ['id' => $id], 'id, courseid', MUST_EXIST);
 
         self::delete_reads_for_notice((int)$id);
         $DB->delete_records('block_notices', ['id' => $id]);
+
+        \block_notices\event\notice_deleted::create([
+            'objectid' => (int)$id,
+            'userid' => $USER->id,
+            'context' => \context_course::instance($notice->courseid),
+        ])->trigger();
     }
 
     /**
@@ -652,7 +676,15 @@ class notices {
             $record['additionaleditorid'] = null;
         }
 
-        return $DB->insert_record('block_notices', $record);
+        $id = $DB->insert_record('block_notices', $record);
+
+        \block_notices\event\notice_created::create([
+            'objectid' => $id,
+            'userid' => $USER->id,
+            'context' => \context_course::instance($courseid),
+        ])->trigger();
+
+        return $id;
     }
 
     /**
@@ -666,14 +698,19 @@ class notices {
         $notice = self::get_notice($id);
 
         $sortorder = $notice['sortorder'];
-        $prevnotice = $DB->get_record_sql(
-            'select * from {block_notices}
-                where courseid = :courseid and visible=:visible and
-                sortorder < :sortorder order by sortorder desc limit 1',
-            ['courseid' => $notice['courseid'], 'visible' => self::NOTICE_VISIBLE, 'sortorder' => $sortorder]
+        // Inline LIMIT is not portable across all Moodle-supported DBs; use the
+        // get_records_sql limitnum argument and pop the first record.
+        $prevnotices = $DB->get_records_sql(
+            'SELECT * FROM {block_notices}
+                WHERE courseid = :courseid AND visible = :visible AND sortorder < :sortorder
+                ORDER BY sortorder DESC',
+            ['courseid' => $notice['courseid'], 'visible' => self::NOTICE_VISIBLE, 'sortorder' => $sortorder],
+            0,
+            1
         );
 
-        if ($prevnotice) {
+        if (!empty($prevnotices)) {
+            $prevnotice = reset($prevnotices);
             $notice['sortorder'] = $prevnotice->sortorder;
             $prevnotice->sortorder = $sortorder;
 
@@ -693,14 +730,19 @@ class notices {
         $notice = self::get_notice($id);
 
         $sortorder = $notice['sortorder'];
-        $nextnotice = $DB->get_record_sql(
-            'select * from {block_notices}
-                where courseid = :courseid and visible=:visible and
-                sortorder > :sortorder order by sortorder asc limit 1',
-            ['courseid' => $notice['courseid'], 'visible' => self::NOTICE_VISIBLE, 'sortorder' => $sortorder]
+        // Inline LIMIT is not portable across all Moodle-supported DBs; use the
+        // get_records_sql limitnum argument and pop the first record.
+        $nextnotices = $DB->get_records_sql(
+            'SELECT * FROM {block_notices}
+                WHERE courseid = :courseid AND visible = :visible AND sortorder > :sortorder
+                ORDER BY sortorder ASC',
+            ['courseid' => $notice['courseid'], 'visible' => self::NOTICE_VISIBLE, 'sortorder' => $sortorder],
+            0,
+            1
         );
 
-        if ($nextnotice) {
+        if (!empty($nextnotices)) {
+            $nextnotice = reset($nextnotices);
             $notice['sortorder'] = $nextnotice->sortorder;
             $nextnotice->sortorder = $sortorder;
 
@@ -715,7 +757,7 @@ class notices {
      * @param int $id
      */
     public static function show_notice(int $id): void {
-        global $DB;
+        global $DB, $USER;
 
         $notice = self::get_notice($id);
 
@@ -733,6 +775,12 @@ class notices {
         $notice['visible'] = self::NOTICE_VISIBLE;
 
         $DB->update_record('block_notices', $notice);
+
+        \block_notices\event\notice_visible::create([
+            'objectid' => $id,
+            'userid' => $USER->id,
+            'context' => \context_course::instance($notice['courseid']),
+        ])->trigger();
     }
 
     /**
@@ -741,7 +789,7 @@ class notices {
      * @param int $id
      */
     public static function hide_notice(int $id): void {
-        global $DB;
+        global $DB, $USER;
 
         $notice = self::get_notice($id);
 
@@ -754,6 +802,12 @@ class notices {
 
         // When a notice is hidden, it may leave gaps in the sortorder sequence.
         self::recalc_visible_notices_sortorder($notice['courseid']);
+
+        \block_notices\event\notice_hidden::create([
+            'objectid' => $id,
+            'userid' => $USER->id,
+            'context' => \context_course::instance($notice['courseid']),
+        ])->trigger();
     }
 
     /**
@@ -789,8 +843,14 @@ class notices {
     public static function has_notice_block(int $courseid): bool {
         global $DB;
 
-        if ($courseid == 1) {
-            $contextids = [1, 2]; // ...1 is system/my-index, 2 is site homepage (site-index)
+        if ($courseid == SITEID) {
+            // Dashboard blocks attach to the system context; site-frontpage blocks
+            // attach to the site course context. Both context ids vary between
+            // installs — resolve them rather than hard-coding 1 and 2.
+            $contextids = [
+                \context_system::instance()->id,
+                \context_course::instance(SITEID)->id,
+            ];
         } else {
             $context = \context_course::instance($courseid);
             $contextids = [$context->id];

@@ -31,7 +31,7 @@ $notice = (array)notices::get_notice($noticeid);
 
 // Setup page context and course and check permissions.
 $courseid = $notice['courseid'];
-if ($courseid == 1) {
+if ($courseid == SITEID) {
     require_login();
     $context = context_system::instance();
     $PAGE->set_context($context);

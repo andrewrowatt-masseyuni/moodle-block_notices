@@ -28,7 +28,7 @@ use block_notices\notices;
 
 // Setup page context and course and check permissions.
 $courseid = required_param('courseid', PARAM_INT);
-if ($courseid == 1) {
+if ($courseid == SITEID) {
     require_login();
     $context = context_system::instance();
     $PAGE->set_context($context);
@@ -54,10 +54,13 @@ $exclusivevalue = optional_param('exclusive', null, PARAM_INT);
 if ($action && $noticeid) {
     require_sesskey();
 
-    // Per-action edit-rights check: prevents crafted URLs from acting on
-    // notices the user is not the additional editor for.
+    // Per-action checks: reject crafted URLs that target a notice from a
+    // different course, and prevent users without edit rights from acting.
     $targetnotice = notices::get_notice($noticeid);
-    if (!$targetnotice || !notices::user_can_edit($targetnotice)) {
+    if (!$targetnotice || (int)$targetnotice['courseid'] !== (int)$courseid) {
+        throw new moodle_exception('errornopermission', 'block_notices');
+    }
+    if (!notices::user_can_edit($targetnotice)) {
         throw new moodle_exception('errornopermission', 'block_notices');
     }
 
@@ -135,9 +138,26 @@ $noticegroupinpreview = [
 // Iterate over all notices, add additional properties to improve the template output, and then add them to the correct "group".
 // Manage-own users only see notices they have been assigned as an additional editor on.
 $additionaleditorfilter = $canmanageall ? null : (int)$USER->id;
+$formatcontext = context_course::instance($courseid);
 foreach (notices::get_notices_admin($courseid, $additionaleditorfilter) as $noticeobject) {
     // Convert the dataset to an array ready for using with a template.
     $noticearray = (array)$noticeobject;
+
+    // Run filters on the title and the full text-cleaning pipeline on the content
+    // before the template renders them; the manageallnotices capability declares
+    // RISK_XSS so the saved HTML is trusted (noclean), but filters must still run.
+    // Note: the inplace-editable title in $noticearray['titlehtml'] is rendered
+    // below and already calls format_string itself.
+    $noticearray['title'] = format_string(
+        $noticeobject->title,
+        true,
+        ['context' => $formatcontext]
+    );
+    $noticearray['content'] = format_text(
+        $noticeobject->content,
+        $noticeobject->contentformat,
+        ['context' => $formatcontext, 'noclean' => true]
+    );
 
     // Render inplace-editable HTML for the title so it can be edited from the list.
     // export_for_template() requires a real renderer_base (the global $OUTPUT is the bootstrap_renderer
@@ -165,8 +185,8 @@ foreach (notices::get_notices_admin($courseid, $additionaleditorfilter) as $noti
         case notices::NOTICE_VISIBLE:
             $noticearray += [
                 'canhide' => true,
-                'canmoveup' => $canmanageall && $noticearray['isfirst'] == 'f',
-                'canmovedown' => $canmanageall && $noticearray['islast'] == 'f',
+                'canmoveup' => $canmanageall && (int)$noticearray['isfirst'] === 0,
+                'canmovedown' => $canmanageall && (int)$noticearray['islast'] === 0,
                 'cansetexclusive_important' => $canmanageall
                     && $exclusivevalue !== notices::NOTICE_EXCLUSIVE_IMPORTANT,
                 'cansetexclusive_information' => $canmanageall

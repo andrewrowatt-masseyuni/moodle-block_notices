@@ -119,41 +119,54 @@ class notice extends \moodleform {
                 'alert alert-info help_text'
             ));
 
-            global $DB;
-            // Pull the same identity fields that the site admin has chosen to expose elsewhere (showuseridentity).
-            $identityfields = \core_user\fields::for_identity(\context_system::instance(), false)->get_required_fields();
-            $namefields = \core_user\fields::get_name_fields();
-            $selectfields = array_unique(array_merge(['id'], $namefields, $identityfields));
-            $eligible = $DB->get_records_select(
-                'user',
-                "deleted = 0 AND suspended = 0 AND username <> 'guest'",
-                null,
-                'lastname, firstname',
-                implode(', ', $selectfields)
-            );
             $emptylabel = $isedit
                 ? get_string('additionaleditorid_none', 'block_notices')
                 : get_string('additionaleditorid_unset', 'block_notices');
-            $options = ['' => $emptylabel];
-            foreach ($eligible as $user) {
-                $label = fullname($user);
-                $extras = [];
-                foreach ($identityfields as $field) {
-                    if (!empty($user->$field)) {
-                        $extras[] = s($user->$field);
+
+            // AJAX-backed user picker (core_user/form_user_selector → core_user_search_identity
+            // web service). The previous implementation loaded every active user into PHP
+            // memory, which doesn't scale past a few thousand users.
+            $attributes = [
+                'multiple' => false,
+                'ajax' => 'core_user/form_user_selector',
+                'noselectionstring' => $emptylabel,
+                'valuehtmlcallback' => function ($userid) {
+                    global $OUTPUT;
+
+                    if (empty($userid)) {
+                        return false;
                     }
-                }
-                if ($extras) {
-                    $label .= ' (' . implode(', ', $extras) . ')';
-                }
-                $options[$user->id] = $label;
-            }
+                    $context = \context_system::instance();
+                    $fields = \core_user\fields::for_name()->with_identity($context, false);
+                    $record = \core_user::get_user(
+                        $userid,
+                        'id ' . $fields->get_sql()->selects,
+                        IGNORE_MISSING
+                    );
+                    if (!$record) {
+                        return false;
+                    }
+
+                    $user = (object)[
+                        'id' => $record->id,
+                        'fullname' => fullname($record, has_capability('moodle/site:viewfullnames', $context)),
+                        'extrafields' => [],
+                    ];
+                    foreach ($fields->get_required_fields([\core_user\fields::PURPOSE_IDENTITY]) as $extrafield) {
+                        $user->extrafields[] = (object)[
+                            'name' => $extrafield,
+                            'value' => s($record->$extrafield),
+                        ];
+                    }
+                    return $OUTPUT->render_from_template('core_user/form_user_selector_suggestion', $user);
+                },
+            ];
             $mform->addElement(
                 'autocomplete',
                 'additionaleditorid',
                 get_string('additionaleditorid', 'block_notices'),
-                $options,
-                ['multiple' => false]
+                [],
+                $attributes
             );
             $mform->setType('additionaleditorid', PARAM_INT);
             $mform->addHelpButton('additionaleditorid', 'additionaleditorid', 'block_notices');

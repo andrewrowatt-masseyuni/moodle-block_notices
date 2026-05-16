@@ -187,9 +187,9 @@ class provider implements
             return;
         }
 
-        // Delete read rows for the supplied users before deleting notices, so the
-        // IN-subquery can still resolve to notice ids in this course.
-        [$readuseridsql, $readuseridparams] = $DB->get_in_or_equal($userids, SQL_PARAMS_NAMED);
+        // 1. Delete the supplied users' read rows on any notice in this course (their
+        // own tracking data, regardless of whether the notice survives).
+        [$readuseridsql, $readuseridparams] = $DB->get_in_or_equal($userids, SQL_PARAMS_NAMED, 'usr');
         $DB->delete_records_select(
             'block_notices_read',
             "userid {$readuseridsql}
@@ -197,21 +197,34 @@ class provider implements
             array_merge(['courseid' => $context->instanceid], $readuseridparams)
         );
 
-        [$createdbyuseriduserinsql, $userinparams] = $DB->get_in_or_equal($userids, SQL_PARAMS_NAMED);
-        $params = array_merge(['courseid' => $context->instanceid], $userinparams);
-        [$modifiedbyuseriduserinsql, $userinparams] = $DB->get_in_or_equal($userids, SQL_PARAMS_NAMED);
-        $params = array_merge($params, $userinparams);
-        [$additionaleditoriduserinsql, $userinparams] = $DB->get_in_or_equal($userids, SQL_PARAMS_NAMED);
-        $params = array_merge($params, $userinparams);
-
-        $DB->delete_records_select(
-            'block_notices',
-            "courseid = :courseid
-                AND (createdbyuserid {$createdbyuseriduserinsql}
-                     OR modifiedbyuserid {$modifiedbyuseriduserinsql}
-                     OR additionaleditorid {$additionaleditoriduserinsql})",
-            $params
+        // 2. Build the filter for the notices about to be deleted. Three separate
+        // get_in_or_equal calls because the placeholders must be unique across the
+        // three OR-branches of the WHERE clause; the 'cby'/'mby'/'aed' prefixes keep
+        // them from colliding when merged into a single params array.
+        [$cbyinsql, $cbyparams] = $DB->get_in_or_equal($userids, SQL_PARAMS_NAMED, 'cby');
+        [$mbyinsql, $mbyparams] = $DB->get_in_or_equal($userids, SQL_PARAMS_NAMED, 'mby');
+        [$aedinsql, $aedparams] = $DB->get_in_or_equal($userids, SQL_PARAMS_NAMED, 'aed');
+        $noticeparams = array_merge(
+            ['courseid' => $context->instanceid],
+            $cbyparams,
+            $mbyparams,
+            $aedparams
         );
+        $noticefilter = "courseid = :courseid
+            AND (createdbyuserid {$cbyinsql}
+                 OR modifiedbyuserid {$mbyinsql}
+                 OR additionaleditorid {$aedinsql})";
+
+        // 3. Delete every read row pointing at notices about to be deleted (any user's
+        // reads, not only $userids') so we don't leave orphans behind.
+        $DB->delete_records_select(
+            'block_notices_read',
+            "noticeid IN (SELECT id FROM {block_notices} WHERE {$noticefilter})",
+            $noticeparams
+        );
+
+        // 4. Finally delete the notices themselves.
+        $DB->delete_records_select('block_notices', $noticefilter, $noticeparams);
     }
 
     /**

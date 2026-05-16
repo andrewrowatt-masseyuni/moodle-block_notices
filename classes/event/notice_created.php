@@ -17,13 +17,66 @@
 namespace block_notices\event;
 
 /**
- * The notice_created event class.
+ * Event notice_created
  *
- * @package     block_notices
- * @category    event
- * @copyright   2024 Andrew Rowatt <A.J.Rowatt@massey.ac.nz>
- * @license     https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ * @package    block_notices
+ * @copyright  2025 Andrew Rowatt <A.J.Rowatt@massey.ac.nz>
+ * @license    https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class notice_created extends \core\event\base {
-    // For more information about the Events API please visit {@link https://docs.moodle.org/dev/Events_API}.
+    /**
+     * Set basic properties for the event.
+     */
+    protected function init() {
+        $this->data['objecttable'] = 'block_notices';
+        $this->data['crud'] = 'c';
+        $this->data['edulevel'] = self::LEVEL_OTHER;
+    }
+
+    /**
+     * Get name.
+     * @return \lang_string|string
+     */
+    public static function get_name() {
+        return get_string('event_notice_created', 'block_notices');
+    }
+
+    /**
+     * Get description.
+     * @return \lang_string|string|null
+     */
+    public function get_description() {
+        $obj = new \stdClass();
+        $obj->userid = $this->userid;
+        $obj->objectid = $this->objectid;
+        return get_string('event_notice_created_desc', 'block_notices', $obj);
+    }
+
+    /**
+     * This is used when restoring course logs where it is required that we
+     * map the objectid to it's new value in the new course.
+     *
+     * Does nothing in the base class except display a debugging message warning
+     * the user that the event does not contain the required functionality to
+     * map this information. For events that do not store an objectid this won't
+     * be called, so no debugging message will be displayed.
+     *
+     * @return string the name of the restore mapping the objectid links to
+     */
+    public static function get_objectid_mapping(): array {
+        return [
+            'db'        => 'notices',
+            'restore'   => \core\event\base::NOT_MAPPED,
+        ];
+    }
+
+    /**
+     * The 'other' fields for this event do not need to mapped during backup and restore as they
+     * only contain test values, not IDs for anything on the course.
+     *
+     * @return array Empty array
+     */
+    public static function get_other_mapping(): array {
+        return [];
+    }
 }

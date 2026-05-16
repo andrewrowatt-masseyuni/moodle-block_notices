@@ -82,6 +82,12 @@ class util {
             get_string('role_manager_description', 'block_notices')
         );
         set_role_contextlevels($roleid, [CONTEXT_SYSTEM]);
-        assign_capability('block/notices:manageallnotices', CAP_ALLOW, $roleid, \context_system::instance()->id);
+        $systemcontextid = \context_system::instance()->id;
+        assign_capability('block/notices:manageallnotices', CAP_ALLOW, $roleid, $systemcontextid);
+        // Required so the role can drive the user picker on the notice edit form:
+        // viewalldetails lets core_user_search_identity run, viewuseridentity lets it
+        // return the configured showuseridentity fields (username, email, ...).
+        assign_capability('moodle/user:viewalldetails', CAP_ALLOW, $roleid, $systemcontextid);
+        assign_capability('moodle/site:viewuseridentity', CAP_ALLOW, $roleid, $systemcontextid);
     }
 }

@@ -75,6 +75,8 @@ class block_notices extends block_base {
                 util::is_staff()
             );
 
+            $formatcontext = \context_course::instance($courseid);
+
             $data = [
                 'canmanage' => $canmanage,
                 'managelabel' => $managelabel,
@@ -88,6 +90,21 @@ class block_notices extends block_base {
 
             foreach ($notices as $noticeobject) {
                 $noticearray = (array)$noticeobject;
+
+                // Run filters on the title (multilang etc.) and run the full text-cleaning
+                // pipeline on the content. The manageallnotices capability declares RISK_XSS,
+                // so the saved HTML is trusted (noclean) — but filters and link/image
+                // processing must still apply.
+                $noticearray['title'] = format_string(
+                    $noticeobject->title,
+                    true,
+                    ['context' => $formatcontext]
+                );
+                $noticearray['content'] = format_text(
+                    $noticeobject->content,
+                    $noticeobject->contentformat,
+                    ['context' => $formatcontext, 'noclean' => true]
+                );
 
                 if ($noticearray['moreinformationurl']) {
                     $noticearray += [
