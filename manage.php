@@ -151,6 +151,9 @@ foreach (notices::get_notices_admin($courseid, $additionaleditorfilter) as $noti
     $exclusivevalue = (int)$noticearray['exclusive'];
     $noticearray['isexclusive_important'] = $exclusivevalue === notices::NOTICE_EXCLUSIVE_IMPORTANT;
     $noticearray['isexclusive_information'] = $exclusivevalue === notices::NOTICE_EXCLUSIVE_INFORMATION;
+    // Edited notices show "reads since update / total"; unedited show just total
+    // (readcount and readcountcurrent are equal in that case).
+    $noticearray['ismodified'] = (int)$noticearray['timemodified'] > (int)$noticearray['timecreated'];
     switch ($noticearray['visible']) {
         case notices::NOTICE_HIDDEN:
             $noticearray += [

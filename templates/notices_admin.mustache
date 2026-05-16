@@ -66,6 +66,12 @@
         <div class="block-notices-title-row d-flex w-100 justify-content-start align-items-center">
             <h5 class="mb-0">{{{titlehtml}}}</h5>
             <small class="item__info" data-block-notices-updatedescription data-timecreated="{{timecreated}}" data-timemodified="{{timemodified}}"><i class="fa-regular fa-hourglass" aria-hidden="true"></i></small>
+            {{#ismodified}}
+            <small class="item__info block-notices-readcount" data-readcount="{{readcount}}" data-readcountcurrent="{{readcountcurrent}}" title="{{#str}} nreads_help, block_notices {{/str}}">{{#str}} nreads_currenttotal, block_notices, { "current": "{{readcountcurrent}}", "total": "{{readcount}}" } {{/str}}</small>
+            {{/ismodified}}
+            {{^ismodified}}
+            <small class="item__info block-notices-readcount" data-readcount="{{readcount}}">{{#str}} nreads, block_notices, {{readcount}} {{/str}}</small>
+            {{/ismodified}}
         </div>
 
         <div class="block-notices-content mb-1">{{{content}}}</div>

@@ -47,4 +47,19 @@ class block_notices_generator extends component_generator_base {
 
         $DB->insert_record('block_notices', $notice);
     }
+
+    /**
+     * Create a per-user read record for a notice.
+     *
+     * @param array|stdClass $record Requires noticeid and userid; timeread defaults to now.
+     */
+    public function create_notice_read($record) {
+        global $DB;
+
+        $record = (object) array_merge([
+            'timeread' => time(),
+        ], (array) $record);
+
+        $DB->insert_record('block_notices_read', $record);
+    }
 }

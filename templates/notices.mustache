@@ -27,11 +27,11 @@
 <p>{{#str}} nonotices, block_notices {{/str}}</p>
 {{/notices}}
 {{#oneormorenotices}}
-<div id="stream-dashboard-notices" data-notices-count="{{noticecount}}">
+<div id="stream-dashboard-notices" data-notices-count="{{noticecount}}" data-courseid="{{courseid}}">
     <div class="swiper">
         <div class="swiper-wrapper">
         {{#notices}}
-            <div class="swiper-slide">
+            <div class="swiper-slide" data-notice-id="{{id}}">
                 <div class="item item__visible_{{visible}} {{#staffonly}}item__staffonly{{/staffonly}} {{#singlenotice}}item__single{{/singlenotice}}">
                     <div>
                         <div class="item__heading">

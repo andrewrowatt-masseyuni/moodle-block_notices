@@ -382,4 +382,149 @@ final class notices_test extends \advanced_testcase {
         $this->expectException(\coding_exception::class);
         \block_notices\output\editable_notice_field::update('content', $id, 'nope');
     }
+
+    /**
+     * Helper: create three visible notices on the given course in deterministic sortorder 1, 2, 3.
+     *
+     * @param int $courseid
+     * @return int[] IDs in display order.
+     */
+    private function setup_three_visible_notices(int $courseid): array {
+        $this->setAdminUser();
+        $id1 = notices::add_notice($courseid, self::TEST_DATA[0]);
+        $id2 = notices::add_notice($courseid, self::TEST_DATA[1]);
+        $id3 = notices::add_notice($courseid, self::TEST_DATA[3]);
+        notices::show_notice($id1);
+        notices::show_notice($id2);
+        notices::show_notice($id3);
+        return [$id1, $id2, $id3];
+    }
+
+    /**
+     * Unread notices appear before read ones; within each group sortorder wins.
+     *
+     * @covers ::get_notices
+     * @covers ::mark_read_batch
+     */
+    public function test_get_notices_orders_unread_first(): void {
+        $this->resetAfterTest(true);
+        $course = $this->getDataGenerator()->create_course();
+        [$id1, $id2, $id3] = $this->setup_three_visible_notices($course->id);
+
+        $user = $this->getDataGenerator()->create_user();
+        $this->setUser($user);
+
+        // Baseline: untouched user sees them in sortorder.
+        $ordered = array_keys(notices::get_notices($course->id));
+        $this->assertSame([$id1, $id2, $id3], $ordered);
+
+        // User reads notice 2.
+        notices::mark_read_batch($user->id, [$id2], $course->id);
+
+        // Notice 2 now drops behind the two unread ones.
+        $ordered = array_keys(notices::get_notices($course->id));
+        $this->assertSame([$id1, $id3, $id2], $ordered);
+    }
+
+    /**
+     * Updating a notice bumps timemodified so the read row is invalidated and the
+     * notice is treated as unread again.
+     *
+     * @covers ::get_notices
+     */
+    public function test_get_notices_invalidates_read_on_update(): void {
+        $this->resetAfterTest(true);
+        $course = $this->getDataGenerator()->create_course();
+        [$id1, $id2, $id3] = $this->setup_three_visible_notices($course->id);
+
+        $user = $this->getDataGenerator()->create_user();
+        $this->setUser($user);
+
+        notices::mark_read_batch($user->id, [$id1, $id2, $id3], $course->id);
+        // All read → display order should match sortorder.
+        $this->assertSame([$id1, $id2, $id3], array_keys(notices::get_notices($course->id)));
+
+        // Admin edits notice 2 — wait a tick so timemodified is strictly greater than timeread.
+        $this->setAdminUser();
+        global $DB;
+        $DB->set_field('block_notices_read', 'timeread', time() - 10, ['userid' => $user->id, 'noticeid' => $id2]);
+        $notice = notices::get_notice($id2);
+        $notice['title'] = 'Updated title';
+        notices::update_notice($notice);
+
+        $this->setUser($user);
+        $ordered = array_keys(notices::get_notices($course->id));
+        $this->assertSame([$id2, $id1, $id3], $ordered, 'updated notice should appear first again');
+    }
+
+    /**
+     * First mark_read_batch insert creates a row; subsequent call updates the same row
+     * and never creates a duplicate.
+     *
+     * @covers ::mark_read_batch
+     */
+    public function test_mark_read_batch_creates_and_updates_rows(): void {
+        global $DB;
+        $this->resetAfterTest(true);
+        $course = $this->getDataGenerator()->create_course();
+        [$id1] = $this->setup_three_visible_notices($course->id);
+        $user = $this->getDataGenerator()->create_user();
+
+        $acked = notices::mark_read_batch($user->id, [$id1], $course->id);
+        $this->assertSame([$id1], $acked);
+        $this->assertEquals(1, $DB->count_records('block_notices_read', ['userid' => $user->id]));
+
+        // Force an earlier timeread so the second call has reason to update.
+        $DB->set_field('block_notices_read', 'timeread', time() - 100, ['userid' => $user->id, 'noticeid' => $id1]);
+        $before = (int)$DB->get_field('block_notices_read', 'timeread', ['userid' => $user->id, 'noticeid' => $id1]);
+
+        notices::mark_read_batch($user->id, [$id1], $course->id);
+        $after = (int)$DB->get_field('block_notices_read', 'timeread', ['userid' => $user->id, 'noticeid' => $id1]);
+
+        $this->assertGreaterThan($before, $after);
+        $this->assertEquals(1, $DB->count_records('block_notices_read', ['userid' => $user->id]));
+    }
+
+    /**
+     * Notices the user can't see (hidden or in a different course) are filtered out
+     * of the ack list and no read row is written.
+     *
+     * @covers ::mark_read_batch
+     */
+    public function test_mark_read_batch_filters_to_visible(): void {
+        global $DB;
+        $this->resetAfterTest(true);
+        $course = $this->getDataGenerator()->create_course();
+        $othercourse = $this->getDataGenerator()->create_course();
+
+        $this->setAdminUser();
+        $hiddenid = notices::add_notice($course->id, self::TEST_DATA[2]); // Left in preview state.
+        $otherid = notices::add_notice($othercourse->id, self::TEST_DATA[0]);
+        notices::show_notice($otherid);
+
+        $user = $this->getDataGenerator()->create_user();
+        $acked = notices::mark_read_batch($user->id, [$hiddenid, $otherid, 999999], $course->id);
+
+        $this->assertSame([], $acked);
+        $this->assertEquals(0, $DB->count_records('block_notices_read'));
+    }
+
+    /**
+     * Deleting a notice cascades to its read rows.
+     *
+     * @covers ::delete_notice
+     */
+    public function test_delete_notice_cascades_reads(): void {
+        global $DB;
+        $this->resetAfterTest(true);
+        $course = $this->getDataGenerator()->create_course();
+        [$id1] = $this->setup_three_visible_notices($course->id);
+        $user = $this->getDataGenerator()->create_user();
+
+        notices::mark_read_batch($user->id, [$id1], $course->id);
+        $this->assertEquals(1, $DB->count_records('block_notices_read', ['noticeid' => $id1]));
+
+        notices::delete_notice($id1);
+        $this->assertEquals(0, $DB->count_records('block_notices_read', ['noticeid' => $id1]));
+    }
 }
