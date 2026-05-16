@@ -1,4 +1,4 @@
-<XMLDB xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" PATH="blocks/notices/db" VERSION="20260517" COMMENT="XMLDB file for Moodle blocks/notices" xsi:noNamespaceSchemaLocation="../../../lib/xmldb/xmldb.xsd">
+<XMLDB xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" PATH="blocks/notices/db" VERSION="20260518" COMMENT="XMLDB file for Moodle blocks/notices" xsi:noNamespaceSchemaLocation="../../../lib/xmldb/xmldb.xsd">
 <TABLES>
 <TABLE NAME="block_notices" COMMENT="Contains notices for a course">
 <FIELDS>
@@ -27,6 +27,22 @@
 <KEY NAME="modifiedbyuserid" TYPE="foreign" FIELDS="modifiedbyuserid" REFTABLE="user" REFFIELDS="id"/>
 <KEY NAME="additionaleditorid" TYPE="foreign" FIELDS="additionaleditorid" REFTABLE="user" REFFIELDS="id"/>
 </KEYS>
+</TABLE>
+<TABLE NAME="block_notices_read" COMMENT="Records the most recent time each user has seen each notice. A notice is unread for a user when timeread is missing or older than the notice's timemodified.">
+<FIELDS>
+<FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+<FIELD NAME="noticeid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="Notice that was read."/>
+<FIELD NAME="userid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="User who read the notice."/>
+<FIELD NAME="timeread" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="Unix timestamp of the most recent read for this user/notice pair."/>
+</FIELDS>
+<KEYS>
+<KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+<KEY NAME="noticeid" TYPE="foreign" FIELDS="noticeid" REFTABLE="block_notices" REFFIELDS="id"/>
+<KEY NAME="userid" TYPE="foreign" FIELDS="userid" REFTABLE="user" REFFIELDS="id"/>
+</KEYS>
+<INDEXES>
+<INDEX NAME="noticeiduserid" UNIQUE="true" FIELDS="noticeid, userid" COMMENT="One row per user/notice pair."/>
+</INDEXES>
 </TABLE>
 </TABLES>
 </XMLDB>

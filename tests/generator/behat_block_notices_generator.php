@@ -50,7 +50,35 @@ class behat_block_notices_generator extends behat_generator_base {
                     'additionaleditor' => 'additionaleditorid',
                 ],
             ],
+            'notice reads' => [
+                'singular' => 'notice read',
+                'datagenerator' => 'notice_read',
+                'required' => [
+                    'user',
+                    'notice',
+                ],
+                'switchids' => [
+                    'user' => 'userid',
+                    'notice' => 'noticeid',
+                ],
+            ],
         ];
+    }
+
+    /**
+     * Resolve a notice id from its title (titles are required and short).
+     *
+     * @param string $title
+     * @return int
+     * @throws Exception
+     */
+    protected function get_notice_id(string $title): int {
+        global $DB;
+
+        if (!$id = $DB->get_field('block_notices', 'id', ['title' => $title], IGNORE_MULTIPLE)) {
+            throw new Exception('The specified notice with title "' . $title . '" does not exist');
+        }
+        return $id;
     }
 
     /**

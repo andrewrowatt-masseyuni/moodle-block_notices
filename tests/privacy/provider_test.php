@@ -53,13 +53,20 @@ final class provider_test extends \core_privacy\tests\provider_testcase {
 
         $this->setUser($user1);
         $id = notices::add_notice(1, notices::TEST_DATA[0]);
+        notices::show_notice($id);
+        $firstvisible = $id;
 
         $notice = notices::get_notice($id);
 
         $this->setUser($user2);
         notices::update_notice($notice);
         $id = notices::add_notice(1, notices::TEST_DATA[1]);
+        notices::show_notice($id);
         $id = notices::add_notice(1, notices::TEST_DATA[2]);
+
+        // User1 has both authored data and a read row; user3 has only a read row.
+        notices::mark_read_batch($this->user1->id, [$firstvisible], 1);
+        notices::mark_read_batch($this->user3->id, [$firstvisible], 1);
     }
 
     /**
@@ -75,8 +82,8 @@ final class provider_test extends \core_privacy\tests\provider_testcase {
         $classname = privacy\provider::class;
         $classname::get_metadata($collection);
 
-        // Check that the collection contains the expected items.
-        $this->assertCount(1, $collection->get_collection());
+        // Two database tables: block_notices and block_notices_read.
+        $this->assertCount(2, $collection->get_collection());
     }
 
     /**
@@ -90,11 +97,11 @@ final class provider_test extends \core_privacy\tests\provider_testcase {
         $userlist = new \core_privacy\local\request\userlist($cmcontext, 'block_notices');
         privacy\provider::get_users_in_context($userlist);
 
-        // Check that the userlist contains the expected users - order agnostic.
+        // User1/user2 are creators/modifiers, user3 only has a read row — all three must surface.
         $this->assertEquals(
             [],
             array_diff(
-                [$this->user1->id, $this->user2->id],
+                [$this->user1->id, $this->user2->id, $this->user3->id],
                 $userlist->get_userids()
             )
         );
@@ -109,8 +116,9 @@ final class provider_test extends \core_privacy\tests\provider_testcase {
         $contextlist = privacy\provider::get_contexts_for_userid($this->user1->id);
         $this->assertCount(1, $contextlist);
 
+        // User3 has a read row → the course context must be returned.
         $contextlist = privacy\provider::get_contexts_for_userid($this->user3->id);
-        $this->assertCount(0, $contextlist);
+        $this->assertCount(1, $contextlist);
     }
 
     /**
@@ -119,8 +127,10 @@ final class provider_test extends \core_privacy\tests\provider_testcase {
      * @covers \local_faultreporting\privacy
      */
     public function test_delete_data_for_user(): void {
+        global $DB;
         $notices = notices::get_notices_admin(1);
         $this->assertCount(3, $notices);
+        $this->assertEquals(1, $DB->count_records('block_notices_read', ['userid' => $this->user1->id]));
 
         $contextlist = new \core_privacy\local\request\approved_contextlist(
             $this->user1,
@@ -131,6 +141,7 @@ final class provider_test extends \core_privacy\tests\provider_testcase {
 
         $notices = notices::get_notices_admin(1);
         $this->assertCount(2, $notices);
+        $this->assertEquals(0, $DB->count_records('block_notices_read', ['userid' => $this->user1->id]));
     }
 
     /**
@@ -139,8 +150,10 @@ final class provider_test extends \core_privacy\tests\provider_testcase {
      * @covers \local_faultreporting\privacy
      */
     public function test_delete_data_for_users(): void {
+        global $DB;
         $notices = notices::get_notices_admin(1);
         $this->assertCount(3, $notices);
+        $this->assertEquals(2, $DB->count_records('block_notices_read'));
 
         $approveduserlist = new \core_privacy\local\request\approved_userlist(
             \context_course::instance(1),
@@ -151,6 +164,8 @@ final class provider_test extends \core_privacy\tests\provider_testcase {
 
         $notices = notices::get_notices_admin(1);
         $this->assertCount(2, $notices);
+        $this->assertEquals(0, $DB->count_records('block_notices_read', ['userid' => $this->user1->id]));
+        $this->assertEquals(0, $DB->count_records('block_notices_read', ['userid' => $this->user3->id]));
     }
 
     /**
@@ -159,13 +174,16 @@ final class provider_test extends \core_privacy\tests\provider_testcase {
      * @covers \local_faultreporting\privacy
      */
     public function test_delete_data_for_all_users_in_context(): void {
+        global $DB;
         $context = \context_course::instance(1);
+        $this->assertEquals(2, $DB->count_records('block_notices_read'));
 
         privacy\provider::delete_data_for_all_users_in_context($context);
 
         // Check that the fault reports have been deleted.
         $notices = notices::get_notices_admin(1);
         $this->assertCount(0, $notices);
+        $this->assertEquals(0, $DB->count_records('block_notices_read'));
     }
 
     /**

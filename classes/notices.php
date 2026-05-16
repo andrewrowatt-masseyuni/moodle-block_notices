@@ -222,13 +222,16 @@ class notices {
     /**
      * Get all notices for a given instance.
      *
+     * Notices the current user has not seen since they were last modified are returned
+     * first, followed by read notices, both groups ordered by sortorder.
+     *
      * @param int $courseid
      * @param bool $includepreview
      * @param bool $includestaffonly
      * @return array
      */
     public static function get_notices(int $courseid, bool $includepreview = false, bool $includestaffonly = false): array {
-        global $DB;
+        global $DB, $USER;
 
         // If there is an exclusive notice for this course and it is currently visible, only return that.
         $exclusive = self::get_active_exclusive_notice($courseid);
@@ -247,14 +250,103 @@ class notices {
             $visible[] = self::NOTICE_IN_PREVIEW;
         }
 
-        [$insql, $inparams] = $DB->get_in_or_equal($visible);
+        // Guests/anonymous users have no read state — the LEFT JOIN with userid=0
+        // returns no rows so all notices sort as unread (tied), falling back to sortorder.
+        $userid = (isloggedin() && !isguestuser()) ? (int)$USER->id : 0;
 
-        $sql = "SELECT * FROM {block_notices}
-            WHERE courseid = ? and staffonly <= ? and
-            visible $insql
-            order by sortorder asc";
+        [$insql, $inparams] = $DB->get_in_or_equal($visible, SQL_PARAMS_NAMED);
 
-        return $DB->get_records_sql($sql, ['courseid' => $courseid, 'staffonly' => (int)$includestaffonly] + $inparams);
+        $sql = "SELECT b.*
+                  FROM {block_notices} b
+                  LEFT JOIN {block_notices_read} r
+                       ON r.noticeid = b.id AND r.userid = :userid
+                 WHERE b.courseid = :courseid
+                   AND b.staffonly <= :staffonly
+                   AND b.visible $insql
+              ORDER BY CASE WHEN r.timeread IS NULL OR r.timeread < b.timemodified THEN 0 ELSE 1 END ASC,
+                       b.sortorder ASC";
+
+        $params = [
+            'userid' => $userid,
+            'courseid' => $courseid,
+            'staffonly' => (int)$includestaffonly,
+        ] + $inparams;
+
+        return $DB->get_records_sql($sql, $params);
+    }
+
+    /**
+     * Record that a user has seen each of the given notices.
+     *
+     * Filters $noticeids down to those that are currently visible to the user (re-using
+     * the get_notices visibility rules), then upserts a row in block_notices_read for
+     * each acked notice with timeread = now(). One row per (noticeid, userid).
+     *
+     * @param int $userid Acting user (typically $USER->id).
+     * @param int[] $noticeids IDs the client claims to have seen.
+     * @param int $courseid Course the user was viewing the carousel on; used for visibility filter.
+     * @param bool $includestaffonly Whether staff-only notices should be visible to this user.
+     * @return int[] The IDs that were actually acked (after filtering).
+     */
+    public static function mark_read_batch(int $userid, array $noticeids, int $courseid, bool $includestaffonly = false): array {
+        global $DB;
+
+        if ($userid <= 0 || empty($noticeids)) {
+            return [];
+        }
+
+        $noticeids = array_values(array_unique(array_map('intval', $noticeids)));
+
+        // Re-resolve visibility server-side. Exclusive/critical short-circuits collapse the
+        // visible set to a single notice, which is the correct guard here too.
+        $visible = self::get_notices($courseid, false, $includestaffonly);
+        $allowed = array_intersect($noticeids, array_keys($visible));
+        if (empty($allowed)) {
+            return [];
+        }
+
+        $now = time();
+        $acked = [];
+
+        $transaction = $DB->start_delegated_transaction();
+        foreach ($allowed as $noticeid) {
+            $existing = $DB->get_record('block_notices_read', ['noticeid' => $noticeid, 'userid' => $userid], 'id, timeread');
+            if ($existing) {
+                if ((int)$existing->timeread < $now) {
+                    $DB->set_field('block_notices_read', 'timeread', $now, ['id' => $existing->id]);
+                }
+            } else {
+                $DB->insert_record('block_notices_read', (object)[
+                    'noticeid' => $noticeid,
+                    'userid' => $userid,
+                    'timeread' => $now,
+                ]);
+            }
+            $acked[] = (int)$noticeid;
+        }
+        $transaction->allow_commit();
+
+        return $acked;
+    }
+
+    /**
+     * Delete all read rows for a notice. Called when a notice is being removed.
+     *
+     * @param int $noticeid
+     */
+    public static function delete_reads_for_notice(int $noticeid): void {
+        global $DB;
+        $DB->delete_records('block_notices_read', ['noticeid' => $noticeid]);
+    }
+
+    /**
+     * Delete all read rows belonging to a user. Used by the privacy provider.
+     *
+     * @param int $userid
+     */
+    public static function delete_reads_for_user(int $userid): void {
+        global $DB;
+        $DB->delete_records('block_notices_read', ['userid' => $userid]);
     }
 
     /**
@@ -394,13 +486,20 @@ class notices {
             $params['additionaleditorid'] = $additionaleditorid;
         }
 
+        // Readcount uses COUNT(*) because the (noticeid, userid) UNIQUE index already
+        // guarantees one row per user/notice pair. readcountcurrent only counts reads of
+        // the current notice version (timeread >= timemodified); for unmodified notices
+        // it equals readcount.
         $sql = "SELECT b.*,
             trim(concat(cb.firstname, ' ', cb.lastname)) as createdby,
             trim(concat(mb.firstname, ' ', mb.lastname)) as modifiedby,
             b.sortorder = (select min(sortorder) from {block_notices}
                 where courseid = b.courseid and visible=:visiblemin) as isfirst,
             b.sortorder = (select max(sortorder) from {block_notices}
-                where courseid = b.courseid and visible=:visiblemax) as islast
+                where courseid = b.courseid and visible=:visiblemax) as islast,
+            (select count(*) from {block_notices_read} r where r.noticeid = b.id) as readcount,
+            (select count(*) from {block_notices_read} r where r.noticeid = b.id
+                and r.timeread >= b.timemodified) as readcountcurrent
             FROM {block_notices} b
             join {user} cb on b.createdbyuserid = cb.id
             join {user} mb on b.modifiedbyuserid = mb.id
@@ -449,6 +548,7 @@ class notices {
     public static function delete_notice($id) {
         global $DB;
 
+        self::delete_reads_for_notice((int)$id);
         $DB->delete_records('block_notices', ['id' => $id]);
     }
 
@@ -460,6 +560,11 @@ class notices {
     public static function delete_all_notices(int $courseid) {
         global $DB;
 
+        $DB->delete_records_select(
+            'block_notices_read',
+            'noticeid IN (SELECT id FROM {block_notices} WHERE courseid = :courseid)',
+            ['courseid' => $courseid]
+        );
         $DB->delete_records('block_notices', ['courseid' => $courseid]);
     }
 

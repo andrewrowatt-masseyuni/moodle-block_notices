@@ -45,5 +45,27 @@ function xmldb_block_notices_upgrade($oldversion) {
         upgrade_block_savepoint(true, 2026051700, 'notices');
     }
 
+    if ($oldversion < 2026051800) {
+        // Per-user read tracking. One row per (noticeid, userid); a notice is
+        // unread when timeread is missing or older than the notice's timemodified.
+        $table = new xmldb_table('block_notices_read');
+        if (!$dbman->table_exists($table)) {
+            $table->add_field('id', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, XMLDB_SEQUENCE, null);
+            $table->add_field('noticeid', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, null);
+            $table->add_field('userid', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, null);
+            $table->add_field('timeread', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, null);
+
+            $table->add_key('primary', XMLDB_KEY_PRIMARY, ['id']);
+            $table->add_key('noticeid', XMLDB_KEY_FOREIGN, ['noticeid'], 'block_notices', ['id']);
+            $table->add_key('userid', XMLDB_KEY_FOREIGN, ['userid'], 'user', ['id']);
+
+            $table->add_index('noticeiduserid', XMLDB_INDEX_UNIQUE, ['noticeid', 'userid']);
+
+            $dbman->create_table($table);
+        }
+
+        upgrade_block_savepoint(true, 2026051800, 'notices');
+    }
+
     return true;
 }
