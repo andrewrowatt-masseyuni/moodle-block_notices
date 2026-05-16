@@ -146,8 +146,6 @@ foreach (notices::get_notices_admin($courseid, $additionaleditorfilter) as $noti
     // Run filters on the title and the full text-cleaning pipeline on the content
     // before the template renders them; the manageallnotices capability declares
     // RISK_XSS so the saved HTML is trusted (noclean), but filters must still run.
-    // Note: the inplace-editable title in $noticearray['titlehtml'] is rendered
-    // below and already calls format_string itself.
     $noticearray['title'] = format_string(
         $noticeobject->title,
         true,
@@ -158,13 +156,6 @@ foreach (notices::get_notices_admin($courseid, $additionaleditorfilter) as $noti
         $noticeobject->contentformat,
         ['context' => $formatcontext, 'noclean' => true]
     );
-
-    // Render inplace-editable HTML for the title so it can be edited from the list.
-    // export_for_template() requires a real renderer_base (the global $OUTPUT is the bootstrap_renderer
-    // shim), and the renderable's own render() method targets the standard core/inplace_editable template.
-    $renderer = $PAGE->get_renderer('core');
-    $noticearray['titlehtml'] = (new \block_notices\output\editable_notice_field('title', $noticeobject))
-        ->render($renderer);
 
     // Add extra properties to improve the template output. Reorder and delete are restricted to manage-all.
     $noticearray['candelete'] = $canmanageall;
