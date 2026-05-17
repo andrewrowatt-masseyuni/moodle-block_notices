@@ -36,7 +36,7 @@
 {{/notices}}
 <ul class="list-group pb-3">
     {{#notices}}
-    <li class="list-group-item visibility-{{visible}} block-notices-item" data-notice-id="{{id}}" data-notice-title="{{title}}">
+    <li class="list-group-item visibility-{{visible}} block-notices-item {{#hasimage}}item__has_image{{/hasimage}}" data-notice-id="{{id}}" data-notice-title="{{title}}">
         <span class="badge badge-light badge-sortorder sr-only">{{sortorder}}</span>
 
         <div class="block-notices-primary d-flex align-items-center">
@@ -76,7 +76,12 @@
             {{/ismodified}}
         </div>
 
-        <div class="block-notices-content mb-1">{{{content}}}</div>
+        <div class="block-notices-content-row d-flex">
+            <div class="block-notices-content mb-1">{{{content}}}</div>
+            {{#hasimage}}
+            <div class="img" role="presentation" style="background-image:url('{{imageurl}}');"></div>
+            {{/hasimage}}
+        </div>
 
         <div class="block-notices-details">
             <small>{{#str}} moreinformationurl, block_notices {{/str}}: <a href="{{moreinformationurl}}" target="_blank">{{moreinformationurl}}</a></small>

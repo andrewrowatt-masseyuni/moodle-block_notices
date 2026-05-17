@@ -118,6 +118,10 @@ class block_notices extends block_base {
                     ];
                 }
 
+                $imageurl = notices::get_image_url((int)$noticeobject->id, $courseid);
+                $noticearray['hasimage'] = $imageurl !== null;
+                $noticearray['imageurl'] = $imageurl !== null ? $imageurl->out(false) : '';
+
                 $data['notices'][] = $noticearray;
             }
 

@@ -33,6 +33,22 @@ use moodle_url;
  */
 class notice extends dynamic_form {
     /**
+     * Filemanager options for the optional notice image.
+     *
+     * @return array
+     */
+    private static function image_filemanager_options(): array {
+        global $CFG;
+        return [
+            'subdirs' => 0,
+            'maxfiles' => 1,
+            'maxbytes' => $CFG->maxbytes,
+            'accepted_types' => ['web_image'],
+            'areamaxbytes' => FILE_AREA_MAX_BYTES_UNLIMITED,
+        ];
+    }
+
+    /**
      * Define the form.
      */
     public function definition() {
@@ -109,6 +125,16 @@ class notice extends dynamic_form {
             '<i class="icon fa fa-info-circle " aria-hidden="true"></i>' . get_string('content_help_additional', 'block_notices'),
             'alert alert-info help_text'
         ));
+
+        $mform->addElement(
+            'filemanager',
+            'image_filemanager',
+            get_string('image', 'block_notices'),
+            null,
+            self::image_filemanager_options()
+        );
+        $mform->addHelpButton('image_filemanager', 'image', 'block_notices');
+
         $mform->addElement('html', html_writer::tag('hr', ''));
 
         $mform->addElement('text', 'moreinformationurl', get_string('moreinformationurl', 'block_notices'), ['size' => 128]);
@@ -252,6 +278,7 @@ class notice extends dynamic_form {
     public function set_data_for_dynamic_submission(): void {
         $noticeid = $this->optional_param('noticeid', 0, PARAM_INT);
         $courseid = $this->optional_param('courseid', 0, PARAM_INT);
+        $options = self::image_filemanager_options();
 
         if ($noticeid > 0) {
             $notice = notices::get_notice($noticeid);
@@ -260,16 +287,29 @@ class notice extends dynamic_form {
             $notice['content'] = $notice['content'] ?? '';
             $notice['noticeid'] = $noticeid;
             $notice['courseid'] = $courseid;
-            $this->set_data((object)$notice);
+            $data = (object)$notice;
+            file_prepare_standard_filemanager(
+                $data,
+                'image',
+                $options,
+                notices::get_notice_context((int)$courseid),
+                'block_notices',
+                'image',
+                $noticeid
+            );
+            $this->set_data($data);
             return;
         }
 
-        $this->set_data((object)[
+        $data = (object)[
             'id' => 0,
             'noticeid' => 0,
             'courseid' => $courseid,
             'content' => '',
-        ]);
+        ];
+        // New notice: stage an empty draft area so the filemanager renders correctly.
+        file_prepare_standard_filemanager($data, 'image', $options, null, null, null, null);
+        $this->set_data($data);
     }
 
     /**
@@ -337,8 +377,19 @@ class notice extends dynamic_form {
             $data['additionaleditorid'] = !empty($formdata->additionaleditorid)
                 ? (int)$formdata->additionaleditorid
                 : null;
-            notices::add_notice($courseid, $data);
+            $noticeid = notices::add_notice($courseid, $data);
         }
+
+        // Move any uploaded image from the draft area into the notice's permanent filearea.
+        file_postupdate_standard_filemanager(
+            $formdata,
+            'image',
+            self::image_filemanager_options(),
+            notices::get_notice_context($courseid),
+            'block_notices',
+            'image',
+            $noticeid
+        );
 
         $url = new moodle_url('/blocks/notices/manage.php', ['courseid' => $courseid]);
         return [
