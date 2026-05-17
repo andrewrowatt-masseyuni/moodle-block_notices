@@ -21,6 +21,9 @@ Feature: View notice
       | owneremail         | Notice1owneremail@noreply.com |
       | createdby          | arowatt                       |
       | modifiedby         | arowatt                       |
+      | timecreated        | 1                             |
+      | timemodified       | 1                             |
+      | timepromoted       | 1                             |
     And the following "block_notices > notice" exists:
       | course             | Acceptance test site          |
       | visible            | NOTICE_VISIBLE                |
@@ -32,6 +35,9 @@ Feature: View notice
       | owneremail         | Notice2owneremail@noreply.com |
       | createdby          | arowatt                       |
       | modifiedby         | arowatt                       |
+      | timecreated        | 2                             |
+      | timemodified       | 2                             |
+      | timepromoted       | 2                             |
     And the following "block_notices > notice" exists:
       | course             | Acceptance test site          |
       | visible            | NOTICE_IN_PREVIEW             |
@@ -43,6 +49,9 @@ Feature: View notice
       | owneremail         | Notice3owneremail@noreply.com |
       | createdby          | arowatt                       |
       | modifiedby         | arowatt                       |
+      | timecreated        | 3                             |
+      | timemodified       | 3                             |
+      | timepromoted       | 3                             |
     And I change the window size to "large"
 
   Scenario: Checking the layout of the Notice block as admin

@@ -54,7 +54,6 @@ Feature: Promote a notice
     And I click on "[data-notice-title=\"OlderNotice\"] [data-notice-action=\"promote\"]" "css_element"
 
     # Student sees the promoted notice first in the carousel.
-    And I log out
     And I log in as "98186700"
     And I am on site homepage
     Then "#stream-dashboard-notices[data-notices-count=\"2\"]" "css_element" should exist

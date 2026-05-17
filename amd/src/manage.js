@@ -22,7 +22,9 @@
  */
 
 import ModalForm from 'core_form/modalform';
+import ModalEvents from 'core/modal_events';
 import {getString} from 'core/str';
+import * as NoticeEditor from 'block_notices/notice_editor';
 
 const FORM_CLASS = 'block_notices\\form\\notice';
 const SELECTOR_ADD = '[data-action="notice-add"]';
@@ -59,6 +61,17 @@ const openModal = (trigger, courseid, noticeid, titlePromise) => {
         } else {
             window.location.reload();
         }
+    });
+
+    // Install a MutationObserver on the modal body so we (re-)initialise Quill whenever
+    // the form HTML appears or is re-rendered. ModalForm fires LOADED synchronously
+    // before the form body promise resolves and emits no event for the no-submit /
+    // server-validation re-renders, so a one-shot LOADED handler isn't enough.
+    modalForm.addEventListener(modalForm.events.LOADED, () => {
+        const modalRoot = modalForm.modal.getRoot();
+        const modalBody = modalForm.modal.getBody()[0];
+        const stop = NoticeEditor.observe(modalBody);
+        modalRoot.on(ModalEvents.hidden, () => stop());
     });
 
     modalForm.show();
