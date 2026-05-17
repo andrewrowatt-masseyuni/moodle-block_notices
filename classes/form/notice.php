@@ -15,32 +15,45 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 namespace block_notices\form;
-use block_notices\notices;
-use html_writer;
 
-defined('MOODLE_INTERNAL') || die();
-require_once($CFG->libdir . '/formslib.php');
+use block_notices\notices;
+use context;
+use context_course;
+use context_system;
+use core_form\dynamic_form;
+use html_writer;
+use moodle_url;
 
 /**
- * Class addnotice
+ * Add / edit a notice via a modal dynamic form.
  *
  * @package    block_notices
  * @copyright  2025 Andrew Rowatt <A.J.Rowatt@massey.ac.nz>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class notice extends \moodleform {
+class notice extends dynamic_form {
     /**
      * Define the form.
      */
     public function definition() {
-        $mform = $this->_form; // Don't forget the underscore!
+        $mform = $this->_form;
 
-        $mform->addElement('hidden', 'id', 0);
+        $noticeid = $this->optional_param('noticeid', 0, PARAM_INT);
+        $courseid = $this->optional_param('courseid', 0, PARAM_INT);
+        $isedit = $noticeid > 0;
+        // Only manage-all users can (re)assign the additional editor. Manage-own users
+        // get a hidden input that preserves the existing value (set via set_data).
+        $canpickadditionaleditor = has_capability(
+            'block/notices:manageallnotices',
+            context_system::instance()
+        );
+
+        $mform->addElement('hidden', 'id', $noticeid);
         $mform->setType('id', PARAM_INT);
-
-        $canpickadditionaleditor = !empty($this->_customdata['canpickadditionaleditor']);
-        $isedit = !empty($this->_customdata['isedit']);
-        $currentvisible = $this->_customdata['currentvisible'] ?? null;
+        $mform->addElement('hidden', 'noticeid', $noticeid);
+        $mform->setType('noticeid', PARAM_INT);
+        $mform->addElement('hidden', 'courseid', $courseid);
+        $mform->setType('courseid', PARAM_INT);
 
         // Start of general group.
 
@@ -51,6 +64,13 @@ class notice extends \moodleform {
             notices::NOTICE_VISIBLE => 'visibility_visible',
             notices::NOTICE_IN_PREVIEW => 'visibility_preview',
         ];
+        $currentvisible = null;
+        if ($isedit) {
+            $existing = notices::get_notice($noticeid);
+            if (!empty($existing)) {
+                $currentvisible = (int)$existing['visible'];
+            }
+        }
         if ($isedit && isset($visibilitystringkey[$currentvisible])) {
             $visibilitydisplay = get_string($visibilitystringkey[$currentvisible], 'block_notices');
         } else {
@@ -71,7 +91,7 @@ class notice extends \moodleform {
         $mform->addHelpButton('title', 'title', 'block_notices');
         $mform->addRule('title', null, 'required', null, 'client');
 
-        $editoroptions = ['maxfiles' => 0, 'noclean' => true, 'context' => null];
+        $editoroptions = ['maxfiles' => 0, 'noclean' => true, 'context' => $this->get_context_for_dynamic_submission()];
         $mform->addElement('editor', 'content', get_string('content', 'block_notices'), null, $editoroptions);
         $mform->setDefault('content', ['text' => '']);
         $mform->addRule('content', null, 'required', null, 'client');
@@ -136,7 +156,7 @@ class notice extends \moodleform {
                     if (empty($userid)) {
                         return false;
                     }
-                    $context = \context_system::instance();
+                    $context = context_system::instance();
                     $fields = \core_user\fields::for_name()->with_identity($context, false);
                     $record = \core_user::get_user(
                         $userid,
@@ -179,10 +199,123 @@ class notice extends \moodleform {
         $mform->setDefault('notes', '');
         $mform->setType('notes', PARAM_TEXT);
         $mform->addHelpButton('notes', 'notes', 'block_notices');
+    }
 
-        $buttonarray = [];
-        $buttonarray[] = $mform->createElement('submit', 'submitbutton', get_string('save'));
-        $buttonarray[] = $mform->createElement('cancel');
-        $mform->addGroup($buttonarray, 'buttonar', '', [' '], false);
+    /**
+     * Returns the context where this form is used.
+     *
+     * @return context
+     */
+    protected function get_context_for_dynamic_submission(): context {
+        $courseid = $this->optional_param('courseid', 0, PARAM_INT);
+        if ($courseid && (int)$courseid !== SITEID) {
+            return context_course::instance($courseid);
+        }
+        return context_system::instance();
+    }
+
+    /**
+     * Throws a moodle_exception if the current user cannot use this form for the supplied notice/course.
+     */
+    protected function check_access_for_dynamic_submission(): void {
+        $noticeid = $this->optional_param('noticeid', 0, PARAM_INT);
+        if ($noticeid > 0) {
+            $existing = notices::get_notice($noticeid);
+            if (empty($existing) || !notices::user_can_edit($existing)) {
+                throw new \moodle_exception('errornopermission', 'block_notices');
+            }
+        } else if (!notices::user_can_create()) {
+            throw new \moodle_exception('errornopermission', 'block_notices');
+        }
+    }
+
+    /**
+     * Returns the page URL used as $PAGE->set_url() when rendering / submitting via AJAX.
+     *
+     * @return moodle_url
+     */
+    protected function get_page_url_for_dynamic_submission(): moodle_url {
+        $courseid = $this->optional_param('courseid', 0, PARAM_INT);
+        return new moodle_url('/blocks/notices/manage.php', ['courseid' => $courseid]);
+    }
+
+    /**
+     * Load the existing notice (edit mode) or the courseid (add mode) into the form.
+     */
+    public function set_data_for_dynamic_submission(): void {
+        $noticeid = $this->optional_param('noticeid', 0, PARAM_INT);
+        $courseid = $this->optional_param('courseid', 0, PARAM_INT);
+
+        if ($noticeid > 0) {
+            $notice = notices::get_notice($noticeid);
+            // Editor element expects ['text' => ..., 'format' => ...]; replace the raw
+            // content/contentformat columns with that shape and re-assert noticeid/courseid
+            // so the hidden fields match the AJAX args (defends against any oddities in
+            // the stored row).
+            $notice['content'] = [
+                'text' => $notice['content'] ?? '',
+                'format' => $notice['contentformat'] ?? FORMAT_HTML,
+            ];
+            $notice['noticeid'] = $noticeid;
+            $notice['courseid'] = $courseid;
+            $this->set_data((object)$notice);
+            return;
+        }
+
+        $this->set_data((object)[
+            'id' => 0,
+            'noticeid' => 0,
+            'courseid' => $courseid,
+            'content' => ['text' => '', 'format' => FORMAT_HTML],
+        ]);
+    }
+
+    /**
+     * Persist the submitted notice — add or update — and return the URL to redirect to.
+     *
+     * @return array {result: bool, url: string}
+     */
+    public function process_dynamic_submission() {
+        $formdata = $this->get_data();
+        $courseid = (int)$this->optional_param('courseid', 0, PARAM_INT);
+        $canpickadditionaleditor = has_capability(
+            'block/notices:manageallnotices',
+            context_system::instance()
+        );
+
+        $data = [
+            'staffonly' => !empty($formdata->staffonly),
+            'title' => $formdata->title,
+            'content' => $formdata->content['text'],
+            'contentformat' => $formdata->content['format'],
+            'moreinformationurl' => $formdata->moreinformationurl,
+            'owner' => $formdata->owner,
+            'owneremail' => $formdata->owneremail,
+            'notes' => $formdata->notes,
+        ];
+
+        $noticeid = (int)($formdata->noticeid ?? 0);
+        if ($noticeid > 0) {
+            $data['id'] = $noticeid;
+            // Only manage-all users can reassign the additional editor; an empty selection
+            // clears it (so only Notices managers can edit thereafter).
+            if ($canpickadditionaleditor) {
+                $data['additionaleditorid'] = !empty($formdata->additionaleditorid)
+                    ? (int)$formdata->additionaleditorid
+                    : null;
+            }
+            notices::update_notice($data);
+        } else {
+            $data['additionaleditorid'] = !empty($formdata->additionaleditorid)
+                ? (int)$formdata->additionaleditorid
+                : null;
+            notices::add_notice($courseid, $data);
+        }
+
+        $url = new moodle_url('/blocks/notices/manage.php', ['courseid' => $courseid]);
+        return [
+            'result' => true,
+            'url' => $url->out(false),
+        ];
     }
 }

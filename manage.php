@@ -213,6 +213,7 @@ $data = [
 ];
 
 $PAGE->requires->js_call_amd('block_notices/block_notices', 'init', []);
+$PAGE->requires->js_call_amd('block_notices/manage', 'init', [$courseid]);
 
 echo $OUTPUT->header();
 
