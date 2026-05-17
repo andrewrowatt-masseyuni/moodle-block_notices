@@ -27,11 +27,11 @@ Feature: Add and edit notices via the modal dynamic form
     And I set the following fields to these values:
       | Staff only               | No                            |
       | Title                    | Notice1title                  |
-      | Content                  | Notice1content                |
       | URL for more information | http://massey.ac.nz           |
       | Owner                    | notice1owner                  |
       | Owner email address      | Notice1owneremail@noreply.com |
       | Notes                    | Remove 1 November 2024        |
+    And I set the notice Quill editor to "Notice1content"
     And I click on "Save" "button" in the ".modal-dialog" "css_element"
     And I should see "Manage notices"
     Then I should see "Notice1title" in the ".block-notices-group-visibility-preview" "css_element"

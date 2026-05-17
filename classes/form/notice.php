@@ -91,10 +91,17 @@ class notice extends dynamic_form {
         $mform->addHelpButton('title', 'title', 'block_notices');
         $mform->addRule('title', null, 'required', null, 'client');
 
-        $editoroptions = ['maxfiles' => 0, 'noclean' => true, 'context' => $this->get_context_for_dynamic_submission()];
-        $mform->addElement('editor', 'content', get_string('content', 'block_notices'), null, $editoroptions);
-        $mform->setDefault('content', ['text' => '']);
-        $mform->addRule('content', null, 'required', null, 'client');
+        // The notice content is captured by a Quill editor (initialised by block_notices/notice_editor
+        // when the modal form renders). The underlying textarea remains in the DOM (hidden by JS) so
+        // mform serialises its value at submit time; the JS mirror keeps that value in sync with the
+        // Quill editor's HTML on every text change.
+        $mform->addElement('textarea', 'content', get_string('content', 'block_notices'), [
+            'rows' => 10,
+            'cols' => 80,
+            'class' => 'block_notices-quill-source',
+            'data-block-notices-quill' => '1',
+        ]);
+        $mform->setDefault('content', '');
         $mform->setType('content', PARAM_RAW); // XSS is prevented when printing the block contents and serving files.
 
         // Arguably a bit of a hack to get the help text to display in my preferred place.
@@ -248,14 +255,9 @@ class notice extends dynamic_form {
 
         if ($noticeid > 0) {
             $notice = notices::get_notice($noticeid);
-            // Editor element expects ['text' => ..., 'format' => ...]; replace the raw
-            // content/contentformat columns with that shape and re-assert noticeid/courseid
-            // so the hidden fields match the AJAX args (defends against any oddities in
-            // the stored row).
-            $notice['content'] = [
-                'text' => $notice['content'] ?? '',
-                'format' => $notice['contentformat'] ?? FORMAT_HTML,
-            ];
+            // Pass the raw HTML content straight to the textarea element; the JS Quill
+            // initialiser seeds itself from textarea.value when the modal renders.
+            $notice['content'] = $notice['content'] ?? '';
             $notice['noticeid'] = $noticeid;
             $notice['courseid'] = $courseid;
             $this->set_data((object)$notice);
@@ -266,8 +268,34 @@ class notice extends dynamic_form {
             'id' => 0,
             'noticeid' => 0,
             'courseid' => $courseid,
-            'content' => ['text' => '', 'format' => FORMAT_HTML],
+            'content' => '',
         ]);
+    }
+
+    /**
+     * Server-side validation. Rejects whitespace-only Quill content (Quill's "empty"
+     * representation is "<p><br></p>", which the standard required rule treats as filled).
+     *
+     * @param array $data
+     * @param array $files
+     * @return array
+     */
+    public function validation($data, $files) {
+        $errors = parent::validation($data, $files);
+        if (trim((string)($data['title'] ?? '')) === '') {
+            $errors['title'] = get_string('required');
+        }
+        $contenttext = trim(html_to_text((string)($data['content'] ?? ''), 0, false));
+        if ($contenttext === '') {
+            $errors['content'] = get_string('required');
+        }
+        if (trim((string)($data['owner'] ?? '')) === '') {
+            $errors['owner'] = get_string('required');
+        }
+        if (trim((string)($data['owneremail'] ?? '')) === '') {
+            $errors['owneremail'] = get_string('required');
+        }
+        return $errors;
     }
 
     /**
@@ -286,8 +314,8 @@ class notice extends dynamic_form {
         $data = [
             'staffonly' => !empty($formdata->staffonly),
             'title' => $formdata->title,
-            'content' => $formdata->content['text'],
-            'contentformat' => $formdata->content['format'],
+            'content' => $formdata->content,
+            'contentformat' => FORMAT_HTML,
             'moreinformationurl' => $formdata->moreinformationurl,
             'owner' => $formdata->owner,
             'owneremail' => $formdata->owneremail,

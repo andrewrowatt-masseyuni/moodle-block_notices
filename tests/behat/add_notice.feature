@@ -27,11 +27,11 @@ Feature: Add a notice
     And I set the following fields to these values:
       | Staff only               | No                            |
       | Title                    | Notice1title                  |
-      | Content                  | Notice1content                |
       | URL for more information | http://massey.ac.nz           |
       | Owner                    | notice1owner                  |
       | Owner email address      | Notice1owneremail@noreply.com |
       | Notes                    | Remove 1 November 2024        |
+    And I set the notice Quill editor to "Notice1content"
     And I press "Save"
 
     And I should see "Manage notices"
