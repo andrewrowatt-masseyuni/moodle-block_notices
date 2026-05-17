@@ -72,6 +72,8 @@ class provider implements
             'privacy:metadata:blocks_notices_read'
         );
 
+        $collection->add_subsystem_link('files', [], 'privacy:metadata:filearea_image');
+
         return $collection;
     }
 

@@ -148,6 +148,51 @@ class notices {
     ];
 
     /**
+     * Returns the file storage context for a notice's image area.
+     *
+     * Course notices live in their course context; site/dashboard notices
+     * (courseid = SITEID) live in the system context. This mirrors the
+     * permission context used by the modal notice form.
+     *
+     * @param int $courseid
+     * @return \context
+     */
+    public static function get_notice_context(int $courseid): \context {
+        if ($courseid && (int)$courseid !== SITEID) {
+            return \context_course::instance($courseid);
+        }
+        return \context_system::instance();
+    }
+
+    /**
+     * Resolve the public pluginfile URL for a notice's image, if one is attached.
+     *
+     * @param int $noticeid
+     * @param int $courseid
+     * @return \moodle_url|null
+     */
+    public static function get_image_url(int $noticeid, int $courseid): ?\moodle_url {
+        if ($noticeid <= 0) {
+            return null;
+        }
+        $context = self::get_notice_context($courseid);
+        $fs = get_file_storage();
+        $files = $fs->get_area_files($context->id, 'block_notices', 'image', $noticeid, 'itemid', false);
+        if (empty($files)) {
+            return null;
+        }
+        $file = reset($files);
+        return \moodle_url::make_pluginfile_url(
+            $file->get_contextid(),
+            $file->get_component(),
+            $file->get_filearea(),
+            $file->get_itemid(),
+            $file->get_filepath(),
+            $file->get_filename()
+        );
+    }
+
+    /**
      * Can the current user create new notices?
      *
      * Only manage-all users may create. The additionaleditorid is set at creation and never changes,
@@ -495,6 +540,9 @@ class notices {
             OR modifiedbyuserid = :modifiedbyuserid
             OR additionaleditorid = :additionaleditorid)';
 
+        // Collect notice ids before any deletion so we can purge their image filearea afterwards.
+        $noticeids = $DB->get_fieldset_select('block_notices', 'id', $noticefilter, $params);
+
         // Delete every read row pointing at the notices about to be deleted (regardless
         // of which user owns the read row) so the notice rows can go without leaving
         // dangling references in block_notices_read.
@@ -503,6 +551,12 @@ class notices {
             "noticeid IN (SELECT id FROM {block_notices} WHERE {$noticefilter})",
             $params
         );
+
+        $contextid = self::get_notice_context($courseid)->id;
+        $fs = get_file_storage();
+        foreach ($noticeids as $noticeid) {
+            $fs->delete_area_files($contextid, 'block_notices', 'image', (int)$noticeid);
+        }
 
         $DB->delete_records_select('block_notices', $noticefilter, $params);
     }
@@ -595,6 +649,12 @@ class notices {
         $notice = $DB->get_record('block_notices', ['id' => $id], 'id, courseid', MUST_EXIST);
 
         self::delete_reads_for_notice((int)$id);
+        get_file_storage()->delete_area_files(
+            self::get_notice_context((int)$notice->courseid)->id,
+            'block_notices',
+            'image',
+            (int)$id
+        );
         $DB->delete_records('block_notices', ['id' => $id]);
 
         \block_notices\event\notice_deleted::create([
@@ -612,11 +672,25 @@ class notices {
     public static function delete_all_notices(int $courseid) {
         global $DB;
 
+        $noticeids = $DB->get_fieldset_select(
+            'block_notices',
+            'id',
+            'courseid = :courseid',
+            ['courseid' => $courseid]
+        );
+
         $DB->delete_records_select(
             'block_notices_read',
             'noticeid IN (SELECT id FROM {block_notices} WHERE courseid = :courseid)',
             ['courseid' => $courseid]
         );
+
+        $contextid = self::get_notice_context($courseid)->id;
+        $fs = get_file_storage();
+        foreach ($noticeids as $noticeid) {
+            $fs->delete_area_files($contextid, 'block_notices', 'image', (int)$noticeid);
+        }
+
         $DB->delete_records('block_notices', ['courseid' => $courseid]);
     }
 

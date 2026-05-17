@@ -161,6 +161,9 @@ foreach (notices::get_notices_admin($courseid, $additionaleditorfilter) as $noti
     );
 
     // Add extra properties to improve the template output. Reorder and delete are restricted to manage-all.
+    $imageurl = notices::get_image_url((int)$noticeobject->id, $courseid);
+    $noticearray['hasimage'] = $imageurl !== null;
+    $noticearray['imageurl'] = $imageurl !== null ? $imageurl->out(false) : '';
     $noticearray['candelete'] = $canmanageall;
     $exclusivevalue = (int)$noticearray['exclusive'];
     $noticearray['isexclusive_important'] = $exclusivevalue === notices::NOTICE_EXCLUSIVE_IMPORTANT;

@@ -82,8 +82,9 @@ final class provider_test extends \core_privacy\tests\provider_testcase {
         $classname = privacy\provider::class;
         $classname::get_metadata($collection);
 
-        // Two database tables: block_notices and block_notices_read.
-        $this->assertCount(2, $collection->get_collection());
+        // Two database tables (block_notices and block_notices_read) plus the linked 'files'
+        // subsystem used by the optional notice image.
+        $this->assertCount(3, $collection->get_collection());
     }
 
     /**
