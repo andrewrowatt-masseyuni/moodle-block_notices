@@ -263,7 +263,7 @@ class notices {
                  WHERE b.courseid = :courseid
                    AND b.staffonly <= :staffonly
                    AND b.visible $insql
-              ORDER BY CASE WHEN r.timeread IS NULL OR r.timeread < b.timemodified THEN 0 ELSE 1 END ASC,
+              ORDER BY CASE WHEN r.timeread IS NULL OR r.timeread < b.timepromoted THEN 0 ELSE 1 END ASC,
                        b.sortorder ASC";
 
         $params = [
@@ -412,12 +412,40 @@ class notices {
             'id' => $noticeid,
             'exclusive' => $value,
             'timemodified' => time(),
+            'timepromoted' => time(),
             'modifiedbyuserid' => $USER->id,
         ]);
 
         $transaction->allow_commit();
 
         \block_notices\event\notice_updated::create([
+            'objectid' => $noticeid,
+            'userid' => $USER->id,
+            'context' => \context_course::instance($notice->courseid),
+        ])->trigger();
+    }
+
+    /**
+     * Promote a notice so it bubbles to the top of the user-facing carousel.
+     *
+     * Updates timepromoted only — timemodified is preserved so the audit trail of
+     * "when was the content last changed" stays accurate and the admin-side
+     * readcountcurrent stat keeps tracking reads of the current content version.
+     *
+     * @param int $noticeid
+     */
+    public static function promote_notice(int $noticeid): void {
+        global $DB, $USER;
+
+        $notice = $DB->get_record('block_notices', ['id' => $noticeid], 'id, courseid', MUST_EXIST);
+
+        $DB->update_record('block_notices', (object)[
+            'id' => $noticeid,
+            'timepromoted' => time(),
+            'modifiedbyuserid' => $USER->id,
+        ]);
+
+        \block_notices\event\notice_promoted::create([
             'objectid' => $noticeid,
             'userid' => $USER->id,
             'context' => \context_course::instance($notice->courseid),
@@ -605,8 +633,9 @@ class notices {
 
         $noticepreviousversion = self::get_notice($data['id']);
 
-        unset($data['visible'], $data['sortorder']);
+        unset($data['visible'], $data['sortorder'], $data['timepromoted']);
         $data['timemodified'] = time();
+        $data['timepromoted'] = time();
         $data['modifiedbyuserid'] = $USER->id;
 
         $DB->update_record('block_notices', (object)$data);
@@ -637,6 +666,7 @@ class notices {
             'visible' => self::NOTICE_IN_PREVIEW,
             'timecreated' => $timecreated,
             'timemodified' => $timecreated,
+            'timepromoted' => $timecreated,
             'createdbyuserid' => $USER->id,
             'modifiedbyuserid' => $USER->id,
             'sortorder' => 0,

@@ -40,6 +40,7 @@ class block_notices_generator extends component_generator_base {
             'staffonly' => 0,
             'timecreated' => time(),
             'timemodified' => time(),
+            'timepromoted' => time(),
             'createdbyuserid' => $USER->id,
             'modifiedbyuserid' => $USER->id,
             'additionaleditorid' => $notice['createdbyuserid'] ?? $USER->id,

@@ -97,6 +97,9 @@ if ($action && $noticeid) {
             }
             notices::set_exclusive($noticeid, $exclusivevalue);
             break;
+        case 'promote':
+            notices::promote_notice($noticeid);
+            break;
     }
 
     // Redirect as Moodle good practice to remove the session key from the URL.
@@ -184,6 +187,7 @@ foreach (notices::get_notices_admin($courseid, $additionaleditorfilter) as $noti
                     && $exclusivevalue !== notices::NOTICE_EXCLUSIVE_INFORMATION,
                 'canclearexclusive' => $canmanageall
                     && $exclusivevalue !== notices::NOTICE_EXCLUSIVE_NONE,
+                'canpromote' => true,
                 'showsortorder' => true,
             ];
             $noticegroupvisible['notices'][] = $noticearray;
@@ -193,6 +197,7 @@ foreach (notices::get_notices_admin($courseid, $additionaleditorfilter) as $noti
             $noticearray += [
                 'canhide' => true,
                 'canshow' => true,
+                'canpromote' => true,
             ];
             $noticegroupinpreview['notices'][] = $noticearray;
             $noticegroupinpreview['count']++;
