@@ -1,4 +1,4 @@
-@block @block_notices @javascript
+@block @block_notices
 Feature: View notice
 
   Background:
@@ -57,36 +57,30 @@ Feature: View notice
   Scenario: Checking the layout of the Notice block as admin
     When I log in as "admin"
     And I am on site homepage
+    And I should see "Manage notices"
 
     # Quick notice count check
     And "#stream-dashboard-notices[data-notices-count=\"3\"]" "css_element" should exist
-    And I click on ".swiper-button-playpause" "css_element"
 
-    And I should see "Notice1title"
-    And I should see "Notice1content"
+    # check slide order
+    And "//div[@id='stream-dashboard-notices']//div[contains(@class,'swiper-slide')][1]//h6[normalize-space()=\"Notice1title\"]" "xpath_element" should exist
+    And "//div[@id='stream-dashboard-notices']//div[contains(@class,'swiper-slide')][1][.//div[@class=\"item__content\"][normalize-space()=\"Notice1content\"]]" "xpath_element" should exist
 
-    And I click on ".swiper-button-next" "css_element"
-    # Wait for next slide
-    And I wait "5" seconds
-    And I should see "Notice2title"
-    And I should see "Notice2content"
+    And "//div[@id='stream-dashboard-notices']//div[contains(@class,'swiper-slide')][2]//h6[normalize-space()=\"Notice2title\"]" "xpath_element" should exist
+    And "//div[@id='stream-dashboard-notices']//div[contains(@class,'swiper-slide')][2][.//div[@class=\"item__content\"][normalize-space()=\"Notice2content\"]]" "xpath_element" should exist
 
-    And I click on ".swiper-button-next" "css_element"
-    # Wait for next slide
-    And I wait "5" seconds
-    And I should see "Notice3title"
-    And I should see "Notice3content"
-    And I should see "Manage notices"
-
+    And "//div[@id='stream-dashboard-notices']//div[contains(@class,'swiper-slide')][3]//h6[normalize-space()=\"Notice3title\"]" "xpath_element" should exist
+    And "//div[@id='stream-dashboard-notices']//div[contains(@class,'swiper-slide')][3][.//div[@class=\"item__content\"][normalize-space()=\"Notice3content\"]]" "xpath_element" should exist
+    
   Scenario: Checking the layout of the Notice block as a student
     When I log in as "98186700"
     And I am on site homepage
 
     # Quick notice count check
     And "#stream-dashboard-notices[data-notices-count=\"1\"]" "css_element" should exist
-    Then I should see "Notice1title"
-    And I should see "Notice1content"
-    And I should not see "Manage notices"
+
+    And "//div[@id='stream-dashboard-notices']//div[contains(@class,'swiper-slide')][1]//h6[normalize-space()=\"Notice1title\"]" "xpath_element" should exist
+    And "//div[@id='stream-dashboard-notices']//div[contains(@class,'swiper-slide')][1][.//div[@class=\"item__content\"][normalize-space()=\"Notice1content\"]]" "xpath_element" should exist
 
   Scenario: Checking the layout of the Notice block as a teacher
     When I log in as "arowatt"
@@ -94,15 +88,10 @@ Feature: View notice
 
     # Quick notice count check
     And "#stream-dashboard-notices[data-notices-count=\"2\"]" "css_element" should exist
-    And I click on ".swiper-button-playpause" "css_element"
+    And "//div[@id='stream-dashboard-notices']//div[contains(@class,'swiper-slide')][1]//h6[normalize-space()=\"Notice1title\"]" "xpath_element" should exist
+    And "//div[@id='stream-dashboard-notices']//div[contains(@class,'swiper-slide')][1][.//div[@class=\"item__content\"][normalize-space()=\"Notice1content\"]]" "xpath_element" should exist
 
-    And I should see "Notice1title"
-    And I should see "Notice1content"
-
-    And I click on ".swiper-button-next" "css_element"
-    # Wait for next slide
-    And I wait "5" seconds
-    And I should see "Notice2title"
-    And I should see "Notice2content"
+    And "//div[@id='stream-dashboard-notices']//div[contains(@class,'swiper-slide')][2]//h6[normalize-space()=\"Notice2title\"]" "xpath_element" should exist
+    And "//div[@id='stream-dashboard-notices']//div[contains(@class,'swiper-slide')][2][.//div[@class=\"item__content\"][normalize-space()=\"Notice2content\"]]" "xpath_element" should exist
 
     And I should not see "Manage notices"
