@@ -141,6 +141,16 @@ class notice extends dynamic_form {
         $mform->setDefault('moreinformationurl', '');
         $mform->setType('moreinformationurl', PARAM_TEXT);
         $mform->addHelpButton('moreinformationurl', 'moreinformationurl', 'block_notices');
+
+        // Optional close date. When set and in the past, the auto-close scheduled task
+        // hides the notice, clears any exclusive flag and emails a responsible person.
+        $mform->addElement(
+            'date_time_selector',
+            'closedate',
+            get_string('closedate', 'block_notices'),
+            ['optional' => true]
+        );
+        $mform->addHelpButton('closedate', 'closedate', 'block_notices');
         // End of general group. Don't need to close this group as it is automatically closed by the next group.
 
         // Start of owner group.
@@ -360,6 +370,8 @@ class notice extends dynamic_form {
             'owner' => $formdata->owner,
             'owneremail' => $formdata->owneremail,
             'notes' => $formdata->notes,
+            // The date_time_selector with optional=true returns 0 when the optional checkbox is unticked.
+            'closedate' => !empty($formdata->closedate) ? (int)$formdata->closedate : null,
         ];
 
         $noticeid = (int)($formdata->noticeid ?? 0);

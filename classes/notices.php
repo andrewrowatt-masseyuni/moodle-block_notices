@@ -887,6 +887,126 @@ class notices {
     }
 
     /**
+     * Return ids of every notice whose closedate is set and has passed.
+     *
+     * Includes hidden notices so the auto-close routine can quietly clear their
+     * stale closedate (see auto_close_notice).
+     *
+     * @param int $now Reference time (usually time()).
+     * @return int[]
+     */
+    public static function get_notices_due_for_close(int $now): array {
+        global $DB;
+
+        $ids = $DB->get_fieldset_select(
+            'block_notices',
+            'id',
+            'closedate IS NOT NULL AND closedate <= :now',
+            ['now' => $now]
+        );
+
+        return array_map('intval', $ids);
+    }
+
+    /**
+     * Auto-close a notice whose closedate has passed.
+     *
+     * Hides the notice, clears its exclusive flag and closedate, emails a responsible
+     * person and triggers a notice_auto_closed event. If the notice is already hidden
+     * the closedate is cleared silently (no email, no event).
+     *
+     * @param int $id
+     */
+    public static function auto_close_notice(int $id): void {
+        global $DB;
+
+        $notice = $DB->get_record('block_notices', ['id' => $id], '*', MUST_EXIST);
+
+        // Already-hidden notices: just clear the stale closedate and bail.
+        if ((int)$notice->visible === self::NOTICE_HIDDEN) {
+            $DB->set_field('block_notices', 'closedate', null, ['id' => $id]);
+            return;
+        }
+
+        $DB->update_record('block_notices', (object)[
+            'id' => $id,
+            'visible' => self::NOTICE_HIDDEN,
+            'sortorder' => 0,
+            'exclusive' => self::NOTICE_EXCLUSIVE_NONE,
+            'closedate' => null,
+        ]);
+        self::recalc_visible_notices_sortorder((int)$notice->courseid);
+
+        self::send_auto_close_email($notice);
+
+        \block_notices\event\notice_auto_closed::create([
+            'objectid' => $id,
+            'userid' => \core_user::get_noreply_user()->id,
+            'context' => \context_course::instance((int)$notice->courseid),
+        ])->trigger();
+    }
+
+    /**
+     * Send the auto-close notification email.
+     *
+     * Recipient is resolved by cascading fallback:
+     *   1. additional editor (if set);
+     *   2. owner email (if set);
+     *   3. last modifier.
+     *
+     * @param \stdClass $notice The notice as it was just before being auto-closed
+     *                          (still has closedate, exclusive, visible set).
+     */
+    private static function send_auto_close_email(\stdClass $notice): void {
+        global $CFG;
+
+        $recipient = null;
+
+        if (!empty($notice->additionaleditorid)) {
+            $recipient = \core_user::get_user((int)$notice->additionaleditorid, '*', IGNORE_MISSING) ?: null;
+        }
+
+        if ($recipient === null && !empty($notice->owneremail)) {
+            // Build a minimal user-like record so email_to_user can deliver to an arbitrary address.
+            // emailstop=0 and id=-1 mirror the pattern used elsewhere in core for ad-hoc recipients.
+            $recipient = (object)[
+                'id' => -1,
+                'email' => $notice->owneremail,
+                'firstname' => $notice->owner ?? '',
+                'lastname' => '',
+                'firstnamephonetic' => '',
+                'lastnamephonetic' => '',
+                'middlename' => '',
+                'alternatename' => '',
+                'mailformat' => 1,
+                'maildisplay' => 2,
+                'mnethostid' => $CFG->mnet_localhost_id,
+                'auth' => 'manual',
+                'suspended' => 0,
+                'deleted' => 0,
+                'emailstop' => 0,
+            ];
+        }
+
+        if ($recipient === null && !empty($notice->modifiedbyuserid)) {
+            $recipient = \core_user::get_user((int)$notice->modifiedbyuserid, '*', IGNORE_MISSING) ?: null;
+        }
+
+        if ($recipient === null) {
+            return;
+        }
+
+        $a = (object)[
+            'title' => format_string($notice->title),
+            'closedate' => userdate((int)($notice->closedate ?? time())),
+        ];
+        $subject = get_string('autoclose_email_subject', 'block_notices', $a);
+        $body = get_string('autoclose_email_body', 'block_notices', $a);
+
+        email_to_user($recipient, \core_user::get_noreply_user(), $subject, $body);
+    }
+
+    /**
      * Recalcuate the sortorder for all visible notices.
      *
      * This function is called when a visible notice is deleted as this may leave gaps in the sortorder.

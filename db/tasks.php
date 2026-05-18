@@ -15,18 +15,23 @@
 // along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
 
 /**
- * Plugin version and other meta-data are defined here.
+ * Scheduled task definitions for block_notices.
  *
- * @package     block_notices
- * @copyright   2024 Andrew Rowatt <A.J.Rowatt@massey.ac.nz>
- * @license     https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ * @package    block_notices
+ * @copyright  2026 Andrew Rowatt <A.J.Rowatt@massey.ac.nz>
+ * @license    https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
 defined('MOODLE_INTERNAL') || die();
 
-$plugin->component = 'block_notices';
-$plugin->release = '1.4.0';
-$plugin->version = 2026051806;
-$plugin->requires = 2024100700;
-$plugin->supported    = [405, 501];
-$plugin->maturity = MATURITY_STABLE;
+$tasks = [
+    [
+        'classname' => 'block_notices\task\auto_close_notices',
+        'blocking' => 0,
+        'minute' => '*/15',
+        'hour' => '*',
+        'day' => '*',
+        'dayofweek' => '*',
+        'month' => '*',
+    ],
+];

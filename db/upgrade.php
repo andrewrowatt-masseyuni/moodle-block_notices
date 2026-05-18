@@ -99,5 +99,25 @@ function xmldb_block_notices_upgrade($oldversion) {
         upgrade_block_savepoint(true, 2026051803, 'notices');
     }
 
+    if ($oldversion < 2026051806) {
+        // Auto-close feature: optional closedate timestamp on each notice.
+        $table = new xmldb_table('block_notices');
+        $field = new xmldb_field(
+            'closedate',
+            XMLDB_TYPE_INTEGER,
+            '10',
+            null,
+            null,
+            null,
+            null,
+            'additionaleditorid'
+        );
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        upgrade_block_savepoint(true, 2026051806, 'notices');
+    }
+
     return true;
 }

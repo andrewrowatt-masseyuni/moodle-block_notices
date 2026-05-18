@@ -21,6 +21,7 @@
 <FIELD NAME="createdbyuserid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="User Id who created this notice."/>
 <FIELD NAME="modifiedbyuserid" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="User Id who last modified this notice."/>
 <FIELD NAME="additionaleditorid" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false" COMMENT="User Id of an additional editor for this notice. Additional editors may edit the notice without needing the manageallnotices capability."/>
+<FIELD NAME="closedate" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false" COMMENT="Optional unix timestamp. When set and in the past, the auto-close scheduled task hides the notice."/>
 </FIELDS>
 <KEYS>
 <KEY NAME="primary" TYPE="primary" FIELDS="id"/>

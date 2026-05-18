@@ -71,7 +71,7 @@ Feature: View notice
 
     And "//div[@id='stream-dashboard-notices']//div[contains(@class,'swiper-slide')][3]//h6[normalize-space()=\"Notice3title\"]" "xpath_element" should exist
     And "//div[@id='stream-dashboard-notices']//div[contains(@class,'swiper-slide')][3][.//div[@class=\"item__content\"][normalize-space()=\"Notice3content\"]]" "xpath_element" should exist
-    
+
   Scenario: Checking the layout of the Notice block as a student
     When I log in as "98186700"
     And I am on site homepage
