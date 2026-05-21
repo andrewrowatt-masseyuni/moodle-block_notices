@@ -71,6 +71,10 @@ class notice extends dynamic_form {
         $mform->addElement('hidden', 'courseid', $courseid);
         $mform->setType('courseid', PARAM_INT);
 
+        // Wrapper for CSS scoping. The form is a dynamic_form rendered inside a modal
+        // on the manage page, so we can't target it by page-id.
+        $mform->addElement('html', '<div class="block_notices-edit-form">');
+
         $visibilitystringkey = [
             notices::NOTICE_HIDDEN => 'visibility_hidden',
             notices::NOTICE_VISIBLE => 'visibility_visible',
@@ -95,7 +99,9 @@ class notice extends dynamic_form {
             $visibilitydisplay
         );
 
-        $mform->addElement('checkbox', 'staffonly', get_string('staffonly', 'block_notices'));
+        // Title + Staff only on one row. The CSS aligns Staff only with the input
+        // (row bottom), not the label.
+        $mform->addElement('html', '<div class="block_notices-row block_notices-row--title">');
 
         $mform->addElement('text', 'title', get_string('title', 'block_notices'), ['size' => 64]);
         $mform->setDefault('title', '');
@@ -103,24 +109,27 @@ class notice extends dynamic_form {
         $mform->addHelpButton('title', 'title', 'block_notices');
         $mform->addRule('title', null, 'required', null, 'client');
 
+        $mform->addElement('checkbox', 'staffonly', get_string('staffonly', 'block_notices'));
+
+        $mform->addElement('html', '</div>');
+
         // The notice content is captured by a Quill editor (initialised by block_notices/notice_editor
         // when the modal form renders). The underlying textarea remains in the DOM (hidden by JS) so
         // mform serialises its value at submit time; the JS mirror keeps that value in sync with the
         // Quill editor's HTML on every text change.
+        // Label is visually hidden via CSS; the placeholder inside Quill (passed
+        // through to JS via data-quill-placeholder) serves as the visible label.
         $mform->addElement('textarea', 'content', get_string('content', 'block_notices'), [
             'rows' => 10,
             'cols' => 80,
             'class' => 'block_notices-quill-source',
             'data-block-notices-quill' => '1',
+            'data-quill-placeholder' => get_string('content_help_additional', 'block_notices'),
         ]);
         $mform->setDefault('content', '');
         $mform->setType('content', PARAM_RAW); // XSS is prevented when printing the block contents and serving files.
 
-        // Arguably a bit of a hack to get the help text to display in my preferred place.
-        $mform->addElement('html', html_writer::div(
-            '<i class="icon fa fa-info-circle " aria-hidden="true"></i>' . get_string('content_help_additional', 'block_notices'),
-            'alert alert-info help_text'
-        ));
+        $mform->addElement('advcheckbox', 'useimage', get_string('useimage', 'block_notices'));
 
         $mform->addElement(
             'filemanager',
@@ -130,28 +139,25 @@ class notice extends dynamic_form {
             self::image_filemanager_options()
         );
         $mform->addHelpButton('image_filemanager', 'image', 'block_notices');
+        $mform->hideIf('image_filemanager', 'useimage', 'notchecked');
+
+        // Group: URL + Owner + Owner email. Owner details are only shown on the rendered
+        // notice when the URL is blank, so they belong in one visual block.
+        $mform->addElement('html',
+            '<fieldset class="block_notices-contact-group">'
+            . html_writer::tag('legend', get_string('contactgroup', 'block_notices'))
+            . html_writer::div(
+                get_string('contactgroupdescription', 'block_notices'),
+                'block_notices-contact-group__hint'
+            )
+        );
 
         $mform->addElement('text', 'moreinformationurl', get_string('moreinformationurl', 'block_notices'), ['size' => 128]);
         $mform->setDefault('moreinformationurl', '');
         $mform->setType('moreinformationurl', PARAM_TEXT);
         $mform->addHelpButton('moreinformationurl', 'moreinformationurl', 'block_notices');
 
-        // Optional close date. When set and in the past, the auto-close scheduled task
-        // hides the notice, clears any exclusive flag and emails a responsible person.
-        $mform->addElement(
-            'date_time_selector',
-            'closedate',
-            get_string('closedate', 'block_notices'),
-            ['optional' => true]
-        );
-        $mform->addHelpButton('closedate', 'closedate', 'block_notices');
-
-        $mform->addElement('html', html_writer::tag('h4', get_string('ownergroup', 'block_notices')));
-
-        $mform->addElement('html', html_writer::div(
-            get_string('ownergroupdescription', 'block_notices'),
-            'alert alert-warning help_text'
-        ));
+        $mform->addElement('html', '<div class="block_notices-row block_notices-row--owner">');
 
         $mform->addElement('text', 'owner', get_string('owner', 'block_notices'));
         $mform->setDefault('owner', '');
@@ -165,13 +171,23 @@ class notice extends dynamic_form {
         $mform->addHelpButton('owneremail', 'owneremail', 'block_notices');
         $mform->addRule('owneremail', null, 'required', null, 'client');
 
-        // End of owner group.
+        $mform->addElement('html', '</div>');
+
+        $mform->addElement('html', '</fieldset>');
+
+        // Optional close date. When set and in the past, the auto-close scheduled task
+        // hides the notice, clears any exclusive flag and emails a responsible person.
+        $mform->addElement(
+            'date_time_selector',
+            'closedate',
+            get_string('closedate', 'block_notices'),
+            ['optional' => true]
+        );
+        $mform->addHelpButton('closedate', 'closedate', 'block_notices');
 
         if ($canpickadditionaleditor) {
-            $mform->addElement('html', html_writer::div(
-                get_string('additionaleditordescription', 'block_notices'),
-                'alert alert-info help_text'
-            ));
+            // Field on the left, description on the right.
+            $mform->addElement('html', '<div class="block_notices-row block_notices-row--editor">');
 
             $emptylabel = $isedit
                 ? get_string('additionaleditorid_none', 'block_notices')
@@ -223,7 +239,14 @@ class notice extends dynamic_form {
                 $attributes
             );
             $mform->setType('additionaleditorid', PARAM_INT);
-            $mform->addHelpButton('additionaleditorid', 'additionaleditorid', 'block_notices');
+            // $mform->addHelpButton('additionaleditorid', 'additionaleditorid', 'block_notices');
+
+            $mform->addElement('html', html_writer::div(
+                get_string('additionaleditordescription', 'block_notices'),
+                'alert alert-info help_text'
+            ));
+
+            $mform->addElement('html', '</div>');
         } else {
             $mform->addElement('hidden', 'additionaleditorid', 0);
             $mform->setType('additionaleditorid', PARAM_INT);
@@ -233,6 +256,8 @@ class notice extends dynamic_form {
         $mform->setDefault('notes', '');
         $mform->setType('notes', PARAM_TEXT);
         $mform->addHelpButton('notes', 'notes', 'block_notices');
+
+        $mform->addElement('html', '</div>');
     }
 
     /**
@@ -288,12 +313,23 @@ class notice extends dynamic_form {
             $notice['content'] = $notice['content'] ?? '';
             $notice['noticeid'] = $noticeid;
             $notice['courseid'] = $courseid;
+            // Default the "Use image" checkbox to checked when an image already exists.
+            $noticecontext = notices::get_notice_context((int)$courseid);
+            $existingfiles = get_file_storage()->get_area_files(
+                $noticecontext->id,
+                'block_notices',
+                'image',
+                $noticeid,
+                '',
+                false
+            );
+            $notice['useimage'] = !empty($existingfiles) ? 1 : 0;
             $data = (object)$notice;
             file_prepare_standard_filemanager(
                 $data,
                 'image',
                 $options,
-                notices::get_notice_context((int)$courseid),
+                $noticecontext,
                 'block_notices',
                 'image',
                 $noticeid
@@ -307,6 +343,7 @@ class notice extends dynamic_form {
             'noticeid' => 0,
             'courseid' => $courseid,
             'content' => '',
+            'useimage' => 0,
         ];
         // New notice: stage an empty draft area so the filemanager renders correctly.
         file_prepare_standard_filemanager($data, 'image', $options, null, null, null, null);
@@ -383,16 +420,27 @@ class notice extends dynamic_form {
             $noticeid = notices::add_notice($courseid, $data);
         }
 
-        // Move any uploaded image from the draft area into the notice's permanent filearea.
-        file_postupdate_standard_filemanager(
-            $formdata,
-            'image',
-            self::image_filemanager_options(),
-            notices::get_notice_context($courseid),
-            'block_notices',
-            'image',
-            $noticeid
-        );
+        $noticecontext = notices::get_notice_context($courseid);
+        if (!empty($formdata->useimage)) {
+            // Move any uploaded image from the draft area into the notice's permanent filearea.
+            file_postupdate_standard_filemanager(
+                $formdata,
+                'image',
+                self::image_filemanager_options(),
+                $noticecontext,
+                'block_notices',
+                'image',
+                $noticeid
+            );
+        } else {
+            // Unticked → drop any previously stored image for this notice.
+            get_file_storage()->delete_area_files(
+                $noticecontext->id,
+                'block_notices',
+                'image',
+                $noticeid
+            );
+        }
 
         $url = new moodle_url('/blocks/notices/manage.php', ['courseid' => $courseid]);
         return [

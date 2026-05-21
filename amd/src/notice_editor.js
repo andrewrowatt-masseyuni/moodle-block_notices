@@ -117,7 +117,7 @@ const init = async(textarea) => {
                 ['clean'],
             ],
         },
-        placeholder: '',
+        placeholder: textarea.dataset.quillPlaceholder || '',
     });
 
     const initial = (textarea.value || '').trim();
