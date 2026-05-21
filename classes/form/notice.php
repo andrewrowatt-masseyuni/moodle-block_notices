@@ -71,10 +71,6 @@ class notice extends dynamic_form {
         $mform->addElement('hidden', 'courseid', $courseid);
         $mform->setType('courseid', PARAM_INT);
 
-        // Start of general group.
-
-        $mform->addElement('header', 'general', get_string('basicinformationgroup', 'block_notices'));
-
         $visibilitystringkey = [
             notices::NOTICE_HIDDEN => 'visibility_hidden',
             notices::NOTICE_VISIBLE => 'visibility_visible',
@@ -135,8 +131,6 @@ class notice extends dynamic_form {
         );
         $mform->addHelpButton('image_filemanager', 'image', 'block_notices');
 
-        $mform->addElement('html', html_writer::tag('hr', ''));
-
         $mform->addElement('text', 'moreinformationurl', get_string('moreinformationurl', 'block_notices'), ['size' => 128]);
         $mform->setDefault('moreinformationurl', '');
         $mform->setType('moreinformationurl', PARAM_TEXT);
@@ -151,11 +145,8 @@ class notice extends dynamic_form {
             ['optional' => true]
         );
         $mform->addHelpButton('closedate', 'closedate', 'block_notices');
-        // End of general group. Don't need to close this group as it is automatically closed by the next group.
 
-        // Start of owner group.
-
-        $mform->addElement('html', html_writer::tag('h3', get_string('ownergroup', 'block_notices')));
+        $mform->addElement('html', html_writer::tag('h4', get_string('ownergroup', 'block_notices')));
 
         $mform->addElement('html', html_writer::div(
             get_string('ownergroupdescription', 'block_notices'),

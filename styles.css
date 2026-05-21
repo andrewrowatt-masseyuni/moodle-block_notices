@@ -172,7 +172,8 @@ section.block_notices.block_notices_exclusive_important {
     text-transform: uppercase;
     line-height: 1;
 
-    color: var(--color-grey-30);
+    /* To allow for different coloured backgrounds */
+    color: #0007;
     padding-left: 12px;
     margin-left: 8px;
     position: relative;
