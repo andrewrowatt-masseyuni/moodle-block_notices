@@ -405,15 +405,21 @@ div.img {
 
     .alert.help_text {
         border-left-width: 4px;
-        margin: 0.25rem 0.5rem;
+        margin: 0.25rem 0;
         padding: 0.4rem 0.6rem;
         font-size: 0.875rem;
+    }
+
+    .inline-help-text .help_text {
+        font-size: 0.8125rem;
+        margin-left: 0.5rem;
+        font-weight: 300;
     }
 
     .form-filetypes-descriptions {
         font-size: 0.8125rem;
         opacity: 0.75;
-        margin-top: 0.25rem;
+        margin-top: 0;
 
         p,
         ul {
@@ -455,6 +461,17 @@ div.img {
         }
     }
 
+    /* Inline "Label: Value" pair for the read-only Visibility display. */
+    .block_notices-visibility {
+        margin-bottom: 0.5rem;
+
+        .block_notices-visibility__label {
+            font-weight: 500;
+            margin-right: 0.25rem;
+            margin-bottom: 0;
+        }
+    }
+
     /* Two-column row layout (Title + Staff only, Owner + Owner email,
        Additional editor + its help text). */
     .block_notices-row {
@@ -476,17 +493,27 @@ div.img {
         }
     }
 
-    /* Title row: title takes the bulk, Staff only sits at the input baseline. */
-    .block_notices-row--title > .form-group.fitem:first-child {
-        flex: 1 1 60%;
-    }
-    .block_notices-row--title > .form-group.fitem:last-child {
-        flex: 0 0 auto;
+    .block_notices--container {
+        border: 2px solid #ccc;
+        padding: 0.5em;
+        border-radius: 0.5rem;
+        background-color: rgb(250 250 250);
+        margin-bottom: 0.5rem;
+
+        &.optional-details {
+            border-style: dashed;
+        }
+
+        >:last-child {
+            margin-bottom: 0;
+        }
     }
 
     /* Owner row: two equal columns. */
-    .block_notices-row--owner > .form-group.fitem {
-        flex: 1 1 240px;
+    .block_notices-row--owner {
+        > .form-group.fitem {
+            flex: 1 1 240px;
+        }
     }
 
     /* Additional editor row: field on left, help text on right (top-aligned).
@@ -506,19 +533,53 @@ div.img {
         }
     }
 
-    /* Visually hide the "Content" label — the Quill placeholder serves as the label.
+    /* Visually hide the label e.g., the Quill placeholder serves as the label.
+       For others, there are checkboxes that also serve as labels.
        Kept in DOM for screen readers. */
-    .block_notices-quill-source > div:first-child {
-        position: absolute;
-        width: 1px;
-        height: 1px;
-        overflow: hidden;
-        clip: rect(0 0 0 0);
-        clip-path: inset(50%);
-        white-space: nowrap;
-        border: 0;
-        padding: 0;
-        margin: -1px;
+    .block_notices-quill-source.form-group.fitem,
+    .block_notices-image-filemanager.form-group.fitem,
+    .block_notices-hide-label > .form-group.fitem {
+        > div:first-child {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            overflow: hidden;
+            clip: rect(0 0 0 0);
+            clip-path: inset(50%);
+            white-space: nowrap;
+            border: 0;
+            padding: 0;
+            margin: -1px;
+        }
+
+        margin-bottom: 0;
+    }
+
+    .block_notices-useimage.form-group.fitem,
+    .block_notices-usemoreinformationurl.form-group.fitem,
+    .block_notices-useclosedate.form-group.fitem,
+    .block_notices-useadditionaleditor.form-group.fitem,
+    .block_notices-usenotes.form-group.fitem {
+        margin-bottom: 0;
+
+        label {
+            margin-bottom: 0;
+            white-space: nowrap;
+        }
+    }
+
+    [data-fieldtype="filemanager"] {
+        .filemanager {
+            max-width: 100%;
+        }
+
+        p {
+            margin: 0;
+        }
+    }
+
+    .form-group.fitem.hide-first-element > div:first-child {
+        display: none;
     }
 }
 

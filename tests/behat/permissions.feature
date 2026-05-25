@@ -75,7 +75,7 @@ Feature: Additional editor assignment grants edit rights without needing a role
     And I am on site homepage
     And I follow "Manage notices"
     And I click on "[data-notice-title=\"EditorOneNotice\"] [data-notice-action=\"edit\"]" "css_element"
-    And I set the field "Additional editor" to "Ethan Editor2"
+    And I set the field "Additional editor selector" to "Ethan Editor2"
     And I press "Save"
     # After reassignment, editor1 should no longer have anything to manage.
     And I log in as "editor1"

@@ -92,26 +92,49 @@ class notice extends dynamic_form {
         } else {
             $visibilitydisplay = get_string('visibility_preview', 'block_notices');
         }
-        $mform->addElement(
-            'static',
-            'visible_label',
-            get_string('visible', 'block_notices'),
-            $visibilitydisplay
-        );
 
-        // Title + Staff only on one row. The CSS aligns Staff only with the input
-        // (row bottom), not the label.
-        $mform->addElement('html', '<div class="block_notices-row block_notices-row--title">');
-
-        $mform->addElement('text', 'title', get_string('title', 'block_notices'), ['size' => 64]);
-        $mform->setDefault('title', '');
-        $mform->setType('title', PARAM_TEXT);
-        $mform->addHelpButton('title', 'title', 'block_notices');
-        $mform->addRule('title', null, 'required', null, 'client');
+        $mform->addElement('html', '<div class="block_notices-row block_notices-row--visibility">');
+        // Render Visibility as an inline "Label: Value" pair rather than the standard
+        // two-column static element so the short value sits next to its label.
+        $mform->addElement('html', html_writer::div(
+            html_writer::tag(
+                'span',
+                get_string('visibility', 'block_notices'),
+                ['class' => 'block_notices-visibility__label']
+            ) . ' ' . html_writer::tag(
+                'span',
+                s($visibilitydisplay),
+                ['class' => 'block_notices-visibility__value']
+            ),
+            'block_notices-visibility'
+        ));
 
         $mform->addElement('checkbox', 'staffonly', get_string('staffonly', 'block_notices'));
+        $mform->addElement('html', '</div>');
+
+        $mform->addElement('html', '<div class="block_notices-row block_notices-row--owner block_notices--container">');
+
+        $mform->addElement('text', 'owner', get_string('owner', 'block_notices'));
+        $mform->setDefault('owner', '');
+        $mform->setType('owner', PARAM_TEXT);
+        $mform->addHelpButton('owner', 'owner', 'block_notices');
+        $mform->addRule('owner', null, 'required', null, 'client');
+
+        $mform->addElement('text', 'owneremail', get_string('owneremail', 'block_notices'));
+        $mform->setDefault('owneremail', '');
+        $mform->setType('owneremail', PARAM_TEXT);
+        $mform->addHelpButton('owneremail', 'owneremail', 'block_notices');
+        $mform->addRule('owneremail', null, 'required', null, 'client');
 
         $mform->addElement('html', '</div>');
+
+        // Content.
+        $mform->addElement('html', '<div class="block_notices--container">');
+        $mform->addElement('text', 'title', get_string('title', 'block_notices'), ['style' => 'width: 100%;', 'maxlength' => 64]);
+        $mform->addRule('title', get_string('maximumchars', '', 64), 'maxlength', 64, 'client');
+        $mform->setDefault('title', '');
+        $mform->setType('title', PARAM_TEXT);
+        $mform->addRule('title', null, 'required', null, 'client');
 
         // The notice content is captured by a Quill editor (initialised by block_notices/notice_editor
         // when the modal form renders). The underlying textarea remains in the DOM (hidden by JS) so
@@ -129,66 +152,102 @@ class notice extends dynamic_form {
         $mform->setDefault('content', '');
         $mform->setType('content', PARAM_RAW); // XSS is prevented when printing the block contents and serving files.
 
-        $mform->addElement('advcheckbox', 'useimage', get_string('useimage', 'block_notices'));
+        $mform->addElement('html', '</div>');
+
+        // Optional or admin / non-content details.
+        $mform->addElement('html', '<div class="block_notices--container optional-details">');
+
+        // Use image.
+        $mform->addElement('html', '<div class="inline-help-text d-flex align-items-top">');
+        $mform->addElement(
+            'advcheckbox',
+            'useimage',
+            get_string('useimage', 'block_notices'),
+            null,
+            ['class' => 'block_notices-useimage']
+        );
+        $mform->addElement('html', html_writer::div(
+            '<i class="fa-regular fa-circle-question" style="line-height: 1.5;"></i><div>' . get_string(
+                'image_help',
+                'block_notices'
+            ) . '</div>',
+            'help_text d-flex',
+            ['style' => 'gap: 0.25rem;']
+        ));
+        $mform->addElement('html', '</div>');
 
         $mform->addElement(
             'filemanager',
             'image_filemanager',
-            get_string('image', 'block_notices'),
-            null,
+            'Image',
+            ['class' => 'block_notices-image-filemanager'],
             self::image_filemanager_options()
         );
-        $mform->addHelpButton('image_filemanager', 'image', 'block_notices');
         $mform->hideIf('image_filemanager', 'useimage', 'notchecked');
 
-        // Group: URL + Owner + Owner email. Owner details are only shown on the rendered
-        // notice when the URL is blank, so they belong in one visual block.
-        $mform->addElement('html',
-            '<fieldset class="block_notices-contact-group">'
-            . html_writer::tag('legend', get_string('contactgroup', 'block_notices'))
-            . html_writer::div(
-                get_string('contactgroupdescription', 'block_notices'),
-                'block_notices-contact-group__hint'
-            )
+        // More information.
+        $mform->addElement('html', '<div class="inline-help-text d-flex align-items-center">');
+        $mform->addElement(
+            'advcheckbox',
+            'moreinformationurl_enable',
+            get_string('moreinformationurl', 'block_notices'),
+            null,
+            ['class' => 'block_notices-usemoreinformationurl']
         );
 
-        $mform->addElement('text', 'moreinformationurl', get_string('moreinformationurl', 'block_notices'), ['size' => 128]);
-        $mform->setDefault('moreinformationurl', '');
-        $mform->setType('moreinformationurl', PARAM_TEXT);
-        $mform->addHelpButton('moreinformationurl', 'moreinformationurl', 'block_notices');
-
-        $mform->addElement('html', '<div class="block_notices-row block_notices-row--owner">');
-
-        $mform->addElement('text', 'owner', get_string('owner', 'block_notices'));
-        $mform->setDefault('owner', '');
-        $mform->setType('owner', PARAM_TEXT);
-        $mform->addHelpButton('owner', 'owner', 'block_notices');
-        $mform->addRule('owner', null, 'required', null, 'client');
-
-        $mform->addElement('text', 'owneremail', get_string('owneremail', 'block_notices'));
-        $mform->setDefault('owneremail', '');
-        $mform->setType('owneremail', PARAM_TEXT);
-        $mform->addHelpButton('owneremail', 'owneremail', 'block_notices');
-        $mform->addRule('owneremail', null, 'required', null, 'client');
-
+        $mform->addElement('html', html_writer::div(
+            '<i class="fa-regular fa-circle-question"></i> ' . get_string(
+                'moreinformationurl_help',
+                'block_notices',
+                get_string(
+                    'moreinformation',
+                    'block_notices'
+                )
+            ),
+            'help_text'
+        ));
         $mform->addElement('html', '</div>');
 
-        $mform->addElement('html', '</fieldset>');
+        $mform->addElement('text', 'moreinformationurl', '', ['size' => 128]);
+        $mform->setDefault('moreinformationurl', '');
+        $mform->setType('moreinformationurl', PARAM_TEXT);
+        $mform->hideIf('moreinformationurl', 'moreinformationurl_enable', 'notchecked');
 
         // Optional close date. When set and in the past, the auto-close scheduled task
         // hides the notice, clears any exclusive flag and emails a responsible person.
+        // The on/off toggle is a plain advcheckbox (rather than date_time_selector's
+        // built-in "Enable" optional flag) so the checkbox can carry a meaningful label.
+
+        $mform->addElement('html', '<div class="inline-help-text d-flex align-items-center">');
+
+        $mform->addElement(
+            'advcheckbox',
+            'closedate_enable',
+            get_string('closedate', 'block_notices'),
+            null,
+            ['class' => 'block_notices-useclosedate']
+        );
+
+        // Inline help text shown only when closedate is disabled.
+        $helpstatic = $mform->addElement('static', 'closedate_help_static', '', html_writer::div(
+            '<i class="fa-regular fa-circle-question"></i> ' . get_string('closedate_help', 'block_notices'),
+            'help_text'
+        ));
+        $helpstaticattributes = $helpstatic->getAttributes();
+        $helpstaticattributes['class'] = 'hide-first-element';
+        $helpstatic->setAttributes($helpstaticattributes);
+        $mform->hideIf('closedate_help_static', 'closedate_enable', 'checked');
+
         $mform->addElement(
             'date_time_selector',
             'closedate',
-            get_string('closedate', 'block_notices'),
-            ['optional' => true]
+            ''
         );
-        $mform->addHelpButton('closedate', 'closedate', 'block_notices');
+        $mform->hideIf('closedate', 'closedate_enable', 'notchecked');
+
+        $mform->addElement('html', '</div>');
 
         if ($canpickadditionaleditor) {
-            // Field on the left, description on the right.
-            $mform->addElement('html', '<div class="block_notices-row block_notices-row--editor">');
-
             $emptylabel = $isedit
                 ? get_string('additionaleditorid_none', 'block_notices')
                 : get_string('additionaleditorid_unset', 'block_notices');
@@ -231,31 +290,59 @@ class notice extends dynamic_form {
                     return $OUTPUT->render_from_template('core_user/form_user_selector_suggestion', $user);
                 },
             ];
+
+            $mform->addElement('html', '<div class="inline-help-text d-flex align-items-center">');
+            $mform->addElement(
+                'advcheckbox',
+                'additionaleditor_enable',
+                get_string('additionaleditorid', 'block_notices'),
+                null,
+                ['class' => 'block_notices-useadditionaleditor']
+            );
+
+            $mform->addElement('html', html_writer::div(
+                '<i class="fa-regular fa-circle-question"></i> ' . get_string('additionaleditordescription', 'block_notices'),
+                'help_text'
+            ));
+            $mform->addElement('html', '</div>');
+
+            $mform->addElement('html', '<div class="block_notices-hide-label">');
             $mform->addElement(
                 'autocomplete',
                 'additionaleditorid',
-                get_string('additionaleditorid', 'block_notices'),
+                get_string('additionaleditorselector', 'block_notices'),
                 [],
                 $attributes
             );
-            $mform->setType('additionaleditorid', PARAM_INT);
-            // $mform->addHelpButton('additionaleditorid', 'additionaleditorid', 'block_notices');
-
-            $mform->addElement('html', html_writer::div(
-                get_string('additionaleditordescription', 'block_notices'),
-                'alert alert-info help_text'
-            ));
-
             $mform->addElement('html', '</div>');
+
+            $mform->setType('additionaleditorid', PARAM_INT);
+            $mform->hideIf('additionaleditorid', 'additionaleditor_enable', 'notchecked');
         } else {
             $mform->addElement('hidden', 'additionaleditorid', 0);
             $mform->setType('additionaleditorid', PARAM_INT);
         }
 
-        $mform->addElement('text', 'notes', get_string('notes', 'block_notices'), ['size' => 128]);
+        $mform->addElement('html', '<div class="inline-help-text d-flex align-items-center">');
+        $mform->addElement(
+            'advcheckbox',
+            'notes_enable',
+            get_string('notes', 'block_notices'),
+            null,
+            ['class' => 'block_notices-usenotes']
+        );
+        $mform->addElement('html', html_writer::div(
+            '<i class="fa-regular fa-circle-question"></i> ' . get_string('notes_help', 'block_notices'),
+            'help_text'
+        ));
+        $mform->addElement('html', '</div>');
+
+        $mform->addElement('text', 'notes', '', ['size' => 128]);
         $mform->setDefault('notes', '');
         $mform->setType('notes', PARAM_TEXT);
-        $mform->addHelpButton('notes', 'notes', 'block_notices');
+        $mform->hideIf('notes', 'notes_enable', 'notchecked');
+
+        $mform->addElement('html', '</div>');
 
         $mform->addElement('html', '</div>');
     }
@@ -324,6 +411,10 @@ class notice extends dynamic_form {
                 false
             );
             $notice['useimage'] = !empty($existingfiles) ? 1 : 0;
+            $notice['closedate_enable'] = !empty($notice['closedate']) ? 1 : 0;
+            $notice['additionaleditor_enable'] = !empty($notice['additionaleditorid']) ? 1 : 0;
+            $notice['moreinformationurl_enable'] = !empty($notice['moreinformationurl']) ? 1 : 0;
+            $notice['notes_enable'] = !empty($notice['notes']) ? 1 : 0;
             $data = (object)$notice;
             file_prepare_standard_filemanager(
                 $data,
@@ -394,12 +485,17 @@ class notice extends dynamic_form {
             'title' => $formdata->title,
             'content' => $formdata->content,
             'contentformat' => FORMAT_HTML,
-            'moreinformationurl' => $formdata->moreinformationurl,
+            'moreinformationurl' => !empty($formdata->moreinformationurl_enable)
+                ? $formdata->moreinformationurl
+                : '',
             'owner' => $formdata->owner,
             'owneremail' => $formdata->owneremail,
-            'notes' => $formdata->notes,
-            // The date_time_selector with optional=true returns 0 when the optional checkbox is unticked.
-            'closedate' => !empty($formdata->closedate) ? (int)$formdata->closedate : null,
+            'notes' => !empty($formdata->notes_enable)
+                ? $formdata->notes
+                : '',
+            // Field closedate_enable gates whether the date is persisted; the non-optional
+            // date_time_selector always submits a timestamp regardless of the checkbox.
+            'closedate' => !empty($formdata->closedate_enable) ? (int)$formdata->closedate : null,
         ];
 
         $noticeid = (int)($formdata->noticeid ?? 0);
@@ -408,13 +504,13 @@ class notice extends dynamic_form {
             // Only manage-all users can reassign the additional editor; an empty selection
             // clears it (so only Notices managers can edit thereafter).
             if ($canpickadditionaleditor) {
-                $data['additionaleditorid'] = !empty($formdata->additionaleditorid)
+                $data['additionaleditorid'] = (!empty($formdata->additionaleditor_enable) && !empty($formdata->additionaleditorid))
                     ? (int)$formdata->additionaleditorid
                     : null;
             }
             notices::update_notice($data);
         } else {
-            $data['additionaleditorid'] = !empty($formdata->additionaleditorid)
+            $data['additionaleditorid'] = (!empty($formdata->additionaleditor_enable) && !empty($formdata->additionaleditorid))
                 ? (int)$formdata->additionaleditorid
                 : null;
             $noticeid = notices::add_notice($courseid, $data);

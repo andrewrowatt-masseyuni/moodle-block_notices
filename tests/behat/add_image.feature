@@ -11,6 +11,7 @@ Feature: Add or remove a decorative image on a notice
     And I add the "Notices" block
     And I am on site homepage
     And I follow "Manage notices"
+    And I change window size to "large"
 
   Scenario: Add a notice with a decorative image
     When I follow "Add notice"
@@ -21,6 +22,7 @@ Feature: Add or remove a decorative image on a notice
       | Owner email address      | img@noreply.com              |
       | Notes                    | n/a                          |
     And I set the notice Quill editor to "Content with image"
+    And I set the field "Use image" to "1"
     And I upload "lib/tests/fixtures/gd-logo.png" file to "Image" filemanager
     And I click on "Save" "button" in the ".modal-dialog" "css_element"
     # The manage list also renders the image alongside the notice.
@@ -41,6 +43,7 @@ Feature: Add or remove a decorative image on a notice
       | Owner email address      | img@noreply.com              |
       | Notes                    | n/a                          |
     And I set the notice Quill editor to "Content with image"
+    And I set the field "Use image" to "1"
     And I upload "lib/tests/fixtures/gd-logo.png" file to "Image" filemanager
     And I click on "Save" "button" in the ".modal-dialog" "css_element"
     And I click on "[data-notice-title=\"ImageRemovalNotice\"] [data-notice-action=\"show\"]" "css_element"

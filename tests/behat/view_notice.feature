@@ -10,6 +10,9 @@ Feature: View notice
     And I am on site homepage
     And I turn editing mode on
     And I add the "Notices" block
+    # Move off the site homepage to avoid any possible read triggers
+    # which will change the order notices are displayed.
+    And I am on the "My courses" page
     And the following "block_notices > notice" exists:
       | course             | Acceptance test site          |
       | visible            | NOTICE_VISIBLE                |
