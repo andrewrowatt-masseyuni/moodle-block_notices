@@ -146,12 +146,12 @@ class block_notices extends block_base {
     }
 
     /**
-     * Enables global configuration of the block in settings.php.
+     * Block has no site-level settings.
      *
-     * @return bool True if the global configuration is enabled.
+     * @return bool
      */
     public function has_config() {
-        return true;
+        return false;
     }
 
     /**

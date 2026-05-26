@@ -130,5 +130,12 @@ function xmldb_block_notices_upgrade($oldversion) {
         upgrade_block_savepoint(true, 2026052600, 'notices');
     }
 
+    if ($oldversion < 2026052601) {
+        // Drop the now-removed customcss site setting.
+        unset_config('customcss', 'block_notices');
+
+        upgrade_block_savepoint(true, 2026052601, 'notices');
+    }
+
     return true;
 }
