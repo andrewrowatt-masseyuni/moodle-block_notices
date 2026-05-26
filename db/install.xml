@@ -10,7 +10,7 @@
 <FIELD NAME="contentformat" TYPE="int" LENGTH="4" NOTNULL="true" SEQUENCE="false"/>
 <FIELD NAME="moreinformationurl" TYPE="char" LENGTH="256" NOTNULL="true" SEQUENCE="false" COMMENT="URL for more information."/>
 <FIELD NAME="owner" TYPE="char" LENGTH="256" NOTNULL="true" SEQUENCE="false" COMMENT="Owner or person responsible for this notice"/>
-<FIELD NAME="owneremail" TYPE="char" LENGTH="256" NOTNULL="true" SEQUENCE="false" COMMENT="Owner or person responsible for this notice"/>
+<FIELD NAME="owneremail" TYPE="char" LENGTH="256" NOTNULL="true" SEQUENCE="false" COMMENT="Email address for the owner or person responsible for this notice"/>
 <FIELD NAME="sortorder" TYPE="int" LENGTH="4" NOTNULL="true" SEQUENCE="false" COMMENT="Provides a mechanism or order or prioritise notices"/>
 <FIELD NAME="notes" TYPE="text" NOTNULL="true" SEQUENCE="false" COMMENT="Administrative notes and next steps/actions for this notice e.g., when to hide or remove it. These notes are not displayed."/>
 <FIELD NAME="staffonly" TYPE="int" LENGTH="1" NOTNULL="false" DEFAULT="0" SEQUENCE="false" COMMENT="Determines if the notice should be only visible to staff"/>
@@ -29,6 +29,9 @@
 <KEY NAME="modifiedbyuserid" TYPE="foreign" FIELDS="modifiedbyuserid" REFTABLE="user" REFFIELDS="id"/>
 <KEY NAME="additionaleditorid" TYPE="foreign" FIELDS="additionaleditorid" REFTABLE="user" REFFIELDS="id"/>
 </KEYS>
+<INDEXES>
+<INDEX NAME="courseid_visible_sortorder" UNIQUE="false" FIELDS="courseid, visible, sortorder" COMMENT="Supports the per-course listing filtered by visibility and ordered by sortorder."/>
+</INDEXES>
 </TABLE>
 <TABLE NAME="block_notices_read" COMMENT="Records the most recent time each user has seen each notice. A notice is unread for a user when timeread is missing or older than the notice's timemodified.">
 <FIELDS>

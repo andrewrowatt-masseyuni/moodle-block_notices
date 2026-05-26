@@ -50,10 +50,9 @@ $PAGE->set_heading(get_string('managenotices', 'block_notices'));
 $action = optional_param('action', null, PARAM_TEXT);
 $noticeid = optional_param('id', null, PARAM_INT);
 $exclusivevalue = optional_param('exclusive', null, PARAM_INT);
+$confirm = optional_param('confirm', 0, PARAM_BOOL);
 
 if ($action && $noticeid) {
-    require_sesskey();
-
     // Per-action checks: reject crafted URLs that target a notice from a
     // different course, and prevent users without edit rights from acting.
     $targetnotice = notices::get_notice($noticeid);
@@ -69,6 +68,27 @@ if ($action && $noticeid) {
     if (!$canmanageall && in_array($action, ['delete', 'moveup', 'movedown', 'setexclusive'], true)) {
         throw new moodle_exception('errornopermission', 'block_notices');
     }
+
+    // Destructive: ask before deleting. Initial click renders an $OUTPUT->confirm
+    // page; only the "Continue" button (which carries confirm=1 + sesskey) actually deletes.
+    if ($action === 'delete' && !$confirm) {
+        echo $OUTPUT->header();
+        echo $OUTPUT->confirm(
+            get_string('deletenoticeconfirm', 'block_notices', format_string($targetnotice['title'])),
+            new moodle_url('/blocks/notices/manage.php', [
+                'courseid' => $courseid,
+                'action' => 'delete',
+                'id' => $noticeid,
+                'confirm' => 1,
+                'sesskey' => sesskey(),
+            ]),
+            $url
+        );
+        echo $OUTPUT->footer();
+        exit;
+    }
+
+    require_sesskey();
 
     switch ($action) {
         case 'hide':
@@ -147,8 +167,8 @@ foreach (notices::get_notices_admin($courseid, $additionaleditorfilter) as $noti
     $noticearray = (array)$noticeobject;
 
     // Run filters on the title and the full text-cleaning pipeline on the content
-    // before the template renders them; the manageallnotices capability declares
-    // RISK_XSS so the saved HTML is trusted (noclean), but filters must still run.
+    // before the template renders them. Content is sanitised by format_text because
+    // additional editors (who have no RISK_XSS capability) can save HTML.
     $noticearray['title'] = format_string(
         $noticeobject->title,
         true,
@@ -157,7 +177,7 @@ foreach (notices::get_notices_admin($courseid, $additionaleditorfilter) as $noti
     $noticearray['content'] = format_text(
         $noticeobject->content,
         $noticeobject->contentformat,
-        ['context' => $formatcontext, 'noclean' => true]
+        ['context' => $formatcontext]
     );
 
     // Add extra properties to improve the template output. Reorder and delete are restricted to manage-all.
@@ -165,6 +185,14 @@ foreach (notices::get_notices_admin($courseid, $additionaleditorfilter) as $noti
     $noticearray['hasimage'] = $imageurl !== null;
     $noticearray['imageurl'] = $imageurl !== null ? $imageurl->out(false) : '';
     $noticearray['candelete'] = $canmanageall;
+    $noticearray['createdbylink'] = (new moodle_url(
+        '/user/view.php',
+        ['id' => (int)$noticeobject->createdbyuserid, 'course' => $courseid]
+    ))->out(false);
+    $noticearray['modifiedbylink'] = (new moodle_url(
+        '/user/view.php',
+        ['id' => (int)$noticeobject->modifiedbyuserid, 'course' => $courseid]
+    ))->out(false);
     $exclusivevalue = (int)$noticearray['exclusive'];
     $noticearray['isexclusive_important'] = $exclusivevalue === notices::NOTICE_EXCLUSIVE_IMPORTANT;
     $noticearray['isexclusive_information'] = $exclusivevalue === notices::NOTICE_EXCLUSIVE_INFORMATION;

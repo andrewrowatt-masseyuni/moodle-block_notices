@@ -119,5 +119,16 @@ function xmldb_block_notices_upgrade($oldversion) {
         upgrade_block_savepoint(true, 2026051806, 'notices');
     }
 
+    if ($oldversion < 2026052600) {
+        // Index supporting the per-course listing filtered by visibility and ordered by sortorder.
+        $table = new xmldb_table('block_notices');
+        $index = new xmldb_index('courseid_visible_sortorder', XMLDB_INDEX_NOTUNIQUE, ['courseid', 'visible', 'sortorder']);
+        if (!$dbman->index_exists($table, $index)) {
+            $dbman->add_index($table, $index);
+        }
+
+        upgrade_block_savepoint(true, 2026052600, 'notices');
+    }
+
     return true;
 }

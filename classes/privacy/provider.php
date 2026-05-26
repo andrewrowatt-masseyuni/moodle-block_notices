@@ -87,18 +87,26 @@ class provider implements
         if (!is_a($context, \context_course::class)) {
             return;
         }
-        // Get the list of users who have data in this context.
 
-        $notices = \block_notices\notices::get_notices_admin($context->instanceid);
-
-        foreach ($notices as $notice) {
-            // Note that the add_user function convieniently handles duplicates.
-            $userlist->add_user($notice->createdbyuserid);
-            $userlist->add_user($notice->modifiedbyuserid);
-            if (!empty($notice->additionaleditorid)) {
-                $userlist->add_user($notice->additionaleditorid);
-            }
-        }
+        // Notice authors / modifiers / additional editors — one SELECT per role keeps
+        // each query indexable rather than forcing an OR-scan across three columns.
+        $userlist->add_from_sql(
+            'createdbyuserid',
+            'SELECT createdbyuserid FROM {block_notices} WHERE courseid = :courseid',
+            ['courseid' => $context->instanceid]
+        );
+        $userlist->add_from_sql(
+            'modifiedbyuserid',
+            'SELECT modifiedbyuserid FROM {block_notices}
+              WHERE courseid = :courseid AND modifiedbyuserid <> 0',
+            ['courseid' => $context->instanceid]
+        );
+        $userlist->add_from_sql(
+            'additionaleditorid',
+            'SELECT additionaleditorid FROM {block_notices}
+              WHERE courseid = :courseid AND additionaleditorid IS NOT NULL',
+            ['courseid' => $context->instanceid]
+        );
 
         // Users who have read tracking rows against any notice in this course.
         $userlist->add_from_sql(
@@ -160,6 +168,10 @@ class provider implements
         global $DB;
         $userid = $contextlist->get_user()->id;
         foreach ($contextlist as $context) {
+            if (!is_a($context, \context_course::class)) {
+                continue;
+            }
+
             // Delete this user's reads against notices in this course before the notices
             // themselves are removed, so the IN-subquery can still resolve.
             $DB->delete_records_select(
@@ -168,7 +180,7 @@ class provider implements
                 ['userid' => $userid, 'courseid' => $context->instanceid]
             );
 
-            \block_notices\notices::delete_notices_by_user($context->instanceid, $userid);
+            \block_notices\notices::scrub_user_from_notices($context->instanceid, $userid);
         }
     }
 
@@ -199,34 +211,42 @@ class provider implements
             array_merge(['courseid' => $context->instanceid], $readuseridparams)
         );
 
-        // 2. Build the filter for the notices about to be deleted. Three separate
-        // get_in_or_equal calls because the placeholders must be unique across the
-        // three OR-branches of the WHERE clause; the 'cby'/'mby'/'aed' prefixes keep
-        // them from colliding when merged into a single params array.
+        // 2. Delete notices these users authored, plus their reads and image files.
         [$cbyinsql, $cbyparams] = $DB->get_in_or_equal($userids, SQL_PARAMS_NAMED, 'cby');
+        $createdids = $DB->get_fieldset_select(
+            'block_notices',
+            'id',
+            "courseid = :courseid AND createdbyuserid {$cbyinsql}",
+            array_merge(['courseid' => $context->instanceid], $cbyparams)
+        );
+        if (!empty($createdids)) {
+            [$insql, $inparams] = $DB->get_in_or_equal($createdids, SQL_PARAMS_NAMED, 'nid');
+            $DB->delete_records_select('block_notices_read', "noticeid {$insql}", $inparams);
+
+            $contextid = \block_notices\notices::get_notice_context($context->instanceid)->id;
+            $fs = get_file_storage();
+            foreach ($createdids as $noticeid) {
+                $fs->delete_area_files($contextid, 'block_notices', 'image', (int)$noticeid);
+            }
+            $DB->delete_records_select('block_notices', "id {$insql}", $inparams);
+        }
+
+        // 3. Scrub the user reference on surviving notices where these users were only
+        // the last modifier or the additional editor. The notice still belongs to its
+        // original creator and must survive a SAR delete.
         [$mbyinsql, $mbyparams] = $DB->get_in_or_equal($userids, SQL_PARAMS_NAMED, 'mby');
+        $DB->execute(
+            "UPDATE {block_notices} SET modifiedbyuserid = 0
+                WHERE courseid = :courseid AND modifiedbyuserid {$mbyinsql}",
+            array_merge(['courseid' => $context->instanceid], $mbyparams)
+        );
+
         [$aedinsql, $aedparams] = $DB->get_in_or_equal($userids, SQL_PARAMS_NAMED, 'aed');
-        $noticeparams = array_merge(
-            ['courseid' => $context->instanceid],
-            $cbyparams,
-            $mbyparams,
-            $aedparams
+        $DB->execute(
+            "UPDATE {block_notices} SET additionaleditorid = NULL
+                WHERE courseid = :courseid AND additionaleditorid {$aedinsql}",
+            array_merge(['courseid' => $context->instanceid], $aedparams)
         );
-        $noticefilter = "courseid = :courseid
-            AND (createdbyuserid {$cbyinsql}
-                 OR modifiedbyuserid {$mbyinsql}
-                 OR additionaleditorid {$aedinsql})";
-
-        // 3. Delete every read row pointing at notices about to be deleted (any user's
-        // reads, not only $userids') so we don't leave orphans behind.
-        $DB->delete_records_select(
-            'block_notices_read',
-            "noticeid IN (SELECT id FROM {block_notices} WHERE {$noticefilter})",
-            $noticeparams
-        );
-
-        // 4. Finally delete the notices themselves.
-        $DB->delete_records_select('block_notices', $noticefilter, $noticeparams);
     }
 
     /**
@@ -251,33 +271,42 @@ class provider implements
      */
     public static function export_user_data(approved_contextlist $contextlist) {
         global $DB;
-        $context = \context_system::instance();
-
         $userid = $contextlist->get_user()->id;
-        $notices = \block_notices\notices::get_notices_by_user($userid);
 
-        if (count($notices) > 0) {
-            $noticesdata = [];
-
-            foreach ($notices as $notice) {
-                $noticedata = [
-                    'title' => $notice->title,
-                    'content' => $notice->content, ];
-                $noticesdata[] = (object)$noticedata;
-
-                // Add the data to the context.
-                writer::with_context($context)->export_data(
-                    [get_string('notices', 'block_notices')],
-                    (object)[get_string('notices', 'block_notices') => $noticesdata]
-                );
-            }
-        }
-
-        // Per-context export of the read tracking rows for this user.
         foreach ($contextlist as $usercontext) {
             if (!is_a($usercontext, \context_course::class)) {
                 continue;
             }
+
+            // Export notices in this course that the user authored, modified, or was
+            // the additional editor on.
+            $notices = $DB->get_records_select(
+                'block_notices',
+                'courseid = :courseid AND (createdbyuserid = :createdbyuserid
+                    OR modifiedbyuserid = :modifiedbyuserid
+                    OR additionaleditorid = :additionaleditorid)',
+                [
+                    'courseid' => $usercontext->instanceid,
+                    'createdbyuserid' => $userid,
+                    'modifiedbyuserid' => $userid,
+                    'additionaleditorid' => $userid,
+                ]
+            );
+            if (!empty($notices)) {
+                $noticesdata = [];
+                foreach ($notices as $notice) {
+                    $noticesdata[] = (object)[
+                        'title' => $notice->title,
+                        'content' => $notice->content,
+                    ];
+                }
+                writer::with_context($usercontext)->export_data(
+                    [get_string('notices', 'block_notices')],
+                    (object)[get_string('notices', 'block_notices') => $noticesdata]
+                );
+            }
+
+            // Export read-tracking rows for the user against notices in this course.
             $reads = $DB->get_records_sql(
                 'SELECT r.id, r.timeread, b.title
                    FROM {block_notices_read} r

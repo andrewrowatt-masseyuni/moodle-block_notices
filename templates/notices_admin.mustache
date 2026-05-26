@@ -86,8 +86,8 @@
         <div class="block-notices-details">
             <small>{{#str}} moreinformationurl, block_notices {{/str}}: <a href="{{moreinformationurl}}" target="_blank">{{moreinformationurl}}</a></small>
             <small>{{#str}} owner, block_notices {{/str}}: <a title="Click to email" href="mailto:{{owneremail}}">{{owner}}</a></small>
-            <small>{{#str}} createdby, block_notices {{/str}}: <a href="/user/view.php?id={{createdbyuserid}}&course={{courseid}}" target="_blank">{{createdby}}</a></small>
-            <small>{{#str}} modifiedby, block_notices {{/str}}: <a href="/user/view.php?id={{modifiedbyuserid}}&course={{courseid}}" target="_blank">{{modifiedby}}</a></small>
+            <small>{{#str}} createdby, block_notices {{/str}}: <a href="{{createdbylink}}" target="_blank">{{createdby}}</a></small>
+            <small>{{#str}} modifiedby, block_notices {{/str}}: <a href="{{modifiedbylink}}" target="_blank">{{modifiedby}}</a></small>
         </div>
     </li>
     {{/notices}}

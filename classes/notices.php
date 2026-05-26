@@ -40,11 +40,6 @@ class notices {
     public const NOTICE_IN_PREVIEW = 2;
 
     /**
-     * @var int defining so it can be used for filtering
-     */
-    public const NOTICE_CRITICAL = 3;
-
-    /**
      * @var int notice.exclusive value: not exclusive.
      */
     public const NOTICE_EXCLUSIVE_NONE = 0;
@@ -284,12 +279,6 @@ class notices {
             return [$exclusive->id => $exclusive];
         }
 
-        $criticalnotice = self::get_critical_notice($courseid);
-        if (count($criticalnotice) != 0) {
-            // If there is a critical notice, we only return that.
-            return $criticalnotice;
-        }
-
         $visible = [self::NOTICE_VISIBLE];
         if ($includepreview) {
             $visible[] = self::NOTICE_IN_PREVIEW;
@@ -498,67 +487,55 @@ class notices {
     }
 
     /**
-     * Get the critical notice for a given course.
+     * Privacy purge for a single user against a single course.
      *
-     * @param int $courseid
-     * @return array
-     */
-    public static function get_critical_notice(int $courseid): array {
-        global $DB;
-
-        $sql = "SELECT * FROM {block_notices}
-            WHERE courseid = :courseid and visible = :visible";
-
-        $criticalnotice = $DB->get_record_sql($sql, ['courseid' => $courseid, 'visible' => self::NOTICE_CRITICAL]);
-
-        if ($criticalnotice) {
-            // If there is a critical notice, we only return that.
-            return (array)$criticalnotice;
-        }
-
-        // No critical notice found, return an empty array.
-        return [];
-    }
-
-    /**
-     * Delete all notices for a given user. Used for privacy purposes.
+     * Deletes notices the user authored (createdbyuserid), and scrubs the user's
+     * reference from notices they only modified or were the additional editor on —
+     * those notices belong to another author and must survive a SAR delete.
      *
      * @param int $courseid
      * @param int $userid
-     * @return array
      */
-    public static function delete_notices_by_user(int $courseid, int $userid): void {
+    public static function scrub_user_from_notices(int $courseid, int $userid): void {
         global $DB;
 
-        $params = [
-            'courseid' => $courseid,
-            'createdbyuserid' => $userid,
-            'modifiedbyuserid' => $userid,
-            'additionaleditorid' => $userid,
-        ];
-        $noticefilter = 'courseid = :courseid AND (createdbyuserid = :createdbyuserid
-            OR modifiedbyuserid = :modifiedbyuserid
-            OR additionaleditorid = :additionaleditorid)';
-
-        // Collect notice ids before any deletion so we can purge their image filearea afterwards.
-        $noticeids = $DB->get_fieldset_select('block_notices', 'id', $noticefilter, $params);
-
-        // Delete every read row pointing at the notices about to be deleted (regardless
-        // of which user owns the read row) so the notice rows can go without leaving
-        // dangling references in block_notices_read.
-        $DB->delete_records_select(
-            'block_notices_read',
-            "noticeid IN (SELECT id FROM {block_notices} WHERE {$noticefilter})",
-            $params
+        // 1. Notices created by this user: delete the rows, their reads and their images.
+        $createdids = $DB->get_fieldset_select(
+            'block_notices',
+            'id',
+            'courseid = :courseid AND createdbyuserid = :createdbyuserid',
+            ['courseid' => $courseid, 'createdbyuserid' => $userid]
         );
 
-        $contextid = self::get_notice_context($courseid)->id;
-        $fs = get_file_storage();
-        foreach ($noticeids as $noticeid) {
-            $fs->delete_area_files($contextid, 'block_notices', 'image', (int)$noticeid);
+        if (!empty($createdids)) {
+            [$insql, $inparams] = $DB->get_in_or_equal($createdids, SQL_PARAMS_NAMED, 'nid');
+            $DB->delete_records_select('block_notices_read', "noticeid {$insql}", $inparams);
+
+            $contextid = self::get_notice_context($courseid)->id;
+            $fs = get_file_storage();
+            foreach ($createdids as $noticeid) {
+                $fs->delete_area_files($contextid, 'block_notices', 'image', (int)$noticeid);
+            }
+
+            $DB->delete_records_select('block_notices', "id {$insql}", $inparams);
         }
 
-        $DB->delete_records_select('block_notices', $noticefilter, $params);
+        // 2. Surviving notices in this course: scrub the user reference where it appears
+        // as last-modifier or additional editor (the notice still belongs to its creator).
+        $DB->set_field_select(
+            'block_notices',
+            'modifiedbyuserid',
+            0,
+            'courseid = :courseid AND modifiedbyuserid = :userid',
+            ['courseid' => $courseid, 'userid' => $userid]
+        );
+        $DB->set_field_select(
+            'block_notices',
+            'additionaleditorid',
+            null,
+            'courseid = :courseid AND additionaleditorid = :userid',
+            ['courseid' => $courseid, 'userid' => $userid]
+        );
     }
 
     /**
@@ -606,36 +583,15 @@ class notices {
     }
 
     /**
-     * Get a single notice.
+     * Get a single notice as an associative array, or an empty array if not found.
      *
      * @param int $id
-     * @return object
+     * @return array
      */
     public static function get_notice($id): array {
         global $DB;
 
         return (array)$DB->get_record('block_notices', ['id' => $id]);
-    }
-
-    /**
-     * Get a single notice.
-     *
-     * @param int $userid
-     * @return object
-     */
-    public static function get_notices_by_user(int $userid): array {
-        global $DB;
-
-        $sql = "select * from {block_notices}
-            where createdbyuserid = :createdbyuseridid
-               or modifiedbyuserid = :modifiedbyuseridid
-               or additionaleditorid = :additionaleditorid";
-
-        return (array)$DB->get_records_sql($sql, [
-            'createdbyuseridid' => $userid,
-            'modifiedbyuseridid' => $userid,
-            'additionaleditorid' => $userid,
-        ]);
     }
 
     /**
@@ -707,7 +663,7 @@ class notices {
 
         $noticepreviousversion = self::get_notice($data['id']);
 
-        unset($data['visible'], $data['sortorder'], $data['timepromoted']);
+        unset($data['visible'], $data['sortorder']);
         $data['timemodified'] = time();
         $data['timepromoted'] = time();
         $data['modifiedbyuserid'] = $USER->id;

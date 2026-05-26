@@ -22,7 +22,6 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-import $ from 'jquery';
 import {get_strings as getStrings} from 'core/str';
 import Ajax from 'core/ajax';
 
@@ -317,15 +316,20 @@ export const init = () => {
         },
     });
 
-    $('.swiper-button-playpause').on('click', function() {
-        if (swiper.autoplay.running) {
-            swiper.autoplay.stop();
-            $(this).removeClass('fa-pause').addClass('fa-play');
-        } else {
-            swiper.autoplay.start();
-            $(this).removeClass('fa-play').addClass('fa-pause');
-        }
-    });
+    const playPauseButton = document.querySelector('.swiper-button-playpause');
+    if (playPauseButton) {
+        playPauseButton.addEventListener('click', () => {
+            if (swiper.autoplay.running) {
+                swiper.autoplay.stop();
+                playPauseButton.classList.remove('fa-pause');
+                playPauseButton.classList.add('fa-play');
+            } else {
+                swiper.autoplay.start();
+                playPauseButton.classList.remove('fa-play');
+                playPauseButton.classList.add('fa-pause');
+            }
+        });
+    }
 
     initReadTracking(root, swiper);
 };

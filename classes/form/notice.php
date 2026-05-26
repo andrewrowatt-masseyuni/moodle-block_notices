@@ -210,7 +210,7 @@ class notice extends dynamic_form {
 
         $mform->addElement('text', 'moreinformationurl', '', ['size' => 128]);
         $mform->setDefault('moreinformationurl', '');
-        $mform->setType('moreinformationurl', PARAM_TEXT);
+        $mform->setType('moreinformationurl', PARAM_URL);
         $mform->hideIf('moreinformationurl', 'moreinformationurl_enable', 'notchecked');
 
         // Optional close date. When set and in the past, the auto-close scheduled task
@@ -463,6 +463,15 @@ class notice extends dynamic_form {
         }
         if (trim((string)($data['owneremail'] ?? '')) === '') {
             $errors['owneremail'] = get_string('required');
+        }
+        // Only permit safe URL schemes for the optional "more information" link, so it
+        // cannot be used as a javascript:/data: XSS vector through additional editors.
+        if (!empty($data['moreinformationurl_enable']) && !empty($data['moreinformationurl'])) {
+            $url = trim((string)$data['moreinformationurl']);
+            $scheme = strtolower((string)parse_url($url, PHP_URL_SCHEME));
+            if (!in_array($scheme, ['http', 'https', 'mailto'], true)) {
+                $errors['moreinformationurl'] = get_string('invalidurl', 'block_notices');
+            }
         }
         return $errors;
     }
