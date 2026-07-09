@@ -1,53 +1,53 @@
 <XMLDB xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" PATH="blocks/notices/db" VERSION="20260517" COMMENT="XMLDB file for Moodle blocks/notices" xsi:noNamespaceSchemaLocation="../../../lib/xmldb/xmldb.xsd">
-<TABLES>
-<TABLE NAME="block_notices" COMMENT="Contains notices for a course">
-<FIELDS>
-<FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
-<FIELD NAME="courseid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="Course Id containing this block instance"/>
-<FIELD NAME="visible" TYPE="int" LENGTH="1" NOTNULL="true" SEQUENCE="false" COMMENT="hidden=0, visible=1"/>
-<FIELD NAME="title" TYPE="char" LENGTH="64" NOTNULL="true" SEQUENCE="false" COMMENT="Title of the notice"/>
-<FIELD NAME="content" TYPE="text" NOTNULL="true" SEQUENCE="false" COMMENT="HTML content of the notice"/>
-<FIELD NAME="contentformat" TYPE="int" LENGTH="4" NOTNULL="true" SEQUENCE="false"/>
-<FIELD NAME="moreinformationurl" TYPE="char" LENGTH="256" NOTNULL="true" SEQUENCE="false" COMMENT="URL for more information."/>
-<FIELD NAME="owner" TYPE="char" LENGTH="256" NOTNULL="true" SEQUENCE="false" COMMENT="Owner or person responsible for this notice"/>
-<FIELD NAME="owneremail" TYPE="char" LENGTH="256" NOTNULL="true" SEQUENCE="false" COMMENT="Email address for the owner or person responsible for this notice"/>
-<FIELD NAME="sortorder" TYPE="int" LENGTH="4" NOTNULL="true" SEQUENCE="false" COMMENT="Provides a mechanism or order or prioritise notices"/>
-<FIELD NAME="notes" TYPE="text" NOTNULL="true" SEQUENCE="false" COMMENT="Administrative notes and next steps/actions for this notice e.g., when to hide or remove it. These notes are not displayed."/>
-<FIELD NAME="staffonly" TYPE="int" LENGTH="1" NOTNULL="false" DEFAULT="0" SEQUENCE="false" COMMENT="Determines if the notice should be only visible to staff"/>
-<FIELD NAME="exclusive" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="Per-course exclusive flag: 0=normal, 1=important (red), 2=information (blue). At most one per course is non-zero."/>
-<FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
-<FIELD NAME="timemodified" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
-<FIELD NAME="timepromoted" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="Drives user-facing sort order; bumped on edit and by the explicit Promote action."/>
-<FIELD NAME="createdbyuserid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="User Id who created this notice."/>
-<FIELD NAME="modifiedbyuserid" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="User Id who last modified this notice."/>
-<FIELD NAME="additionaleditorid" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false" COMMENT="User Id of an additional editor for this notice. Additional editors may edit the notice without needing the manageallnotices capability."/>
-<FIELD NAME="closedate" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false" COMMENT="Optional unix timestamp. When set and in the past, the auto-close scheduled task hides the notice."/>
-</FIELDS>
-<KEYS>
-<KEY NAME="primary" TYPE="primary" FIELDS="id"/>
-<KEY NAME="createdbyuserid" TYPE="foreign" FIELDS="createdbyuserid" REFTABLE="user" REFFIELDS="id"/>
-<KEY NAME="modifiedbyuserid" TYPE="foreign" FIELDS="modifiedbyuserid" REFTABLE="user" REFFIELDS="id"/>
-<KEY NAME="additionaleditorid" TYPE="foreign" FIELDS="additionaleditorid" REFTABLE="user" REFFIELDS="id"/>
-</KEYS>
-<INDEXES>
-<INDEX NAME="courseid_visible_sortorder" UNIQUE="false" FIELDS="courseid, visible, sortorder" COMMENT="Supports the per-course listing filtered by visibility and ordered by sortorder."/>
-</INDEXES>
-</TABLE>
-<TABLE NAME="block_notices_read" COMMENT="Records the most recent time each user has seen each notice. A notice is unread for a user when timeread is missing or older than the notice's timemodified.">
-<FIELDS>
-<FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
-<FIELD NAME="noticeid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="Notice that was read."/>
-<FIELD NAME="userid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="User who read the notice."/>
-<FIELD NAME="timeread" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="Unix timestamp of the most recent read for this user/notice pair."/>
-</FIELDS>
-<KEYS>
-<KEY NAME="primary" TYPE="primary" FIELDS="id"/>
-<KEY NAME="noticeid" TYPE="foreign" FIELDS="noticeid" REFTABLE="block_notices" REFFIELDS="id"/>
-<KEY NAME="userid" TYPE="foreign" FIELDS="userid" REFTABLE="user" REFFIELDS="id"/>
-</KEYS>
-<INDEXES>
-<INDEX NAME="noticeiduserid" UNIQUE="true" FIELDS="noticeid, userid" COMMENT="One row per user/notice pair."/>
-</INDEXES>
-</TABLE>
-</TABLES>
+    <TABLES>
+        <TABLE NAME="block_notices" COMMENT="Contains notices for a course">
+            <FIELDS>
+                <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+                <FIELD NAME="courseid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="Course Id containing this block instance"/>
+                <FIELD NAME="visible" TYPE="int" LENGTH="1" NOTNULL="true" SEQUENCE="false" COMMENT="hidden=0, visible=1"/>
+                <FIELD NAME="title" TYPE="char" LENGTH="64" NOTNULL="true" SEQUENCE="false" COMMENT="Title of the notice"/>
+                <FIELD NAME="content" TYPE="text" NOTNULL="true" SEQUENCE="false" COMMENT="HTML content of the notice"/>
+                <FIELD NAME="contentformat" TYPE="int" LENGTH="4" NOTNULL="true" SEQUENCE="false"/>
+                <FIELD NAME="moreinformationurl" TYPE="char" LENGTH="256" NOTNULL="true" SEQUENCE="false" COMMENT="URL for more information."/>
+                <FIELD NAME="owner" TYPE="char" LENGTH="256" NOTNULL="true" SEQUENCE="false" COMMENT="Owner or person responsible for this notice"/>
+                <FIELD NAME="owneremail" TYPE="char" LENGTH="256" NOTNULL="true" SEQUENCE="false" COMMENT="Email address for the owner or person responsible for this notice"/>
+                <FIELD NAME="sortorder" TYPE="int" LENGTH="4" NOTNULL="true" SEQUENCE="false" COMMENT="Provides a mechanism or order or prioritise notices"/>
+                <FIELD NAME="notes" TYPE="text" NOTNULL="true" SEQUENCE="false" COMMENT="Administrative notes and next steps/actions for this notice e.g., when to hide or remove it. These notes are not displayed."/>
+                <FIELD NAME="staffonly" TYPE="int" LENGTH="1" NOTNULL="false" DEFAULT="0" SEQUENCE="false" COMMENT="Determines if the notice should be only visible to staff"/>
+                <FIELD NAME="exclusive" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="Per-course exclusive flag: 0=normal, 1=important (red), 2=information (blue). At most one per course is non-zero."/>
+                <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+                <FIELD NAME="timemodified" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+                <FIELD NAME="timepromoted" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="Drives user-facing sort order; bumped on edit and by the explicit Promote action."/>
+                <FIELD NAME="createdbyuserid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="User Id who created this notice."/>
+                <FIELD NAME="modifiedbyuserid" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="User Id who last modified this notice."/>
+                <FIELD NAME="additionaleditorid" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false" COMMENT="User Id of an additional editor for this notice. Additional editors may edit the notice without needing the manageallnotices capability."/>
+                <FIELD NAME="closedate" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false" COMMENT="Optional unix timestamp. When set and in the past, the auto-close scheduled task hides the notice."/>
+            </FIELDS>
+            <KEYS>
+                <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+                <KEY NAME="createdbyuserid" TYPE="foreign" FIELDS="createdbyuserid" REFTABLE="user" REFFIELDS="id"/>
+                <KEY NAME="modifiedbyuserid" TYPE="foreign" FIELDS="modifiedbyuserid" REFTABLE="user" REFFIELDS="id"/>
+                <KEY NAME="additionaleditorid" TYPE="foreign" FIELDS="additionaleditorid" REFTABLE="user" REFFIELDS="id"/>
+            </KEYS>
+            <INDEXES>
+                <INDEX NAME="courseid_visible_sortorder" UNIQUE="false" FIELDS="courseid, visible, sortorder" COMMENT="Supports the per-course listing filtered by visibility and ordered by sortorder."/>
+            </INDEXES>
+        </TABLE>
+        <TABLE NAME="block_notices_read" COMMENT="Records the most recent time each user has seen each notice. A notice is unread for a user when timeread is missing or older than the notice's timemodified.">
+            <FIELDS>
+                <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+                <FIELD NAME="noticeid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="Notice that was read."/>
+                <FIELD NAME="userid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="User who read the notice."/>
+                <FIELD NAME="timeread" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="Unix timestamp of the most recent read for this user/notice pair."/>
+            </FIELDS>
+            <KEYS>
+                <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+                <KEY NAME="noticeid" TYPE="foreign" FIELDS="noticeid" REFTABLE="block_notices" REFFIELDS="id"/>
+                <KEY NAME="userid" TYPE="foreign" FIELDS="userid" REFTABLE="user" REFFIELDS="id"/>
+            </KEYS>
+            <INDEXES>
+                <INDEX NAME="noticeiduserid" UNIQUE="true" FIELDS="noticeid, userid" COMMENT="One row per user/notice pair."/>
+            </INDEXES>
+        </TABLE>
+    </TABLES>
 </XMLDB>

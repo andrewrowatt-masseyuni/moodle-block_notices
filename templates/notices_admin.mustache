@@ -23,8 +23,172 @@
     icons (move, exclusive, edit, delete) are hover-revealed on
     pointer-fine devices and always visible on touch devices.
 
+    Context variables required for this template:
+    * groups - array of visibility groups (In preview, Visible, Hidden),
+      each with: groupcssclasssuffix, description, css (bootstrap badge
+      colour), count, and a notices array. Each notice carries id, title,
+      content, visible, staffonly, sortorder, timecreated, timemodified,
+      hasimage, imageurl, isexclusive_important, isexclusive_information,
+      ismodified, readcount, readcountcurrent, moreinformationurl, owner,
+      owneremail, createdby, createdbylink, modifiedby, modifiedbylink,
+      plus the per-action booleans (canshow, canhide, canmoveup,
+      canmovedown, cansetexclusive_important, cansetexclusive_information,
+      canclearexclusive, canpromote, candelete).
+    * canmanageall - bool, whether the "Add notice" action is shown.
+    * sesskey - string, session key for the action links.
+    * courseid - int, course being managed.
+
     Example context (json):
     {
+        "sesskey": "aBcDeF1234",
+        "courseid": 2,
+        "canmanageall": true,
+        "groups": [
+            {
+                "groupcssclasssuffix": "visibility-preview",
+                "description": "In preview",
+                "css": "warning",
+                "count": 1,
+                "notices": [
+                    {
+                        "id": 21,
+                        "title": "Draft: end of semester survey",
+                        "content": "<p>Draft copy awaiting sign-off before it goes live.</p>",
+                        "visible": 2,
+                        "staffonly": 0,
+                        "sortorder": 0,
+                        "timecreated": 1719360000,
+                        "timemodified": 1719360000,
+                        "hasimage": false,
+                        "imageurl": "",
+                        "isexclusive_important": false,
+                        "isexclusive_information": false,
+                        "ismodified": false,
+                        "readcount": 0,
+                        "readcountcurrent": 0,
+                        "moreinformationurl": "https://ost.massey.ac.nz",
+                        "owner": "Ema Alter",
+                        "owneremail": "E.J.Alter@massey.ac.nz",
+                        "createdby": "Ema Alter",
+                        "createdbylink": "https://moodle.example.com/user/view.php?id=34&course=2",
+                        "modifiedby": "Ema Alter",
+                        "modifiedbylink": "https://moodle.example.com/user/view.php?id=34&course=2",
+                        "candelete": true,
+                        "canhide": true,
+                        "canshow": true,
+                        "canpromote": true
+                    }
+                ]
+            },
+            {
+                "groupcssclasssuffix": "visibility-visible",
+                "description": "Visible",
+                "css": "success",
+                "count": 2,
+                "notices": [
+                    {
+                        "id": 12,
+                        "title": "Copyright Notice",
+                        "content": "<p>All Stream course materials are copyrighted and must not be shared.</p>",
+                        "visible": 1,
+                        "staffonly": 0,
+                        "sortorder": 1,
+                        "timecreated": 1719100000,
+                        "timemodified": 1719446400,
+                        "hasimage": true,
+                        "imageurl": "https://moodle.example.com/pluginfile.php/1/block_notices/image/12/copyright.jpg",
+                        "isexclusive_important": true,
+                        "isexclusive_information": false,
+                        "ismodified": true,
+                        "readcount": 128,
+                        "readcountcurrent": 87,
+                        "moreinformationurl": "https://www.massey.ac.nz/copyright",
+                        "owner": "Andrew Rowatt",
+                        "owneremail": "A.J.Rowatt@massey.ac.nz",
+                        "createdby": "Andrew Rowatt",
+                        "createdbylink": "https://moodle.example.com/user/view.php?id=2&course=2",
+                        "modifiedby": "Andrew Rowatt",
+                        "modifiedbylink": "https://moodle.example.com/user/view.php?id=2&course=2",
+                        "candelete": true,
+                        "canhide": true,
+                        "canmoveup": false,
+                        "canmovedown": true,
+                        "cansetexclusive_important": false,
+                        "cansetexclusive_information": true,
+                        "canclearexclusive": true,
+                        "canpromote": true,
+                        "showsortorder": true
+                    },
+                    {
+                        "id": 18,
+                        "title": "MyHub",
+                        "content": "<p>Access your enrolment, results and personal details in MyHub.</p>",
+                        "visible": 1,
+                        "staffonly": 1,
+                        "sortorder": 2,
+                        "timecreated": 1719200000,
+                        "timemodified": 1719200000,
+                        "hasimage": false,
+                        "imageurl": "",
+                        "isexclusive_important": false,
+                        "isexclusive_information": false,
+                        "ismodified": false,
+                        "readcount": 42,
+                        "readcountcurrent": 42,
+                        "moreinformationurl": "https://myhub.massey.ac.nz",
+                        "owner": "Andrew Rowatt",
+                        "owneremail": "A.J.Rowatt@massey.ac.nz",
+                        "createdby": "Andrew Rowatt",
+                        "createdbylink": "https://moodle.example.com/user/view.php?id=2&course=2",
+                        "modifiedby": "Hayden Burnett",
+                        "modifiedbylink": "https://moodle.example.com/user/view.php?id=51&course=2",
+                        "candelete": true,
+                        "canhide": true,
+                        "canmoveup": true,
+                        "canmovedown": false,
+                        "cansetexclusive_important": true,
+                        "cansetexclusive_information": true,
+                        "canclearexclusive": false,
+                        "canpromote": true,
+                        "showsortorder": true
+                    }
+                ]
+            },
+            {
+                "groupcssclasssuffix": "visibility-hidden",
+                "description": "Hidden",
+                "css": "light",
+                "count": 1,
+                "notices": [
+                    {
+                        "id": 9,
+                        "title": "Student Portal Unavailable Friday, 21 June",
+                        "content": "<p>The Student Portal will be unavailable from Friday, 21 June for maintenance.</p>",
+                        "visible": 0,
+                        "staffonly": 0,
+                        "sortorder": 0,
+                        "timecreated": 1718000000,
+                        "timemodified": 1718600000,
+                        "hasimage": false,
+                        "imageurl": "",
+                        "isexclusive_important": false,
+                        "isexclusive_information": false,
+                        "ismodified": true,
+                        "readcount": 310,
+                        "readcountcurrent": 122,
+                        "moreinformationurl": "https://www.massey.ac.nz/student-life",
+                        "owner": "Hayden Burnett",
+                        "owneremail": "h.burnett@massey.ac.nz",
+                        "createdby": "Hayden Burnett",
+                        "createdbylink": "https://moodle.example.com/user/view.php?id=51&course=2",
+                        "modifiedby": "Hayden Burnett",
+                        "modifiedbylink": "https://moodle.example.com/user/view.php?id=51&course=2",
+                        "candelete": true,
+                        "canshow": true
+                    }
+                ]
+            }
+        ]
     }
 }}
 {{#groups}}
@@ -40,17 +204,17 @@
         <span class="badge badge-light badge-sortorder sr-only">{{sortorder}}</span>
 
         <div class="block-notices-primary d-flex align-items-center">
-            <div class="block-notices-status d-flex align-items-center" style="gap: 0.5em;">
-                <span style="font-weight: 300;" class="badge badge-{{css}} noticegroup">{{description}}</span>
-                {{#staffonly}}<span style="font-weight: 300;" class="badge badge-info staffonly">{{#str}} staffonly, block_notices {{/str}}</span>{{/staffonly}}
-                {{#isexclusive_important}}<span style="font-weight: 300;" class="badge badge-danger exclusive">{{#str}} exclusive_important, block_notices {{/str}}</span>{{/isexclusive_important}}
-                {{#isexclusive_information}}<span style="font-weight: 300;" class="badge badge-primary exclusive">{{#str}} exclusive_information, block_notices {{/str}}</span>{{/isexclusive_information}}
+            <div class="block-notices-status d-flex align-items-center">
+                <span class="badge badge-{{css}} noticegroup">{{description}}</span>
+                {{#staffonly}}<span class="badge badge-info staffonly">{{#str}} staffonly, block_notices {{/str}}</span>{{/staffonly}}
+                {{#isexclusive_important}}<span class="badge badge-danger exclusive">{{#str}} exclusive_important, block_notices {{/str}}</span>{{/isexclusive_important}}
+                {{#isexclusive_information}}<span class="badge badge-primary exclusive">{{#str}} exclusive_information, block_notices {{/str}}</span>{{/isexclusive_information}}
 
                 {{#canshow}}<a class="block-notices-action" role="button" href="manage.php?sesskey={{sesskey}}&courseid={{courseid}}&action=show&id={{id}}" data-notice-action="show" title="{{#str}} show, core {{/str}}" aria-label="{{#str}} show, core {{/str}}">{{#pix}} t/hide, core, {{#str}} show, core {{/str}} {{/pix}}</a>{{/canshow}}
                 {{#canhide}}<a class="block-notices-action" role="button" href="manage.php?sesskey={{sesskey}}&courseid={{courseid}}&action=hide&id={{id}}" data-notice-action="hide" title="{{#str}} hide, core {{/str}}" aria-label="{{#str}} hide, core {{/str}}">{{#pix}} t/show, core, {{#str}} hide, core {{/str}} {{/pix}}</a>{{/canhide}}
             </div>
 
-            <div class="block-notices-actions-secondary d-flex align-items-center" style="gap: 0.5em;">
+            <div class="block-notices-actions-secondary d-flex align-items-center">
                 {{#canmoveup}}<a role="button" href="manage.php?sesskey={{sesskey}}&courseid={{courseid}}&action=moveup&id={{id}}" data-notice-action="moveup" title="{{#str}} moveup, core {{/str}}" aria-label="{{#str}} moveup, core {{/str}}">{{#pix}} t/up, core, {{#str}} moveup, core {{/str}} {{/pix}}</a>{{/canmoveup}}
                 {{#canmovedown}}<a role="button" href="manage.php?sesskey={{sesskey}}&courseid={{courseid}}&action=movedown&id={{id}}" data-notice-action="movedown" title="{{#str}} movedown, core {{/str}}" aria-label="{{#str}} movedown, core {{/str}}">{{#pix}} t/down, core, {{#str}} movedown, core {{/str}} {{/pix}}</a>{{/canmovedown}}
 

@@ -64,85 +64,6 @@ class notices {
     ];
 
     /**
-     * @var array test data for notices. May move to lib_test
-     */
-    public const TEST_DATA = [
-        [
-            'visible' => 1,
-            'title' => 'MOST (Massey Online Survey Tool)',
-            'content' => '<p>Course evaluations are now open
-                . <a href="https://ost.massey.ac.nz" target="_blank">
-                Click here to tell us what you think</a>.</p>',
-            'contentformat' => 1,
-            'moreinformationurl' => 'https://ost.massey.ac.nz',
-            'owner' => 'Ema Alter',
-            'owneremail' => 'E.J.Alter@massey.ac.nz',
-            'notes' => 'Remove 12 November 2024',
-        ],
-        [
-            'visible' => 1,
-            'title' => 'Copyright Notice',
-            'content' => '<p>All Stream course materials are copyrighted and
-                intended solely for the University\'s educational purposes.
-                They may contain extracts from copyrighted works used under licenses.
-                You may create a single copy for personal use, but further copying or
-                distribution of any course materials, including powerpoints,
-                readings, tests, and exam papers, to others or online platforms is
-                prohibited. Non-compliance with this warning may lead to legal action
-                for copyright infringement and/or disciplinary measures by the University.</p>',
-            'contentformat' => 1,
-            'moreinformationurl' => 'https://www.massey.ac.nz/
-                study/study-and-assignment-support-and-guides/student-copyright-guide/',
-            'owner' => 'Andrew Rowatt',
-            'owneremail' => 'A.J.Rowatt@massey.ac.nz',
-            'notes' => 'Contact Jean if this needs to be updated.',
-        ],
-        [
-            'visible' => 0,
-            'title' => 'Student Portal Unavailable Friday, 21 June',
-            'content' => '<p>The Student Portal will be unavailable from <strong>&nbsp;Friday,
-            21 June at 6pm until Saturday, 22 June at 6pm</strong>&nbsp;while an update occurs.</p>
-	        <p style="text-align: center;"><strong>Stream will remain accessible during this time.</strong>
-	        </p><p>Students are encouraged to complete any applications in the portal ahead of time to
-            avoid inconvenience. This includes semester two enrolments, scholarships
-	        , and special circumstance requests.</p>',
-            'contentformat' => 1,
-            'moreinformationurl' => 'https://www.massey.ac.nz/student-life/
-			services-and-support-for-students/it-services-and-support/',
-            'owner' => 'Hayden Burnett',
-            'owneremail' => 'h.burnett@massey.ac.nz',
-            'notes' => 'n/a',
-        ],
-        [
-            'visible' => 1,
-            'title' => 'MyHub',
-            'content' => '<p><a href="https://myhub.massey.ac.nz"
-                target="_blank">MyHub</a> is your go-to platform to enhance your career prospects
-                with job searches and skill workshops, engage in wellbeing activities, influence
-                university decisions through Student Voice, and explore extensive support for
-                study planning, course selection, and essential student resources.</p>',
-            'contentformat' => 1,
-            'moreinformationurl' => 'https://myhub.massey.ac.nz',
-            'owner' => 'Andrew Rowatt',
-            'owneremail' => 'A.J.Rowatt@massey.ac.nz',
-            'notes' => 'n/a',
-        ],
-        [
-            'visible' => 2,
-            'title' => 'Office 365 free for Students',
-            'content' => '<p>Ensure you\'re fully equipped for your Massey University courses.
-                Office 365 is free for you and helps with accessing course materials and submitting
-                assignments and exams in the right format.
-                <a href="https://massey.ac.nz/freeoffice" target="_blank">Get Office 365 here</a>.</p>',
-            'contentformat' => 1,
-            'moreinformationurl' => 'https://massey.ac.nz/freeoffice',
-            'owner' => 'Andrew Rowatt',
-            'owneremail' => 'A.J.Rowatt@massey.ac.nz',
-            'notes' => 'ITS manage this resource.',
-        ],
-    ];
-
-    /**
      * Returns the file storage context for a notice's image area.
      *
      * Course notices live in their course context; site/dashboard notices
@@ -435,9 +356,11 @@ class notices {
         $transaction = $DB->start_delegated_transaction();
 
         if ($value !== self::NOTICE_EXCLUSIVE_NONE) {
-            $DB->execute(
-                'UPDATE {block_notices} SET exclusive = 0
-                  WHERE courseid = :courseid AND exclusive > 0 AND id <> :id',
+            $DB->set_field_select(
+                'block_notices',
+                'exclusive',
+                self::NOTICE_EXCLUSIVE_NONE,
+                'courseid = :courseid AND exclusive > 0 AND id <> :id',
                 ['courseid' => $notice->courseid, 'id' => $noticeid]
             );
         }
@@ -1026,24 +949,6 @@ class notices {
     public static function require_notice_block($courseid): void {
         if (!self::has_notice_block($courseid)) {
             throw new \moodle_exception('block_notices:missingblock', 'block_notices');
-        }
-    }
-
-    /**
-     * Add test data to the notices table.
-     *
-     * @param int $courseid
-     */
-    public static function add_notice_test_data(int $courseid): void {
-        foreach (self::TEST_DATA as $notice) {
-            $id = self::add_notice($courseid, $notice);
-
-            // New notices are always in preview mode, update to visible or hidden if required.
-            if ($notice['visible'] == self::NOTICE_VISIBLE) {
-                self::show_notice($id);
-            } else if ($notice['visible'] == self::NOTICE_HIDDEN) {
-                self::hide_notice($id);
-            }
         }
     }
 }

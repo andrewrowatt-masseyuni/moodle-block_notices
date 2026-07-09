@@ -17,10 +17,61 @@
 {{!
     @template block_notices/notices
 
-    TODO describe template notices
+    Renders the course notices carousel (Swiper). Shows a "no notices"
+    message when the list is empty, one static slide when there is a
+    single notice, and a paginated carousel with prev/next/playpause
+    controls for two or more. A "Manage notices" link is appended for
+    users who can manage notices.
+
+    Context variables required for this template:
+    * notices - array of notices to display (each: id, title, content,
+      visible, staffonly, timecreated, timemodified, hasimage, imageurl,
+      moreinformationlink, moreinformationtext).
+    * oneormorenotices - bool, true when there is at least one notice.
+    * singlenotice - bool, true when there is exactly one notice.
+    * noticecount - int, number of notices.
+    * courseid - int, course the block is displayed in.
+    * canmanage - bool, whether to show the manage link.
+    * managelabel - string, label for the manage link.
+    * wwwroot - string, Moodle root URL used to build the manage link.
 
     Example context (json):
     {
+        "courseid": 2,
+        "wwwroot": "https://moodle.example.com",
+        "noticecount": 2,
+        "oneormorenotices": true,
+        "singlenotice": false,
+        "canmanage": true,
+        "managelabel": "Manage notices",
+        "notices": [
+            {
+                "id": 12,
+                "title": "MOST (Massey Online Survey Tool)",
+                "content": "<p>Course evaluations are now open. Your feedback helps us improve teaching.</p>",
+                "visible": 1,
+                "staffonly": 0,
+                "timecreated": 1719446400,
+                "timemodified": 1719446400,
+                "hasimage": true,
+                "imageurl": "https://moodle.example.com/pluginfile.php/1/block_notices/image/12/survey.jpg",
+                "moreinformationlink": "https://ost.massey.ac.nz",
+                "moreinformationtext": "More information"
+            },
+            {
+                "id": 15,
+                "title": "Staff briefing this Friday",
+                "content": "<p>All teaching staff should attend the semester briefing at 10am in Room 2.14.</p>",
+                "visible": 1,
+                "staffonly": 1,
+                "timecreated": 1719360000,
+                "timemodified": 1719532800,
+                "hasimage": false,
+                "imageurl": "",
+                "moreinformationlink": "mailto:A.J.Rowatt@massey.ac.nz",
+                "moreinformationtext": "Andrew Rowatt"
+            }
+        ]
     }
 }}
 {{^notices}}
@@ -36,7 +87,7 @@
                     <div>
                         <div class="item__heading">
                             <h6 title="{{title}}">{{title}}</h6>
-                            {{#staffonly}}<div style="font-weight: 300;" class="badge badge-light item__staffonly_tag ml-1">{{#str}} staffonly, block_notices {{/str}}</div>{{/staffonly}}
+                            {{#staffonly}}<div class="badge badge-light item__staffonly_tag ml-1">{{#str}} staffonly, block_notices {{/str}}</div>{{/staffonly}}
                             <div class="item__info" data-block-notices-updatedescription data-timecreated="{{timecreated}}" data-timemodified="{{timemodified}}"><i class="fa-regular fa-hourglass"></i></div>
                         </div>
                         <div class="item__content">{{{content}}}</div>
@@ -61,6 +112,6 @@
 </div>
 {{/oneormorenotices}}
 {{#canmanage}}
-<hr />
+<hr>
 <div><a role="button" href="{{wwwroot}}/blocks/notices/manage.php?courseid={{courseid}}">{{#pix}} t/preferences, core, {{managelabel}} {{/pix}}{{managelabel}}</a></div>
 {{/canmanage}}

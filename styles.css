@@ -97,6 +97,10 @@ section.block_notices.block_notices_exclusive_important {
         padding: 8px;
         border-radius: 8px;
     }
+
+    .badge {
+        font-weight: 300;
+    }
 }
 
 .swiper {
@@ -320,6 +324,10 @@ div.img {
 #page-blocks-notices-manage {
     --max_image_width: 200px;
 
+    .badge {
+        font-weight: 300;
+    }
+
     .list-group-item {
         position: relative;
 
@@ -339,6 +347,10 @@ div.img {
         .block-notices-primary {
             margin-bottom: 0.25em;
             min-height: 1.75em;
+
+            .block-notices-status {
+                gap: 0.5em;
+            }
         }
 
         .block-notices-content-row {
@@ -371,6 +383,7 @@ div.img {
 
         .block-notices-actions-secondary a {
             line-height: 1;
+            gap: 0.5em;
         }
 
         /* Normalise icon spacing so the flex gap is the only inter-icon space.

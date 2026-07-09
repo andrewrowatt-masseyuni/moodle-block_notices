@@ -52,7 +52,7 @@ final class provider_test extends \core_privacy\tests\provider_testcase {
         $this->user3 = $user3;
 
         $this->setUser($user1);
-        $id = notices::add_notice(1, notices::TEST_DATA[0]);
+        $id = notices::add_notice(1, notices_test::TEST_DATA[0]);
         notices::show_notice($id);
         $firstvisible = $id;
 
@@ -60,9 +60,9 @@ final class provider_test extends \core_privacy\tests\provider_testcase {
 
         $this->setUser($user2);
         notices::update_notice($notice);
-        $id = notices::add_notice(1, notices::TEST_DATA[1]);
+        $id = notices::add_notice(1, notices_test::TEST_DATA[1]);
         notices::show_notice($id);
-        $id = notices::add_notice(1, notices::TEST_DATA[2]);
+        $id = notices::add_notice(1, notices_test::TEST_DATA[2]);
 
         // User1 has both authored data and a read row; user3 has only a read row.
         notices::mark_read_batch($this->user1->id, [$firstvisible], 1);

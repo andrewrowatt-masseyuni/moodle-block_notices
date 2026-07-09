@@ -39,7 +39,7 @@ class block_notices extends block_base {
      * @return stdClass The block contents.
      */
     public function get_content() {
-        global $CFG, $DB, $OUTPUT, $USER;
+        global $CFG, $DB, $OUTPUT;
 
         if ($this->content !== null) {
             return $this->content;
@@ -62,8 +62,8 @@ class block_notices extends block_base {
             : get_string('managemynotices', 'block_notices');
         $courseid = $this->page->course->id;
 
-        $this->page->requires->js('/blocks/notices/swiper/swiper-bundle.min.js', false);
-        $this->page->requires->css('/blocks/notices/swiper/swiper-bundle.min.css');
+        $this->page->requires->js('/blocks/notices/thirdparty/swiper/swiper-bundle.min.js', false);
+        $this->page->requires->css('/blocks/notices/thirdparty/swiper/swiper-bundle.min.css');
         $this->page->requires->js_call_amd('block_notices/block_notices', 'init', []);
 
         if (!empty($this->config->text)) {
@@ -173,8 +173,6 @@ class block_notices extends block_base {
      * @return array
      */
     public function html_attributes() {
-        global $CFG;
-
         $attributes = parent::html_attributes();
 
         // If this block is going to render the exclusive notice for its course, tag it for styling.

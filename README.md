@@ -64,8 +64,8 @@ The notices block UI has been optimised for the [Snap theme](https://moodle.org/
 
 This plugin bundles two third-party libraries, declared in <thirdpartylibs.xml>:
 
--   [Quill](https://quilljs.com/) **2.0.3** (BSD 3-clause) — rich-text editor used by the add/edit notice form. Located at <thirdparty/quill/>.
--   [Swiper](https://swiperjs.com/) **11.0.5** (MIT) — touch-friendly carousel that powers the notices block display. Located at <swiper/>.
+-   [Quill](https://quilljs.com/) **2.0.3** (BSD 3-clause) — rich-text editor used by the add/edit notice form. Quill was chosen deliberately to tightly constrain the formatting options available to notice authors. At the time of writing, this type of restriction was not possible using Moodle's built-in TinyMCE editor. Located at <thirdparty/quill/>.
+-   [Swiper](https://swiperjs.com/) **11.0.5** (MIT) — touch-friendly carousel that powers the notices block display. Located at <thirdparty/swiper/>.
 
 Both libraries are vendored in the plugin and managed using Moodle's standard third-party library convention.
 

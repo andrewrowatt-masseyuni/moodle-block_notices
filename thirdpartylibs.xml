@@ -8,7 +8,7 @@
         <licenseversion>3</licenseversion>
     </library>
     <library>
-        <location>swiper</location>
+        <location>thirdparty/swiper</location>
         <name>Swiper</name>
         <version>11.0.5</version>
         <license>MIT</license>
