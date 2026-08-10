@@ -219,7 +219,7 @@ class notices {
                    AND b.staffonly <= :staffonly
                    AND b.visible $insql
               ORDER BY CASE WHEN r.timeread IS NULL OR r.timeread < b.timepromoted THEN 0 ELSE 1 END ASC,
-                       b.sortorder ASC";
+                       b.sortorder ASC, b.id ASC";
 
         $params = [
             'userid' => $userid,
