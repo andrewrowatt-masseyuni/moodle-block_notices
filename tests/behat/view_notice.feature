@@ -67,13 +67,13 @@ Feature: View notice
 
     # check slide order
     And "//div[@id='stream-dashboard-notices']//div[contains(@class,'swiper-slide')][1]//h6[normalize-space()=\"Notice1title\"]" "xpath_element" should exist
-    And "//div[@id='stream-dashboard-notices']//div[contains(@class,'swiper-slide')][1][.//div[@class=\"item__content\"][normalize-space()=\"Notice1content\"]]" "xpath_element" should exist
+    And "//div[@id='stream-dashboard-notices']//div[contains(@class,'swiper-slide')][1][.//div[@class=\"blocknoticeitem__content\"][normalize-space()=\"Notice1content\"]]" "xpath_element" should exist
 
     And "//div[@id='stream-dashboard-notices']//div[contains(@class,'swiper-slide')][2]//h6[normalize-space()=\"Notice2title\"]" "xpath_element" should exist
-    And "//div[@id='stream-dashboard-notices']//div[contains(@class,'swiper-slide')][2][.//div[@class=\"item__content\"][normalize-space()=\"Notice2content\"]]" "xpath_element" should exist
+    And "//div[@id='stream-dashboard-notices']//div[contains(@class,'swiper-slide')][2][.//div[@class=\"blocknoticeitem__content\"][normalize-space()=\"Notice2content\"]]" "xpath_element" should exist
 
     And "//div[@id='stream-dashboard-notices']//div[contains(@class,'swiper-slide')][3]//h6[normalize-space()=\"Notice3title\"]" "xpath_element" should exist
-    And "//div[@id='stream-dashboard-notices']//div[contains(@class,'swiper-slide')][3][.//div[@class=\"item__content\"][normalize-space()=\"Notice3content\"]]" "xpath_element" should exist
+    And "//div[@id='stream-dashboard-notices']//div[contains(@class,'swiper-slide')][3][.//div[@class=\"blocknoticeitem__content\"][normalize-space()=\"Notice3content\"]]" "xpath_element" should exist
 
   Scenario: Checking the layout of the Notice block as a student
     When I log in as "98186700"
@@ -83,7 +83,7 @@ Feature: View notice
     And "#stream-dashboard-notices[data-notices-count=\"1\"]" "css_element" should exist
 
     And "//div[@id='stream-dashboard-notices']//div[contains(@class,'swiper-slide')][1]//h6[normalize-space()=\"Notice1title\"]" "xpath_element" should exist
-    And "//div[@id='stream-dashboard-notices']//div[contains(@class,'swiper-slide')][1][.//div[@class=\"item__content\"][normalize-space()=\"Notice1content\"]]" "xpath_element" should exist
+    And "//div[@id='stream-dashboard-notices']//div[contains(@class,'swiper-slide')][1][.//div[@class=\"blocknoticeitem__content\"][normalize-space()=\"Notice1content\"]]" "xpath_element" should exist
 
   Scenario: Checking the layout of the Notice block as a teacher
     When I log in as "arowatt"
@@ -92,9 +92,9 @@ Feature: View notice
     # Quick notice count check
     And "#stream-dashboard-notices[data-notices-count=\"2\"]" "css_element" should exist
     And "//div[@id='stream-dashboard-notices']//div[contains(@class,'swiper-slide')][1]//h6[normalize-space()=\"Notice1title\"]" "xpath_element" should exist
-    And "//div[@id='stream-dashboard-notices']//div[contains(@class,'swiper-slide')][1][.//div[@class=\"item__content\"][normalize-space()=\"Notice1content\"]]" "xpath_element" should exist
+    And "//div[@id='stream-dashboard-notices']//div[contains(@class,'swiper-slide')][1][.//div[@class=\"blocknoticeitem__content\"][normalize-space()=\"Notice1content\"]]" "xpath_element" should exist
 
     And "//div[@id='stream-dashboard-notices']//div[contains(@class,'swiper-slide')][2]//h6[normalize-space()=\"Notice2title\"]" "xpath_element" should exist
-    And "//div[@id='stream-dashboard-notices']//div[contains(@class,'swiper-slide')][2][.//div[@class=\"item__content\"][normalize-space()=\"Notice2content\"]]" "xpath_element" should exist
+    And "//div[@id='stream-dashboard-notices']//div[contains(@class,'swiper-slide')][2][.//div[@class=\"blocknoticeitem__content\"][normalize-space()=\"Notice2content\"]]" "xpath_element" should exist
 
     And I should not see "Manage notices"

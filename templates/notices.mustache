@@ -83,15 +83,15 @@
         <div class="swiper-wrapper">
         {{#notices}}
             <div class="swiper-slide" data-notice-id="{{id}}" data-notice-title="{{title}}">
-                <div class="item {{#hasimage}}item__has_image {{/hasimage}}item__visible_{{visible}} {{#staffonly}}item__staffonly{{/staffonly}} {{#singlenotice}}item__single{{/singlenotice}}">
+                <div class="blocknoticeitem {{#hasimage}}blocknoticeitem__has_image {{/hasimage}}blocknoticeitem__visible_{{visible}} {{#staffonly}}blocknoticeitem__staffonly{{/staffonly}} {{#singlenotice}}blocknoticeitem__single{{/singlenotice}}">
                     <div>
-                        <div class="item__heading">
+                        <div class="blocknoticeitem__heading">
                             <h6 title="{{title}}">{{title}}</h6>
-                            {{#staffonly}}<div class="badge badge-light item__staffonly_tag ml-1">{{#str}} staffonly, block_notices {{/str}}</div>{{/staffonly}}
-                            <div class="item__info" data-block-notices-updatedescription data-timecreated="{{timecreated}}" data-timemodified="{{timemodified}}"><i class="fa-regular fa-hourglass"></i></div>
+                            {{#staffonly}}<div class="badge badge-light blocknoticeitem__staffonly_tag ml-1">{{#str}} staffonly, block_notices {{/str}}</div>{{/staffonly}}
+                            <div class="blocknoticeitem__info" data-block-notices-updatedescription data-timecreated="{{timecreated}}" data-timemodified="{{timemodified}}"><i class="fa-regular fa-hourglass"></i></div>
                         </div>
-                        <div class="item__content">{{{content}}}</div>
-                        <div class="item__more_info">
+                        <div class="blocknoticeitem__content">{{{content}}}</div>
+                        <div class="blocknoticeitem__more_info">
                             <a target="_blank" href="{{moreinformationlink}}">{{moreinformationtext}}</a>
                         </div>
                     </div>
