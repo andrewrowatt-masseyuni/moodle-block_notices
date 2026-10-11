@@ -27,7 +27,8 @@ This plugin was based on an H5P widget:
 -   Staff-only notices are restricted to users with a non-student or non-“ST” account.
 -   Per-course **Exclusive** notice styles: **Important** (red) and **Information** (blue), each with distinct presentation. Only the exclusive notice will display, i.e., no carousel functionality.
 -   Auto-hide scheduling — notices automatically stop displaying on or after their configured close date.
--   Read tracking — records when each user last viewed each notice version and surfaces read counts in management. UNread 
+-   Read tracking — records when each user last viewed each notice version and surfaces read counts in management.
+-   Per-user display order — unread notices are shown first (in the managed sort order), followed by read notices from least to most recently read, so notices a user skipped or has not seen for a while come back to the front.
 -   **Promote** action to bump a notice to the top of the carousel.
 -   Internal-only administrative notes for notice managers.
 -   Optional per-notice additional editor user.
