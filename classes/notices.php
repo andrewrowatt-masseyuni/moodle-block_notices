@@ -183,8 +183,14 @@ class notices {
     /**
      * Get all notices for a given instance.
      *
-     * Notices the current user has not seen since they were last modified are returned
-     * first, followed by read notices, both groups ordered by sortorder.
+     * Ordering, in precedence:
+     *  1. unread — notices the current user has not seen since they were last promoted come first;
+     *  2. last read — read notices are ordered by when the user last saw them, least recent first,
+     *     so notices they skipped or have not seen for a while rotate to the front;
+     *  3. sortorder;
+     *  4. id.
+     *
+     * Last read does not apply to unread notices, so they stay in sortorder.
      *
      * @param int $courseid
      * @param bool $includepreview
@@ -211,6 +217,9 @@ class notices {
 
         [$insql, $inparams] = $DB->get_in_or_equal($visible, SQL_PARAMS_NAMED);
 
+        // Unread notices get a constant last-read key (0) rather than r.timeread, which keeps
+        // them in sortorder and avoids NULL ordering differences between DB drivers.
+        $unread = 'r.timeread IS NULL OR r.timeread < b.timepromoted';
         $sql = "SELECT b.*
                   FROM {block_notices} b
                   LEFT JOIN {block_notices_read} r
@@ -218,7 +227,8 @@ class notices {
                  WHERE b.courseid = :courseid
                    AND b.staffonly <= :staffonly
                    AND b.visible $insql
-              ORDER BY CASE WHEN r.timeread IS NULL OR r.timeread < b.timepromoted THEN 0 ELSE 1 END ASC,
+              ORDER BY CASE WHEN $unread THEN 0 ELSE 1 END ASC,
+                       CASE WHEN $unread THEN 0 ELSE r.timeread END ASC,
                        b.sortorder ASC, b.id ASC";
 
         $params = [

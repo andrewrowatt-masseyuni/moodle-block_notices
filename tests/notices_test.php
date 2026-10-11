@@ -299,7 +299,7 @@ final class notices_test extends \advanced_testcase {
     }
 
     /**
-     * Unread notices appear before read ones; within each group sortorder wins.
+     * Unread notices appear before read ones.
      *
      * @covers ::get_notices
      * @covers ::mark_read_batch
@@ -339,7 +339,7 @@ final class notices_test extends \advanced_testcase {
         $this->setUser($user);
 
         notices::mark_read_batch($user->id, [$id1, $id2, $id3], $course->id);
-        // All read → display order should match sortorder.
+        // All read in one batch (same timeread) → display order falls back to sortorder.
         $this->assertSame([$id1, $id2, $id3], array_keys(notices::get_notices($course->id)));
 
         // Admin edits notice 2 — wait a tick so timemodified is strictly greater than timeread.
@@ -353,6 +353,67 @@ final class notices_test extends \advanced_testcase {
         $this->setUser($user);
         $ordered = array_keys(notices::get_notices($course->id));
         $this->assertSame([$id2, $id1, $id3], $ordered, 'updated notice should appear first again');
+    }
+
+    /**
+     * Read notices are ordered by when the user last read them, least recent first, ahead of
+     * sortorder; notices read at the same time fall back to sortorder.
+     *
+     * @covers ::get_notices
+     */
+    public function test_get_notices_orders_read_by_last_read(): void {
+        global $DB;
+        $this->resetAfterTest(true);
+        $course = $this->getDataGenerator()->create_course();
+        [$id1, $id2, $id3] = $this->setup_three_visible_notices($course->id);
+
+        $user = $this->getDataGenerator()->create_user();
+        $this->setUser($user);
+
+        notices::mark_read_batch($user->id, [$id1, $id2, $id3], $course->id);
+
+        // Backdate the promotions so the reads below all remain current (timeread >= timepromoted).
+        $now = time();
+        $DB->set_field('block_notices', 'timepromoted', $now - 100, ['courseid' => $course->id]);
+        $DB->set_field('block_notices_read', 'timeread', $now - 10, ['userid' => $user->id, 'noticeid' => $id1]);
+        $DB->set_field('block_notices_read', 'timeread', $now - 30, ['userid' => $user->id, 'noticeid' => $id2]);
+        $DB->set_field('block_notices_read', 'timeread', $now - 20, ['userid' => $user->id, 'noticeid' => $id3]);
+
+        $ordered = array_keys(notices::get_notices($course->id));
+        $this->assertSame([$id2, $id3, $id1], $ordered, 'least recently read notice should appear first');
+
+        // Notice 1 now ties with notice 2 on last read; sortorder breaks the tie.
+        $DB->set_field('block_notices_read', 'timeread', $now - 30, ['userid' => $user->id, 'noticeid' => $id1]);
+
+        $ordered = array_keys(notices::get_notices($course->id));
+        $this->assertSame([$id1, $id2, $id3], $ordered, 'same last read should fall back to sortorder');
+    }
+
+    /**
+     * Last read does not reorder unread notices: a stale read (older than timepromoted) and a
+     * missing read are both unread and stay in sortorder.
+     *
+     * @covers ::get_notices
+     */
+    public function test_get_notices_unread_ignores_last_read(): void {
+        global $DB;
+        $this->resetAfterTest(true);
+        $course = $this->getDataGenerator()->create_course();
+        [$id1, $id2, $id3] = $this->setup_three_visible_notices($course->id);
+
+        $user = $this->getDataGenerator()->create_user();
+        $this->setUser($user);
+
+        // Notices 1 and 2 were read before they were last promoted (notice 2 longest ago);
+        // notice 3 has never been read.
+        notices::mark_read_batch($user->id, [$id1, $id2], $course->id);
+        $now = time();
+        $DB->set_field('block_notices', 'timepromoted', $now, ['courseid' => $course->id]);
+        $DB->set_field('block_notices_read', 'timeread', $now - 200, ['userid' => $user->id, 'noticeid' => $id1]);
+        $DB->set_field('block_notices_read', 'timeread', $now - 300, ['userid' => $user->id, 'noticeid' => $id2]);
+
+        $ordered = array_keys(notices::get_notices($course->id));
+        $this->assertSame([$id1, $id2, $id3], $ordered);
     }
 
     /**
